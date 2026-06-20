@@ -92,9 +92,12 @@ setTimeout(() => {
   if (!window._fbReady) {
     window._fbReady = true;
     window._firebase = { firebaseOk: false };
+    document.getElementById('tela-login').style.display = 'none';
+    document.getElementById('tela-app').style.display = 'flex';
+    document.getElementById('loading').style.display = 'none';
     document.dispatchEvent(new Event('fbReady'));
   }
-}, 1500);
+}, 2000);
 </script>
 <style>
 :root{
@@ -3437,13 +3440,12 @@ async function fazerLogout(){
 }
 
 // ─── PWA SERVICE WORKER ──────────────────────────────────────────────────────
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js')
-      .then(() => console.log('SW registrado'))
-      .catch(e => console.log('SW erro:', e));
-  });
-}
+// sw.js desativado temporariamente
+// if ('serviceWorker' in navigator) {
+//   window.addEventListener('load', () => {
+//     navigator.serviceWorker.register('sw.js').catch(e => console.log('SW erro:', e));
+//   });
+// }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 document.querySelectorAll('input[type=date]').forEach(el=>el.value=hoje());
