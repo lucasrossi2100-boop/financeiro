@@ -46,14 +46,13 @@
     onAuthStateChanged(auth, (user) => {
       window._firebaseUser = user;
       if (user) {
-        // Usuário logado — carrega o app
         document.getElementById('tela-login').style.display = 'none';
         document.getElementById('tela-app').style.display = 'block';
-        // Atualiza nome do usuário
         const nomeEl = document.getElementById('user-nome');
         if (nomeEl) nomeEl.textContent = user.displayName || user.email;
+        // Configura UI conforme admin ou cliente
+        setTimeout(()=>setupPerfilUI(), 100);
       } else {
-        // Não logado — mostra tela de login
         document.getElementById('tela-login').style.display = 'flex';
         document.getElementById('tela-app').style.display = 'none';
       }
@@ -396,10 +395,20 @@ tbody tr:hover td{background:var(--surface2)}
 
   <div class="sb-section">
     <span class="sb-label">Perfil ativo</span>
-    <button class="profile-btn active" onclick="setProfile('pessoal')"><span class="pn">Pessoal</span><span class="ps">Finanças pessoais</span></button>
-    <button class="profile-btn" onclick="setProfile('rossi')"><span class="pn">Rossi &amp; Moraes</span><span class="ps">Empresa pessoal</span></button>
-    <button class="profile-btn" onclick="setProfile('usina')"><span class="pn">Usina Lins</span><span class="ps">Empresa</span></button>
-    <button class="profile-btn" onclick="setProfile('teste')"><span class="pn">Teste</span><span class="ps">Perfil de testes</span></button>
+    <!-- ADMIN: vê todos os perfis -->
+    <div id="sb-perfis-admin">
+      <button class="profile-btn active" onclick="setProfile('pessoal')"><span class="pn">Pessoal</span><span class="ps">Finanças pessoais</span></button>
+      <button class="profile-btn" onclick="setProfile('rossi')"><span class="pn">Rossi &amp; Moraes</span><span class="ps">Empresa pessoal</span></button>
+      <button class="profile-btn" onclick="setProfile('usina')"><span class="pn">Usina Lins</span><span class="ps">Empresa</span></button>
+      <button class="profile-btn" onclick="setProfile('teste')"><span class="pn">Teste</span><span class="ps">Perfil de testes</span></button>
+    </div>
+    <!-- CLIENTE: vê só o próprio perfil -->
+    <div id="sb-perfil-cliente" style="display:none">
+      <div style="padding:10px 10px;background:var(--green-s);border:1px solid var(--green);border-radius:var(--radius-sm);margin-bottom:4px">
+        <div style="font-size:13px;font-weight:500;color:var(--text)" id="cliente-nome-sb">Minha conta</div>
+        <div style="font-size:11px;color:var(--muted)">Meus dados financeiros</div>
+      </div>
+    </div>
   </div>
 
   <div class="sb-section" style="margin-top:8px">
@@ -1455,8 +1464,10 @@ function lsSave(profile,type){
 async function fbSave(profile,type){
   if(!fbOk||!_db||!_ref||!_set)return;
   try{
+    // Admin salva no perfil nomeado, cliente salva no próprio uid
+    const path=isAdmin()?`financeiro/${profile}/${type}`:`financeiro/${profile}/${type}`;
     const data=DATA[profile][type];
-    await _set(_ref(_db,`financeiro/${profile}/${type}`),data||null);
+    await _set(_ref(_db,path),data||null);
   }catch(e){console.warn('fbSave err',e)}
 }
 
@@ -1474,35 +1485,46 @@ function initFB(){
 
   if(fbOk){
     _db=f.db;_ref=f.ref;_set=f.set;_onValue=f.onValue;
-    // Atualiza badge
     const sb=document.getElementById('sync-badge');
     if(sb){sb.className='sync-badge ok';sb.innerHTML='<span class="sync-dot"></span>Sincronizado';}
-    const msb=document.getElementById('mob-sync-badge');
-    if(msb){msb.className='sync-badge ok';msb.innerHTML='<span class="sync-dot"></span><span>Sync</span>';}
 
-    // Carrega dados do Firebase para cada perfil
-    ['pessoal','rossi','usina','teste'].forEach(p=>{
-      try{
-        _onValue(_ref(_db,`financeiro/${p}`),(snap)=>{
+    if(isAdmin()){
+      // Admin — carrega todos os perfis
+      ['pessoal','rossi','usina','teste'].forEach(p=>{
+        try{
+          _onValue(_ref(_db,`financeiro/${p}`),(snap)=>{
+            try{
+              const val=snap.val();
+              if(val){
+                ['lancs','invs','metas','objs','notas','assinaturas','recorrentes','cartoes'].forEach(t=>{
+                  if(val[t]!==undefined){DATA[p][t]=Array.isArray(val[t])?val[t]:Object.values(val[t]||{});lsSave(p,t);}
+                });
+              }
+              if(p===cp) refreshAll();
+            }catch(e){console.warn('snap err',e)}
+          });
+        }catch(e){console.warn('listener err',e)}
+      });
+    } else {
+      // Cliente — carrega só os próprios dados
+      const uid=window._firebaseUser?.uid;
+      if(uid){
+        if(!DATA[uid]) DATA[uid]={lancs:[],invs:[],metas:[],objs:[],notas:[],assinaturas:[],recorrentes:[],cartoes:[]};
+        cp=uid;
+        _onValue(_ref(_db,`financeiro/${uid}`),(snap)=>{
           try{
             const val=snap.val();
             if(val){
-              const types=['lancs','invs','metas','objs','notas','assinaturas','recorrentes'];
-              types.forEach(t=>{
-                if(val[t]!==undefined){
-                  DATA[p][t]=Array.isArray(val[t])?val[t]:Object.values(val[t]||{});
-                  lsSave(p,t);
-                }
+              ['lancs','invs','metas','objs','notas','assinaturas','recorrentes','cartoes'].forEach(t=>{
+                if(val[t]!==undefined) DATA[uid][t]=Array.isArray(val[t])?val[t]:Object.values(val[t]||{});
               });
             }
-            // Só re-renderiza se for o perfil atual
-            if(p===cp) refreshAll();
-          }catch(e){console.warn('snap parse err',e)}
+            refreshAll();
+          }catch(e){console.warn('snap err cliente',e)}
         });
-      }catch(e){console.warn('listener err',e)}
-    });
+      }
+    }
   } else {
-    // Modo local — carrega do localStorage
     lsLoad();
     refreshAll();
   }
@@ -1517,7 +1539,33 @@ document.addEventListener('fbReady',()=>{
 // ─── PROFILE & NAV ───────────────────────────────────────────────────────────
 // Senha do perfil admin (Rossi & Moraes)
 const ADMIN_HASH = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8'; // "password" — TROQUE ABAIXO
-const ADMIN_SENHA = 'rossi2025'; // ← TROQUE AQUI pela sua senha
+// ─── ADMIN ────────────────────────────────────────────────────────────────────
+const ADMIN_EMAIL = 'lucasrossi2100@gmail.com';
+
+function isAdmin(){
+  const f=window._firebase;
+  if(!f||!f.firebaseOk) return true; // modo local = admin
+  const user=window._firebaseUser;
+  return !user || user.email===ADMIN_EMAIL;
+}
+
+function setupPerfilUI(){
+  const admin=isAdmin();
+  // Sidebar perfis
+  const sidebarPerfis=document.getElementById('sb-perfis-admin');
+  if(sidebarPerfis) sidebarPerfis.style.display=admin?'block':'none';
+  // Perfil do cliente
+  const perfilCliente=document.getElementById('sb-perfil-cliente');
+  if(perfilCliente) perfilCliente.style.display=admin?'none':'block';
+  // Se cliente, força perfil único baseado no uid
+  if(!admin&&window._firebaseUser){
+    const uid=window._firebaseUser.uid;
+    cp=uid; // usa uid como perfil
+    if(!DATA[uid]) DATA[uid]={lancs:[],invs:[],metas:[],objs:[],notas:[],assinaturas:[],recorrentes:[],cartoes:[]};
+    const nomeEl=document.getElementById('cliente-nome-sb');
+    if(nomeEl) nomeEl.textContent=window._firebaseUser.displayName||window._firebaseUser.email;
+  }
+}
 
 let rossiAutenticado = false;
 
