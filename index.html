@@ -390,21 +390,30 @@ tbody tr:hover td{background:var(--surface2)}
 <div id="tela-app" style="display:none;width:100%;height:100vh">
 <div class="app">
 <aside class="sidebar">
-  <div class="sb-logo"><h1>Financeiro</h1><span>Painel pessoal</span></div>
+  <div class="sb-logo"><h1>FinRossi</h1><span id="sb-logo-sub">Painel pessoal</span></div>
   <div id="sync-badge" class="sync-badge local"><span class="sync-dot"></span>Modo local</div>
 
   <div class="sb-section">
-    <span class="sb-label">Perfil ativo</span>
-    <!-- ADMIN: vê todos os perfis -->
+    <!-- ADMIN: nova estrutura -->
     <div id="sb-perfis-admin">
-      <button class="profile-btn active" onclick="setProfile('pessoal')"><span class="pn">Pessoal</span><span class="ps">Finanças pessoais</span></button>
-      <button class="profile-btn" onclick="setProfile('rossi')"><span class="pn">Rossi &amp; Moraes</span><span class="ps">Empresa pessoal</span></button>
-      <button class="profile-btn" onclick="setProfile('usina')"><span class="pn">Usina Lins</span><span class="ps">Empresa</span></button>
-      <button class="profile-btn" onclick="setProfile('teste')"><span class="pn">Teste</span><span class="ps">Perfil de testes</span></button>
+      <span class="sb-label">Minha área</span>
+      <button class="profile-btn active" id="pb-pessoal" onclick="setProfile('pessoal')">
+        <span class="pn">👤 Pessoal</span><span class="ps">Minhas finanças</span>
+      </button>
+      <button class="profile-btn" id="pb-finrossi" onclick="setProfile('finrossi')">
+        <span class="pn">💼 FinRossi</span><span class="ps">Receitas e negócio</span>
+      </button>
+      <span class="sb-label" style="margin-top:8px">Gestão</span>
+      <button class="profile-btn" id="pb-clientes" onclick="goToClientes()">
+        <span class="pn">👥 Clientes</span><span class="ps">Cadastros e planos</span>
+      </button>
+      <button class="profile-btn" id="pb-preview" onclick="goToPreview()">
+        <span class="pn">👁 Preview</span><span class="ps">Como o cliente vê</span>
+      </button>
     </div>
     <!-- CLIENTE: vê só o próprio perfil -->
     <div id="sb-perfil-cliente" style="display:none">
-      <div style="padding:10px 10px;background:var(--green-s);border:1px solid var(--green);border-radius:var(--radius-sm);margin-bottom:4px">
+      <div style="padding:10px;background:var(--green-s);border:1px solid var(--green);border-radius:var(--radius-sm)">
         <div style="font-size:13px;font-weight:500;color:var(--text)" id="cliente-nome-sb">Minha conta</div>
         <div style="font-size:11px;color:var(--muted)">Meus dados financeiros</div>
       </div>
@@ -1143,6 +1152,107 @@ tbody tr:hover td{background:var(--surface2)}
   </div>
 </section>
 
+<!-- CLIENTES -->
+<section id="sec-clientes" class="section-hidden">
+  <div class="page-header">
+    <div class="page-title"><h2>👥 Clientes</h2><p>Gestão de clientes FinRossi</p></div>
+    <div class="header-actions">
+      <button class="btn primary" onclick="openModalNovoCliente()">+ Novo cliente</button>
+    </div>
+  </div>
+  <div class="metrics" id="clientes-metrics"></div>
+
+  <!-- FILTROS -->
+  <div class="filter-bar" style="margin-bottom:14px">
+    <select id="cli-filtro-status" onchange="renderClientes()" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius-sm);padding:7px 12px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
+      <option value="">Todos</option>
+      <option value="ativo">Ativos</option>
+      <option value="trial">Trial</option>
+      <option value="inativo">Inativos</option>
+    </select>
+    <select id="cli-filtro-plano" onchange="renderClientes()" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius-sm);padding:7px 12px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
+      <option value="">Todos os planos</option>
+      <option value="gratuito">Gratuito</option>
+      <option value="starter">Starter</option>
+      <option value="essencial">Essencial</option>
+      <option value="consultoria">Consultoria</option>
+    </select>
+    <input id="cli-busca" type="text" placeholder="Buscar cliente..." oninput="renderClientes()" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius-sm);padding:7px 12px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;flex:1;max-width:260px">
+  </div>
+
+  <!-- TABELA DE CLIENTES -->
+  <div class="card card-full">
+    <div id="clientes-tabela"></div>
+  </div>
+</section>
+
+<!-- PREVIEW (como o cliente vê) -->
+<section id="sec-preview" class="section-hidden">
+  <div class="page-header">
+    <div class="page-title"><h2>👁 Preview do cliente</h2><p>Visualize como o cliente vê o app</p></div>
+  </div>
+  <div class="card card-full" style="margin-bottom:16px;background:linear-gradient(135deg,rgba(96,165,250,0.06),rgba(192,132,252,0.04));border-color:rgba(96,165,250,0.2)">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+      <div style="font-size:28px">👁</div>
+      <div>
+        <div style="font-size:15px;font-weight:500">Modo Preview</div>
+        <div style="font-size:13px;color:var(--muted)">Esta é a tela que seus clientes veem quando fazem login no FinRossi</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+      <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:14px">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">O que o cliente vê</div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:5px;font-size:13px">
+          <li>✅ Dashboard com receitas/despesas</li>
+          <li>✅ Lançamentos</li>
+          <li>✅ Investimentos</li>
+          <li>✅ Metas e objetivos</li>
+          <li>✅ Calendário financeiro</li>
+          <li>✅ Notas, assinaturas, recorrentes</li>
+          <li>✅ Cartões de crédito</li>
+        </ul>
+      </div>
+      <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:14px">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">O que o cliente NÃO vê</div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:5px;font-size:13px">
+          <li>❌ Seus perfis pessoais</li>
+          <li>❌ Painel FinRossi</li>
+          <li>❌ Lista de clientes</li>
+          <li>❌ Dados de outros clientes</li>
+          <li>❌ Configurações admin</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <!-- Simulação da tela do cliente -->
+  <div class="card card-full">
+    <h3><span class="dot" style="background:var(--blue)"></span>Simulação — tela do cliente</h3>
+    <div style="border:2px solid var(--border2);border-radius:12px;overflow:hidden;margin-top:12px">
+      <div style="background:var(--surface2);padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px">
+        <div style="width:10px;height:10px;border-radius:50%;background:#f87171"></div>
+        <div style="width:10px;height:10px;border-radius:50%;background:#fbbf24"></div>
+        <div style="width:10px;height:10px;border-radius:50%;background:#4ade80"></div>
+        <div style="font-size:12px;color:var(--muted);margin-left:8px">lucasrossi2100-boop.github.io/financeiro</div>
+      </div>
+      <div style="padding:20px;background:var(--surface)">
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px">
+          <div style="background:var(--surface2);border-radius:8px;padding:12px">
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Receitas</div>
+            <div style="font-size:18px;font-family:'DM Serif Display',serif;color:var(--green)">R$ 0,00</div>
+          </div>
+          <div style="background:var(--surface2);border-radius:8px;padding:12px">
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Despesas</div>
+            <div style="font-size:18px;font-family:'DM Serif Display',serif;color:var(--red)">R$ 0,00</div>
+          </div>
+        </div>
+        <div style="font-size:13px;color:var(--muted);text-align:center;padding:20px">
+          Cliente vê seus próprios dados aqui — separados dos seus
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 </main>
 </div>
 </div>
@@ -1330,6 +1440,40 @@ tbody tr:hover td{background:var(--surface2)}
   </div>
 </div>
 
+<!-- MODAL NOVO CLIENTE -->
+<div class="modal-overlay" id="modal-novo-cliente">
+  <div class="modal">
+    <h3>Cadastrar novo cliente</h3>
+    <div class="form-row">
+      <div class="field"><label>Nome</label><input id="nc-nome" type="text" placeholder="Nome completo"></div>
+      <div class="field"><label>Email</label><input id="nc-email" type="email" placeholder="email@exemplo.com"></div>
+    </div>
+    <div class="form-row">
+      <div class="field"><label>Senha</label><input id="nc-senha" type="password" placeholder="Senha de acesso"></div>
+      <div class="field"><label>Plano</label>
+        <select id="nc-plano">
+          <option value="gratuito">Gratuito (trial)</option>
+          <option value="starter">Starter — R$19,90</option>
+          <option value="essencial">Essencial — R$39,90</option>
+          <option value="consultoria">Consultoria — R$89,90</option>
+        </select>
+      </div>
+    </div>
+    <div class="field"><label>Origem</label>
+      <select id="nc-origem">
+        <option value="teste">Teste gratuito (sem cobrança)</option>
+        <option value="trial">Trial 30 dias</option>
+        <option value="pagante">Pagante</option>
+      </select>
+    </div>
+    <div class="btn-row">
+      <button class="btn primary" onclick="cadastrarNovoCliente()">Cadastrar</button>
+      <button class="btn" onclick="closeModal('modal-novo-cliente')">Cancelar</button>
+    </div>
+    <div class="msg" id="msg-novo-cliente"></div>
+  </div>
+</div>
+
 <!-- MODAL CARTÃO -->
 <div class="modal-overlay" id="modal-cartao">
   <div class="modal">
@@ -1436,7 +1580,7 @@ let cp='pessoal', charts={}, fbOk=false;
 let _db,_ref,_set,_get,_onValue,_remove,_push;
 
 // Dados em memória (sincronizados do Firebase ou localStorage)
-let DATA={pessoal:{lancs:[],invs:[],metas:[],objs:[],notas:[],assinaturas:[],recorrentes:[],cartoes:[]},rossi:{lancs:[],invs:[],metas:[],objs:[],notas:[],assinaturas:[],recorrentes:[],cartoes:[]},usina:{lancs:[],invs:[],metas:[],objs:[],notas:[],assinaturas:[],recorrentes:[],cartoes:[]},teste:{lancs:[],invs:[],metas:[],objs:[],notas:[],assinaturas:[],recorrentes:[],cartoes:[]}};
+let DATA={pessoal:{lancs:[],invs:[],metas:[],objs:[],notas:[],assinaturas:[],recorrentes:[],cartoes:[]},finrossi:{lancs:[],invs:[],metas:[],objs:[],notas:[],assinaturas:[],recorrentes:[],cartoes:[]},rossi:{lancs:[],invs:[],metas:[],objs:[],notas:[],assinaturas:[],recorrentes:[],cartoes:[]},usina:{lancs:[],invs:[],metas:[],objs:[],notas:[],assinaturas:[],recorrentes:[],cartoes:[]},teste:{lancs:[],invs:[],metas:[],objs:[],notas:[],assinaturas:[],recorrentes:[],cartoes:[]}};
 
 const hoje=()=>new Date().toISOString().slice(0,10);
 const fmtR=(v)=>'R$\u00a0'+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -1569,12 +1713,19 @@ function setupPerfilUI(){
 
 let rossiAutenticado = false;
 
+function goToClientes(){ goTo('clientes'); }
+function goToPreview(){ goTo('preview'); }
+
 function setProfile(p){
-  if(p==='rossi' && !rossiAutenticado){
-    abrirModalSenha();
-    return;
-  }
   _setProfileInterno(p);
+  // Atualiza botão ativo na sidebar admin
+  ['pessoal','finrossi'].forEach(id=>{
+    const btn=document.getElementById('pb-'+id);
+    if(btn) btn.classList.toggle('active',id===p);
+  });
+  // Atualiza subtítulo do logo
+  const sub=document.getElementById('sb-logo-sub');
+  if(sub) sub.textContent=p==='pessoal'?'Minhas finanças':p==='finrossi'?'Negócio FinRossi':'Painel';
 }
 
 function _setProfileInterno(p){
@@ -1621,11 +1772,16 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(inp) inp.addEventListener('keydown',e=>{ if(e.key==='Enter') confirmarSenha(); });
 });
 
-const SECS=['dashboard','lancamentos','investimentos','historico','metas','objetivos','renda','empresas','notas','assinaturas','recorrentes','calendario','manual','cartoes'];
+const SECS=['dashboard','lancamentos','investimentos','historico','metas','objetivos','renda','empresas','notas','assinaturas','recorrentes','calendario','manual','cartoes','clientes','preview'];
 function goTo(name){
-  SECS.forEach(s=>document.getElementById('sec-'+s).classList.toggle('section-hidden',s!==name));
-  document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick').includes("'"+name+"'")));
-  const fn={dashboard:refreshDash,investimentos:renderInvs,historico:renderHistorico,metas:renderMetas,objetivos:renderObjs,renda:renderRP,empresas:renderEmpresas,notas:renderNotas,assinaturas:renderAssinaturas,recorrentes:renderRecorrentes,calendario:renderCalendario,manual:renderManual,cartoes:renderCartoes};
+  SECS.forEach(s=>{const el=document.getElementById('sec-'+s);if(el)el.classList.toggle('section-hidden',s!==name)});
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick')?.includes("'"+name+"'")));
+  // Atualiza perfil btn ativo no admin
+  ['pessoal','finrossi','clientes','preview'].forEach(p=>{
+    const btn=document.getElementById('pb-'+p);
+    if(btn) btn.classList.toggle('active',(name==='dashboard'&&p==='pessoal')||name===p);
+  });
+  const fn={dashboard:refreshDash,investimentos:renderInvs,historico:renderHistorico,metas:renderMetas,objetivos:renderObjs,renda:renderRP,empresas:renderEmpresas,notas:renderNotas,assinaturas:renderAssinaturas,recorrentes:renderRecorrentes,calendario:renderCalendario,manual:renderManual,cartoes:renderCartoes,clientes:renderClientes,preview:renderPreview};
   if(fn[name])fn[name]();
 }
 
@@ -3178,6 +3334,158 @@ const MANUAL_SECTIONS=[
     'A simulação mostra o prazo com o seu aporte mensal atual'
   ]},
 ];
+
+// ─── CLIENTES ────────────────────────────────────────────────────────────────
+const BACKEND_URL = 'https://finrossi-backend-production.up.railway.app';
+const ADMIN_TOKEN = ''; // Deixe em branco — será pedido se necessário
+
+let _adminToken = '';
+
+function getAdminToken(){
+  if(_adminToken) return _adminToken;
+  const t = prompt('Digite a senha admin para continuar:');
+  if(t) _adminToken = t;
+  return _adminToken;
+}
+
+function openModalNovoCliente(){
+  ['nc-nome','nc-email','nc-senha'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('msg-novo-cliente').textContent='';
+  document.getElementById('modal-novo-cliente').classList.add('open');
+}
+
+async function cadastrarNovoCliente(){
+  const nome=document.getElementById('nc-nome').value.trim();
+  const email=document.getElementById('nc-email').value.trim();
+  const senha=document.getElementById('nc-senha').value;
+  const plano=document.getElementById('nc-plano').value;
+  const origem=document.getElementById('nc-origem').value;
+  const msg=document.getElementById('msg-novo-cliente');
+
+  if(!nome||!email||!senha){showMsg('msg-novo-cliente','Preencha todos os campos','err');return}
+
+  const token=getAdminToken();
+  if(!token){showMsg('msg-novo-cliente','Token admin necessário','err');return}
+
+  msg.textContent='Cadastrando...';
+  msg.style.color='var(--muted)';
+
+  try{
+    const res=await fetch(`${BACKEND_URL}/admin/clientes/teste`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-admin-token':token},
+      body:JSON.stringify({nome,email,senha,plano,origem})
+    });
+    const data=await res.json();
+    if(data.ok){
+      showMsg('msg-novo-cliente','Cliente cadastrado com sucesso!','ok');
+      setTimeout(()=>{closeModal('modal-novo-cliente');renderClientes();},1500);
+    } else {
+      showMsg('msg-novo-cliente',data.erro||'Erro ao cadastrar','err');
+    }
+  }catch(e){
+    showMsg('msg-novo-cliente','Erro de conexão com o backend','err');
+  }
+}
+
+async function renderClientes(){
+  const token=getAdminToken();
+  if(!token) return;
+
+  const tabela=document.getElementById('clientes-tabela');
+  tabela.innerHTML='<p style="color:var(--muted);font-size:13px;padding:12px">Carregando clientes...</p>';
+
+  try{
+    const res=await fetch(`${BACKEND_URL}/admin/clientes`,{
+      headers:{'x-admin-token':token}
+    });
+    const data=await res.json();
+    const clientes=data.clientes||[];
+
+    // Filtros
+    const filtroStatus=document.getElementById('cli-filtro-status')?.value||'';
+    const filtroPlano=document.getElementById('cli-filtro-plano')?.value||'';
+    const busca=(document.getElementById('cli-busca')?.value||'').toLowerCase();
+
+    let lista=clientes;
+    if(filtroStatus) lista=lista.filter(c=>c.status===filtroStatus);
+    if(filtroPlano) lista=lista.filter(c=>c.plano===filtroPlano);
+    if(busca) lista=lista.filter(c=>(c.nome+c.email).toLowerCase().includes(busca));
+
+    // Métricas
+    const ativos=clientes.filter(c=>c.status==='ativo').length;
+    const trial=clientes.filter(c=>c.origem==='trial').length;
+    const inativos=clientes.filter(c=>c.status==='inativo').length;
+    const recMensal=clientes.filter(c=>c.status==='ativo'&&c.plano!=='gratuito').reduce((a,c)=>{
+      const precos={starter:19.90,essencial:39.90,consultoria:89.90};
+      return a+(precos[c.plano]||0);
+    },0);
+
+    document.getElementById('clientes-metrics').innerHTML=`
+      <div class="mc"><div class="mc-label">Total de clientes</div><div class="mc-val blue">${clientes.length}</div></div>
+      <div class="mc"><div class="mc-label">Ativos</div><div class="mc-val green">${ativos}</div></div>
+      <div class="mc"><div class="mc-label">Trial</div><div class="mc-val amber">${trial}</div></div>
+      <div class="mc"><div class="mc-label">Inativos</div><div class="mc-val red">${inativos}</div></div>
+      <div class="mc"><div class="mc-label">Receita mensal</div><div class="mc-val green">${fmtR(recMensal)}</div></div>
+    `;
+
+    if(!lista.length){
+      tabela.innerHTML='<p class="empty">Nenhum cliente encontrado</p>';
+      return;
+    }
+
+    const PLANO_CORES={gratuito:'var(--muted)',starter:'var(--blue)',essencial:'var(--green)',consultoria:'var(--gold,#c9a84c)'};
+    const STATUS_CORES={ativo:'var(--green)',trial:'var(--amber)',inativo:'var(--red)',pendente:'var(--amber)'};
+
+    tabela.innerHTML=`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead><tr style="border-bottom:1px solid var(--border)">
+        <th style="text-align:left;padding:8px 10px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Nome</th>
+        <th style="text-align:left;padding:8px 10px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Email</th>
+        <th style="text-align:center;padding:8px 10px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Plano</th>
+        <th style="text-align:center;padding:8px 10px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Status</th>
+        <th style="text-align:center;padding:8px 10px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Origem</th>
+        <th style="text-align:center;padding:8px 10px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Cadastro</th>
+        <th style="text-align:center;padding:8px 10px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Ações</th>
+      </tr></thead>
+      <tbody>${lista.map(c=>`<tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:10px">${c.nome||'—'}</td>
+        <td style="padding:10px;color:var(--muted);font-size:12px">${c.email}</td>
+        <td style="padding:10px;text-align:center">
+          <span style="font-size:11px;padding:2px 8px;border-radius:20px;background:${PLANO_CORES[c.plano]||'var(--muted)'}18;color:${PLANO_CORES[c.plano]||'var(--muted)'}">${c.plano||'—'}</span>
+        </td>
+        <td style="padding:10px;text-align:center">
+          <span style="font-size:11px;padding:2px 8px;border-radius:20px;background:${STATUS_CORES[c.status]||'var(--muted)'}18;color:${STATUS_CORES[c.status]||'var(--muted)'}">${c.status||'—'}</span>
+        </td>
+        <td style="padding:10px;text-align:center;font-size:12px;color:var(--muted)">${c.origem==='teste'?'🎁 Teste':c.origem==='trial'?'⏱ Trial':'💳 Pagante'}</td>
+        <td style="padding:10px;text-align:center;font-size:12px;color:var(--muted)">${c.dataCadastro?c.dataCadastro.slice(0,10):'—'}</td>
+        <td style="padding:10px;text-align:center">
+          <button class="btn danger xs" onclick="desativarCliente('${c.uid}')" ${c.status==='inativo'?'disabled':''}>
+            ${c.status==='inativo'?'Inativo':'Desativar'}
+          </button>
+        </td>
+      </tr>`).join('')}</tbody>
+    </table></div>`;
+
+  }catch(e){
+    tabela.innerHTML=`<p style="color:var(--red);font-size:13px;padding:12px">Erro ao carregar clientes: ${e.message}</p>`;
+  }
+}
+
+async function desativarCliente(uid){
+  if(!confirm('Desativar este cliente?')) return;
+  const token=getAdminToken();
+  try{
+    const res=await fetch(`${BACKEND_URL}/admin/clientes/${uid}/desativar`,{
+      method:'POST',
+      headers:{'x-admin-token':token}
+    });
+    const data=await res.json();
+    if(data.ok){renderClientes();}
+    else alert('Erro: '+data.erro);
+  }catch(e){alert('Erro de conexão')}
+}
+
+function renderPreview(){ /* Seção estática — já renderizada no HTML */ }
 
 // ─── CARTÕES DE CRÉDITO ──────────────────────────────────────────────────────
 function getCartoes(){return pd().cartoes||[];}
