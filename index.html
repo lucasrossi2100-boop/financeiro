@@ -6,7 +6,8 @@
 <title>FinRossi — Controle Financeiro</title>
 
 <!-- PWA -->
-<link rel="manifest" href="manifest.json">
+<!-- PWA manifest removido temporariamente -->
+<!-- <link rel="manifest" href="manifest.json"> -->
 <meta name="theme-color" content="#0f0f0f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -3316,6 +3317,8 @@ function exportarManualPDF(){
   janela.document.close();
   setTimeout(()=>janela.print(),800);
 }
+
+function isMobile(){ return window.innerWidth <= 640; }
 
 function setupMobile(){
   const mob = isMobile();
