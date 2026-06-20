@@ -2785,7 +2785,6 @@ async function remAssin(id){
   pd().assinaturas=getAssin().filter(a=>a.id!==id);renderAssinaturas();saveAssin();
 }
 
-const ASSIN_ICONS={'Streaming':'🎬','Música':'🎵','Saúde/Academia':'💪','Educação':'📚','Software':'💻','Jogos':'🎮','Outros':'📦'};
 function renderAssinaturas(){
   const list=getAssin();
   const ativas=list.filter(a=>a.status!=='pausada');
