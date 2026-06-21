@@ -400,15 +400,8 @@ tbody tr:hover td{background:var(--surface2)}
       <button class="profile-btn active" id="pb-pessoal" onclick="setProfile('pessoal')">
         <span class="pn">👤 Pessoal</span><span class="ps">Minhas finanças</span>
       </button>
-      <button class="profile-btn" id="pb-finrossi" onclick="setProfile('finrossi')">
-        <span class="pn">💼 FinRossi</span><span class="ps">Receitas e negócio</span>
-      </button>
-      <span class="sb-label" style="margin-top:8px">Gestão</span>
-      <button class="profile-btn" id="pb-clientes" onclick="goToClientes()">
-        <span class="pn">👥 Clientes</span><span class="ps">Cadastros e planos</span>
-      </button>
-      <button class="profile-btn" id="pb-preview" onclick="goToPreview()">
-        <span class="pn">👁 Preview</span><span class="ps">Como o cliente vê</span>
+      <button class="profile-btn" id="pb-finrossi" onclick="abrirFinRossi()">
+        <span class="pn">💼 FinRossi</span><span class="ps">Negócio e clientes</span>
       </button>
     </div>
     <!-- CLIENTE: vê só o próprio perfil -->
@@ -443,8 +436,8 @@ tbody tr:hover td{background:var(--surface2)}
     <button class="nav-item" id="nav-renda" onclick="goTo('renda')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Renda Passiva
     </button>
-    <button class="nav-item" id="nav-empresas" onclick="goTo('empresas')" style="display:none">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>Empresas
+    <button class="nav-item" id="nav-clientes-item" style="display:none" onclick="goTo('clientes')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Clientes
     </button>
     <button class="nav-item" onclick="goTo('notas')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>Notas
@@ -1714,18 +1707,55 @@ function setupPerfilUI(){
 let rossiAutenticado = false;
 
 function goToClientes(){ goTo('clientes'); }
-function goToPreview(){ goTo('preview'); }
+
+let finrossiAutenticado = false;
+
+function abrirFinRossi(){
+  if(finrossiAutenticado){_setProfileFinRossi();return;}
+  // Tenta token salvo primeiro
+  const tokenSalvo=localStorage.getItem('fin_admin_token');
+  if(tokenSalvo){_adminToken=tokenSalvo;finrossiAutenticado=true;_setProfileFinRossi();return;}
+  // Pede senha
+  const senha=prompt('🔐 Senha FinRossi (área administrativa):');
+  if(!senha)return;
+  fetch(`${BACKEND_URL}/admin/clientes`,{headers:{'x-admin-token':senha}})
+    .then(res=>{
+      if(res.status===401){alert('❌ Senha incorreta.');return;}
+      finrossiAutenticado=true;_adminToken=senha;
+      localStorage.setItem('fin_admin_token',senha);
+      _setProfileFinRossi();
+    }).catch(()=>alert('Erro de conexão com o servidor.'));
+}
+
+function _setProfileFinRossi(){
+  cp='finrossi';
+  if(!DATA.finrossi) DATA.finrossi={lancs:[],invs:[],metas:[],objs:[],notas:[],assinaturas:[],recorrentes:[],cartoes:[]};
+  ['pessoal','finrossi'].forEach(id=>{
+    const btn=document.getElementById('pb-'+id);
+    if(btn) btn.classList.toggle('active',id==='finrossi');
+  });
+  const sub=document.getElementById('sb-logo-sub');
+  if(sub) sub.textContent='Negócio e clientes';
+  // Mostra item Clientes no nav
+  const navCli=document.getElementById('nav-clientes-item');
+  if(navCli) navCli.style.display='flex';
+  goTo('dashboard');
+  refreshAll();
+}
 
 function setProfile(p){
+  if(p==='finrossi'){abrirFinRossi();return;}
   _setProfileInterno(p);
-  // Atualiza botão ativo na sidebar admin
+  finrossiAutenticado=false;
+  // Esconde item Clientes no nav
+  const navCli=document.getElementById('nav-clientes-item');
+  if(navCli) navCli.style.display='none';
   ['pessoal','finrossi'].forEach(id=>{
     const btn=document.getElementById('pb-'+id);
     if(btn) btn.classList.toggle('active',id===p);
   });
-  // Atualiza subtítulo do logo
   const sub=document.getElementById('sb-logo-sub');
-  if(sub) sub.textContent=p==='pessoal'?'Minhas finanças':p==='finrossi'?'Negócio FinRossi':'Painel';
+  if(sub) sub.textContent=p==='pessoal'?'Minhas finanças':'Painel';
 }
 
 function _setProfileInterno(p){
@@ -3349,11 +3379,13 @@ let _adminToken = localStorage.getItem('fin_admin_token')||'';
 
 function getAdminToken(){
   if(_adminToken) return _adminToken;
-  const t = prompt('Digite a senha admin (ADMIN_SECRET do Railway):');
-  if(t){
-    _adminToken = t;
-    localStorage.setItem('fin_admin_token', t);
-  }
+  // Tenta pegar do localStorage primeiro
+  const saved=localStorage.getItem('fin_admin_token');
+  if(saved){_adminToken=saved;return _adminToken;}
+  const t = prompt('🔐 Senha de administrador (ADMIN_SECRET):');
+  if(!t){goTo('dashboard');return null;}
+  _adminToken = t;
+  localStorage.setItem('fin_admin_token', t);
   return _adminToken;
 }
 
@@ -3400,7 +3432,7 @@ async function cadastrarNovoCliente(){
 
 async function renderClientes(){
   const token=getAdminToken();
-  if(!token) return;
+  if(!token){goTo('dashboard');return;}
 
   const tabela=document.getElementById('clientes-tabela');
   tabela.innerHTML='<p style="color:var(--muted);font-size:13px;padding:12px">Carregando clientes...</p>';
@@ -3410,10 +3442,11 @@ async function renderClientes(){
       headers:{'x-admin-token':token}
     });
     
-    // Se token errado, limpa e pede de novo
     if(res.status===401){
       _adminToken='';
-      tabela.innerHTML='<p style="color:var(--red);font-size:13px;padding:12px">❌ Senha incorreta. Clique em Clientes novamente para tentar de novo.</p>';
+      localStorage.removeItem('fin_admin_token');
+      goTo('dashboard');
+      setTimeout(()=>alert('❌ Senha admin incorreta. Tente novamente.'),100);
       return;
     }
 
@@ -3503,7 +3536,12 @@ async function desativarCliente(uid){
   }catch(e){alert('Erro de conexão')}
 }
 
-function renderPreview(){ /* Seção estática — já renderizada no HTML */ }
+function renderPreview(){ 
+  // Preview não precisa de autenticação — exibe conteúdo estático
+  // Seção já renderizada no HTML
+}
+
+function goToPreview(){ goTo('preview'); }
 
 // ─── CARTÕES DE CRÉDITO ──────────────────────────────────────────────────────
 function getCartoes(){return pd().cartoes||[];}
