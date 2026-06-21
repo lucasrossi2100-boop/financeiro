@@ -1428,20 +1428,21 @@ const fmtR0=(v)=>'R$\u00a0'+Number(v).toLocaleString('pt-BR',{minimumFractionDig
 const mesLbl=(ym)=>{const[y,m]=ym.split('-');return['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][+m-1]+'/'+y.slice(2)};
 const curMes=()=>new Date().toISOString().slice(0,7);
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-const pd=()=>DATA[cp];
+const pd=()=>{if(!DATA[cp])DATA[cp]={lancs:[],invs:[],metas:[],objs:[],notas:[],assinaturas:[],recorrentes:[],cartoes:[]};return DATA[cp];};
 
 function showMsg(id,txt,cls){const el=document.getElementById(id);if(!el)return;el.textContent=txt;el.className='msg '+cls;setTimeout(()=>{el.textContent='';el.className='msg'},2800)}
 function destroyChart(id){if(charts[id]){charts[id].destroy();delete charts[id]}}
 
 // ─── STORAGE ─────────────────────────────────────────────────────────────────
 function lsLoad(){
-  ['pessoal','rossi','usina','teste'].forEach(p=>{
+  ['pessoal','finrossi','rossi','usina','teste'].forEach(p=>{
     ['lancs','invs','metas','objs','notas','assinaturas','recorrentes','cartoes'].forEach(t=>{
       try{const v=localStorage.getItem(`fin3_${p}_${t}`);if(v)DATA[p][t]=JSON.parse(v)}catch{}
     });
   });
 }
 function lsSave(profile,type){
+  if(!DATA[profile]) DATA[profile]={lancs:[],invs:[],metas:[],objs:[],notas:[],assinaturas:[],recorrentes:[],cartoes:[]};
   try{localStorage.setItem(`fin3_${profile}_${type}`,JSON.stringify(DATA[profile][type]))}catch{}
 }
 
@@ -2653,6 +2654,7 @@ async function remNota(id){
 }
 
 function renderNotas(){
+  try{
   document.getElementById('notas-sub').textContent='Perfil: '+PNAMES[cp];
   const busca=(document.getElementById('nota-busca')||{}).value?.toLowerCase()||'';
   const filtCat=(document.getElementById('nota-filtro-cat')||{}).value||'';
@@ -2682,6 +2684,7 @@ function renderNotas(){
       </div>
     </div>`;
   }).join('');
+  }catch(e){console.error('renderNotas error:',e);}
 }
 
 // ─── ASSINATURAS ─────────────────────────────────────────────────────────────
@@ -2714,6 +2717,7 @@ async function remAssin(id){
 }
 
 function renderAssinaturas(){
+  try{
   const list=getAssin();
   const ativas=list.filter(a=>a.status!=='pausada');
   const total=ativas.reduce((a,b)=>a+b.val,0);
@@ -2735,7 +2739,15 @@ function renderAssinaturas(){
     charts['assin-cat']=new Chart(ctxC,{type:'doughnut',data:{labels:cL.length?cL:['Sem dados'],datasets:[{data:cV.length?cV:[1],backgroundColor:cL.length?PALETTE.slice(0,cL.length):['#333'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#888',font:{size:11},padding:6,boxWidth:10}}}}});}
 
   const listEl=document.getElementById('assin-list');
-  if(!list.length){listEl.innerHTML='<p class="empty">Nenhuma assinatura cadastrada</p>';return}
+  if(!list.length){listEl.innerHTML=`
+    <div style="text-align:center;padding:40px 24px">
+      <div style="font-size:40px;margin-bottom:12px">📺</div>
+      <div style="font-family:'DM Serif Display',serif;font-size:17px;margin-bottom:8px">Nenhuma assinatura cadastrada</div>
+      <p style="font-size:13px;color:var(--muted);max-width:340px;margin:0 auto 20px;line-height:1.7">
+        Cadastre Netflix, Spotify, academia e outros serviços recorrentes para acompanhar quanto gasta por mês.
+      </p>
+      <button class="btn primary" onclick="openModalAssin()">+ Cadastrar assinatura</button>
+    </div>`;return}
   const sorted=[...list].sort((a,b)=>a.dia-b.dia);
   listEl.innerHTML=sorted.map(a=>{
     const icon=ASSIN_ICONS[a.cat]||'📦';
@@ -2757,6 +2769,7 @@ function renderAssinaturas(){
       </div>
     </div>`;
   }).join('');
+  }catch(e){console.error('renderAssinaturas error:',e);}
 }
 
 // ─── CONTAS RECORRENTES ───────────────────────────────────────────────────────
@@ -2806,6 +2819,7 @@ async function lancarRecorrentesDoMes(){
 }
 
 function renderRecorrentes(){
+  try{
   const list=getRec();
   const total=list.reduce((a,b)=>a+b.val,0);
   const mes=curMes();
@@ -2820,7 +2834,15 @@ function renderRecorrentes(){
   `;
 
   const listEl=document.getElementById('rec-list');
-  if(!list.length){listEl.innerHTML='<p class="empty">Nenhuma conta recorrente cadastrada</p>';return}
+  if(!list.length){listEl.innerHTML=`
+    <div style="text-align:center;padding:40px 24px">
+      <div style="font-size:40px;margin-bottom:12px">🔁</div>
+      <div style="font-family:'DM Serif Display',serif;font-size:17px;margin-bottom:8px">Nenhuma conta recorrente</div>
+      <p style="font-size:13px;color:var(--muted);max-width:360px;margin:0 auto 20px;line-height:1.7">
+        Cadastre aluguel, energia, internet e outros gastos fixos mensais. Com um clique, todos são lançados automaticamente nas despesas.
+      </p>
+      <button class="btn primary" onclick="openModalRec()">+ Cadastrar conta recorrente</button>
+    </div>`;return}
   const sorted=[...list].sort((a,b)=>a.dia-b.dia);
   listEl.innerHTML=`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
     <thead><tr style="border-bottom:1px solid var(--border)">
@@ -2851,6 +2873,7 @@ function renderRecorrentes(){
       </tr>`;
     }).join('')}</tbody>
   </table></div>`;
+  }catch(e){console.error('renderRecorrentes error:',e);}
 }
 
 // ─── CALENDÁRIO FINANCEIRO ────────────────────────────────────────────────────
@@ -2864,6 +2887,7 @@ function mudarMesCalendario(dir){
 }
 
 function renderCalendario(){
+  try{
   const now=new Date();
   const hoje_str=now.toISOString().slice(0,10);
   document.getElementById('cal-titulo').textContent=MONTHS[calMes]+' de '+calAno;
@@ -2961,6 +2985,7 @@ function renderCalendario(){
       </div>
     </div>`;
   }).join('');
+  }catch(e){console.error('renderCalendario error:',e);}
 }
 
 function mostrarDiaCalendario(dia){
@@ -3267,13 +3292,82 @@ async function remCartao(id){
 }
 
 function renderCartoes(){
+  try{
   populateCartaoSelect();
   const cartoes=getCartoes();
   const mes=curMes();
   const grid=document.getElementById('cartoes-grid');
+  const gastosEl=document.getElementById('cartoes-gastos');
+  if(!grid||!gastosEl){console.warn('renderCartoes: elementos não encontrados');return;}
+
   if(!cartoes.length){
-    grid.innerHTML=`<div class="card" style="grid-column:1/-1"><p class="empty">Nenhum cartão cadastrado. Clique em "+ Novo cartão".</p></div>`;
-    document.getElementById('cartoes-gastos').innerHTML='';
+    grid.innerHTML=`
+      <div style="grid-column:1/-1">
+        <!-- Hero vazio -->
+        <div class="card" style="text-align:center;padding:48px 24px;margin-bottom:18px;border-style:dashed">
+          <div style="font-size:52px;margin-bottom:16px">💳</div>
+          <div style="font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:10px">Nenhum cartão cadastrado ainda</div>
+          <p style="font-size:13px;color:var(--muted);max-width:420px;margin:0 auto 28px;line-height:1.8">
+            Cadastre seus cartões para controlar fatura, limite disponível e ver automaticamente quais despesas foram feitas em cada cartão.
+          </p>
+          <button class="btn primary" onclick="openModalCartao()" style="font-size:14px;padding:11px 28px">
+            + Cadastrar primeiro cartão
+          </button>
+        </div>
+
+        <!-- Como funciona -->
+        <div class="card" style="margin-bottom:18px">
+          <h3><span class="dot" style="background:var(--accent)"></span>Como funciona</h3>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:4px">
+            <div style="display:flex;gap:12px;align-items:flex-start">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--accent-s);border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--accent);flex-shrink:0">1</div>
+              <div>
+                <div style="font-size:13px;font-weight:500;margin-bottom:3px">Cadastre o cartão</div>
+                <div style="font-size:12px;color:var(--muted);line-height:1.6">Informe nome, banco, 4 dígitos finais, limite e dia de vencimento.</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:12px;align-items:flex-start">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--accent-s);border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--accent);flex-shrink:0">2</div>
+              <div>
+                <div style="font-size:13px;font-weight:500;margin-bottom:3px">Lance as despesas</div>
+                <div style="font-size:12px;color:var(--muted);line-height:1.6">Em <b>Lançamentos</b>, ao adicionar uma despesa selecione o cartão. O valor entra na fatura automaticamente.</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:12px;align-items:flex-start">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--accent-s);border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--accent);flex-shrink:0">3</div>
+              <div>
+                <div style="font-size:13px;font-weight:500;margin-bottom:3px">Acompanhe a fatura</div>
+                <div style="font-size:12px;color:var(--muted);line-height:1.6">Aqui você vê fatura atual, limite disponível, gastos por categoria e alerta de limite.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- O que você vai ver depois -->
+        <div class="card">
+          <h3><span class="dot" style="background:var(--blue)"></span>O que aparece aqui depois de cadastrar</h3>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:4px">
+            ${[
+              ['💳','Card por cartão','Fatura atual, limite disponível e % usado com barra de progresso'],
+              ['📊','Gastos do mês','Lista detalhada de despesas vinculadas a cada cartão'],
+              ['🍩','Distribuição','Gráfico de pizza mostrando quanto cada cartão representa'],
+              ['📈','Fatura vs Limite','Gráfico de barras comparando fatura com o limite total']
+            ].map(([icon,titulo,desc])=>`
+              <div style="background:var(--surface2);border-radius:10px;padding:14px">
+                <div style="font-size:22px;margin-bottom:8px">${icon}</div>
+                <div style="font-size:13px;font-weight:500;margin-bottom:4px">${titulo}</div>
+                <div style="font-size:11px;color:var(--muted);line-height:1.6">${desc}</div>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>`;
+    gastosEl.innerHTML='';
+    destroyChart('cartao-dist');
+    destroyChart('cartao-limite');
+    const ctxD=document.getElementById('c-cartao-dist');
+    const ctxL=document.getElementById('c-cartao-limite');
+    if(ctxD){ctxD.parentElement.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:12px;color:var(--muted)">Sem dados</div>';}
+    if(ctxL){ctxL.parentElement.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:12px;color:var(--muted)">Sem dados</div>';}
     return;
   }
   const lancs=pd().lancs.filter(l=>l.tipo==='despesa'&&l.data.startsWith(mes));
@@ -3315,7 +3409,6 @@ function renderCartoes(){
   }).join('');
 
   // Gastos detalhados
-  const gastosEl=document.getElementById('cartoes-gastos');
   const rows=cartoes.map(c=>{
     const gastos=lancs.filter(l=>l.cartaoId===c.id);
     const total=gastos.reduce((a,b)=>a+b.val,0);
@@ -3331,7 +3424,18 @@ function renderCartoes(){
       ${gastos.length>3?`<div style="font-size:11px;color:var(--muted);padding-left:16px">+${gastos.length-3} mais</div>`:''}
     </div>`;
   }).join('');
-  gastosEl.innerHTML=rows||'<p class="empty">Nenhum gasto com cartão este mês</p>';
+  const totalGeral=cartoes.reduce((sum,c)=>sum+lancs.filter(l=>l.cartaoId===c.id).reduce((a,b)=>a+b.val,0),0);
+  gastosEl.innerHTML=rows||(totalGeral===0?`
+    <div style="padding:24px;text-align:center">
+      <div style="font-size:32px;margin-bottom:12px">🧾</div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.7;max-width:380px;margin:0 auto">
+        Nenhum gasto vinculado a cartão em <strong>${MONTHS[parseInt(mes.split('-')[1])-1]}</strong>.<br>
+        Para vincular, vá em <strong>Lançamentos</strong>, adicione uma despesa e selecione o cartão no campo <em>"Cartão de crédito"</em>.
+      </p>
+      <button class="btn" onclick="goTo('lancamentos')" style="margin-top:16px">
+        → Ir para Lançamentos
+      </button>
+    </div>`:'');
 
   // Gráficos
   destroyChart('cartao-dist');
@@ -3349,6 +3453,7 @@ function renderCartoes(){
       {label:'Limite',data:com.map(c=>c.limite),backgroundColor:'rgba(74,222,128,0.3)',borderRadius:4}
     ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#888',font:{size:11},boxWidth:10}}},scales:{x:{ticks:{color:'#888'},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#888'},grid:{color:'rgba(255,255,255,0.04)'}}}}});
   }
+  }catch(e){console.error('renderCartoes error:',e);}
 }
 
 function renderManual(){
