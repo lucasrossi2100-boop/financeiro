@@ -876,6 +876,347 @@ tbody tr:hover td{background:var(--surface2)}
     <div id="rp-prazo" style="margin-top:12px"></div>
   </div>
 
+  </div>
+</section>
+
+<section id="sec-assinaturas" class="section-hidden">
+  <div class="page-header">
+    <div class="page-title"><h2>Assinaturas</h2><p>Controle de serviços recorrentes</p></div>
+    <div class="header-actions"><button class="btn primary" onclick="openModalAssin()">+ Nova assinatura</button></div>
+  </div>
+  <div class="metrics" id="assin-metrics"></div>
+  <div class="grid2" style="margin-bottom:16px">
+    <div class="card">
+      <h3><span class="dot" style="background:var(--purple)"></span>Gastos por categoria</h3>
+      <div class="chart-wrap" style="height:200px"><canvas id="c-assin-cat"></canvas></div>
+    </div>
+    <div class="card">
+      <h3><span class="dot" style="background:var(--blue)"></span>Lista de assinaturas</h3>
+      <div id="assin-list"></div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTAS RECORRENTES -->
+<section id="sec-recorrentes" class="section-hidden">
+  <div class="page-header">
+    <div class="page-title"><h2>Contas Recorrentes</h2><p>Cadastre uma vez, lança todo mês automaticamente</p></div>
+    <div class="header-actions"><button class="btn primary" onclick="openModalRec()">+ Nova conta</button></div>
+  </div>
+  <div class="metrics" id="rec-metrics"></div>
+  <div class="card card-full">
+    <h3><span class="dot" style="background:var(--amber)"></span>Contas ativas</h3>
+    <div id="rec-list"></div>
+  </div>
+  <div class="card card-full" style="margin-top:16px">
+    <h3><span class="dot" style="background:var(--green)"></span>Lançar contas do mês</h3>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:12px">Clique para gerar automaticamente todos os lançamentos recorrentes do mês atual que ainda não foram lançados.</p>
+    <button class="btn primary" onclick="lancarRecorrentesDoMes()" style="height:46px;font-size:14px">
+      ⚡ Gerar lançamentos de <span id="rec-mes-label"></span>
+    </button>
+    <div class="msg" id="msg-rec" style="margin-top:8px"></div>
+  </div>
+</section>
+
+<!-- CALENDÁRIO FINANCEIRO -->
+<section id="sec-calendario" class="section-hidden">
+  <div class="page-header">
+    <div class="page-title"><h2>Calendário Financeiro</h2><p>Próximos vencimentos e pagamentos</p></div>
+    <div class="header-actions">
+      <button class="btn" onclick="mudarMesCalendario(-1)">‹</button>
+      <span id="cal-titulo" style="font-size:14px;font-weight:500;padding:0 8px"></span>
+      <button class="btn" onclick="mudarMesCalendario(1)">›</button>
+    </div>
+  </div>
+  <!-- Grade do calendário -->
+  <div class="card card-full" style="margin-bottom:16px">
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:8px">
+      <div style="text-align:center;font-size:11px;color:var(--muted);padding:4px;font-weight:500">Dom</div>
+      <div style="text-align:center;font-size:11px;color:var(--muted);padding:4px;font-weight:500">Seg</div>
+      <div style="text-align:center;font-size:11px;color:var(--muted);padding:4px;font-weight:500">Ter</div>
+      <div style="text-align:center;font-size:11px;color:var(--muted);padding:4px;font-weight:500">Qua</div>
+      <div style="text-align:center;font-size:11px;color:var(--muted);padding:4px;font-weight:500">Qui</div>
+      <div style="text-align:center;font-size:11px;color:var(--muted);padding:4px;font-weight:500">Sex</div>
+      <div style="text-align:center;font-size:11px;color:var(--muted);padding:4px;font-weight:500">Sáb</div>
+    </div>
+    <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px"></div>
+  </div>
+  <!-- Legenda -->
+  <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;font-size:12px">
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--red);margin-right:5px"></span>Vencido</span>
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--amber);margin-right:5px"></span>Hoje</span>
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--green);margin-right:5px"></span>Futuro</span>
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--blue);margin-right:5px"></span>Receita</span>
+  </div>
+  <!-- Lista de vencimentos do mês -->
+  <div class="card card-full">
+    <h3><span class="dot" style="background:var(--amber)"></span>Vencimentos do mês</h3>
+    <div id="cal-lista"></div>
+  </div>
+</section>
+
+<section id="sec-notas" class="section-hidden">
+  <div class="page-header">
+    <div class="page-title"><h2>Notas</h2><p id="notas-sub">Bloco de anotações pessoal</p></div>
+    <div class="header-actions">
+      <button class="btn primary" onclick="addNota()">+ Nova nota</button>
+    </div>
+  </div>
+
+  <!-- NOVA NOTA RÁPIDA -->
+  <div class="card card-full" style="margin-bottom:16px">
+    <div class="field" style="margin-bottom:8px">
+      <label>Título</label>
+      <input id="nota-titulo" type="text" placeholder="Ex: Reunião com cliente, Ideia de negócio...">
+    </div>
+    <div class="field" style="margin-bottom:8px">
+      <label>Conteúdo</label>
+      <textarea id="nota-texto" rows="4" placeholder="Escreva sua anotação aqui..." style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius-sm);padding:10px 12px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;resize:vertical;width:100%;line-height:1.6;transition:border-color .15s"></textarea>
+    </div>
+    <div class="form-row">
+      <div class="field">
+        <label>Categoria</label>
+        <select id="nota-cat">
+          <option>Geral</option>
+          <option>Financeiro</option>
+          <option>Reunião</option>
+          <option>Ideia</option>
+          <option>Tarefa</option>
+          <option>Importante</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Cor</label>
+        <select id="nota-cor">
+          <option value="default">Padrão</option>
+          <option value="green">Verde</option>
+          <option value="blue">Azul</option>
+          <option value="amber">Âmbar</option>
+          <option value="red">Vermelho</option>
+          <option value="purple">Roxo</option>
+        </select>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn primary" onclick="addNota()">Salvar nota</button>
+      <button class="btn" onclick="limparFormNota()">Limpar</button>
+    </div>
+    <div class="msg" id="msg-nota"></div>
+  </div>
+
+  <!-- BUSCA + FILTRO -->
+  <div class="filter-bar" style="margin-bottom:14px">
+    <input id="nota-busca" type="text" placeholder="Buscar notas..." oninput="renderNotas()" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius-sm);padding:7px 12px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;flex:1;max-width:260px">
+    <select id="nota-filtro-cat" onchange="renderNotas()" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius-sm);padding:5px 10px;font-size:12px;font-family:'DM Sans',sans-serif;outline:none">
+      <option value="">Todas as categorias</option>
+      <option>Geral</option><option>Financeiro</option><option>Reunião</option>
+      <option>Ideia</option><option>Tarefa</option><option>Importante</option>
+    </select>
+  </div>
+
+  <!-- LISTA DE NOTAS -->
+  <div id="notas-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px"></div>
+</section>
+<section id="sec-empresas" class="section-hidden">
+<div class="page-header">
+    <div class="page-title"><h2>Dashboard Empresas</h2><p>Saúde financeira comparativa</p></div>
+    <div class="header-actions">
+      <select id="emp-mes-filtro" onchange="renderEmpresas()" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius-sm);padding:7px 12px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;height:42px">
+        <option value="">Mês atual</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- COMPARATIVO LADO A LADO -->
+  <div class="grid2" id="emp-comparativo" style="margin-bottom:16px"></div>
+
+  <!-- GRÁFICOS COMPARATIVOS -->
+  <div class="grid2" style="margin-bottom:16px">
+    <div class="card">
+      <h3><span class="dot" style="background:var(--green)"></span>Receitas comparadas</h3>
+      <div class="chart-wrap" style="height:200px"><canvas id="c-emp-rec"></canvas></div>
+    </div>
+    <div class="card">
+      <h3><span class="dot" style="background:var(--red)"></span>Despesas comparadas</h3>
+      <div class="chart-wrap" style="height:200px"><canvas id="c-emp-des"></canvas></div>
+    </div>
+  </div>
+  <div class="grid2" style="margin-bottom:16px">
+    <div class="card">
+      <h3><span class="dot" style="background:var(--amber)"></span>Saldo mensal comparado</h3>
+      <div class="chart-wrap" style="height:200px"><canvas id="c-emp-saldo"></canvas></div>
+    </div>
+    <div class="card">
+      <h3><span class="dot" style="background:var(--blue)"></span>Total investido comparado</h3>
+      <div class="chart-wrap" style="height:200px"><canvas id="c-emp-inv"></canvas></div>
+    </div>
+  </div>
+
+  <!-- EVOLUÇÃO MENSAL POR EMPRESA -->
+  <div class="card card-full">
+    <h3><span class="dot" style="background:var(--purple)"></span>Evolução de receitas — últimos 6 meses</h3>
+    <div class="chart-wrap" style="height:220px"><canvas id="c-emp-evo"></canvas></div>
+  </div>
+
+  <!-- DESPESAS POR CATEGORIA POR EMPRESA -->
+  <div class="grid2" style="margin-bottom:16px">
+    <div class="card">
+      <h3><span class="dot" style="background:var(--blue)"></span>Categorias — Rossi &amp; Moraes</h3>
+      <div class="chart-wrap" style="height:200px"><canvas id="c-emp-cat-rossi"></canvas></div>
+    </div>
+    <div class="card">
+      <h3><span class="dot" style="background:var(--amber)"></span>Categorias — Usina Lins</h3>
+      <div class="chart-wrap" style="height:200px"><canvas id="c-emp-cat-usina"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<!-- MANUAL DE USO -->
+<section id="sec-manual" class="section-hidden">
+  <div class="page-header">
+    <div class="page-title"><h2>📖 Manual de Uso</h2><p>Aprenda a usar o FinRossi</p></div>
+    <div class="header-actions">
+      <button class="btn export" onclick="exportarManualPDF()">⬇ Baixar PDF</button>
+    </div>
+  </div>
+  <div id="manual-content"></div>
+</section>
+
+<!-- CARTÕES DE CRÉDITO -->
+<section id="sec-cartoes" class="section-hidden">
+  <div class="mobile-topbar" id="mob-top-cartoes">
+    <div style="font-family:'DM Serif Display',serif;font-size:20px">Cartões</div>
+    <button class="btn primary sm" onclick="openModalCartao()" style="height:36px;font-size:13px">+ Novo cartão</button>
+  </div>
+  <div class="page-header">
+    <div class="page-title"><h2>Cartões de Crédito</h2><p>Controle de faturas e gastos</p></div>
+    <div class="header-actions"><button class="btn primary" onclick="openModalCartao()">+ Novo cartão</button></div>
+  </div>
+
+  <!-- CARDS DE CARTÕES -->
+  <div id="cartoes-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-bottom:16px"></div>
+
+  <!-- GASTOS POR CARTÃO -->
+  <div class="card card-full" style="margin-bottom:16px">
+    <h3><span class="dot" style="background:var(--blue)"></span>Gastos por cartão — mês atual</h3>
+    <div id="cartoes-gastos"></div>
+  </div>
+
+  <!-- GRÁFICO COMPARATIVO -->
+  <div class="grid2">
+    <div class="card">
+      <h3><span class="dot" style="background:var(--purple)"></span>Distribuição de gastos</h3>
+      <div class="chart-wrap" style="height:200px"><canvas id="c-cartao-dist"></canvas></div>
+    </div>
+    <div class="card">
+      <h3><span class="dot" style="background:var(--amber)"></span>Fatura vs Limite</h3>
+      <div class="chart-wrap" style="height:200px"><canvas id="c-cartao-limite"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<!-- CLIENTES -->
+<section id="sec-clientes" class="section-hidden">
+  <div class="page-header">
+    <div class="page-title"><h2>👥 Clientes</h2><p>Gestão de clientes FinRossi</p></div>
+    <div class="header-actions">
+      <button class="btn primary" onclick="openModalNovoCliente()">+ Novo cliente</button>
+    </div>
+  </div>
+  <div class="metrics" id="clientes-metrics"></div>
+
+  <!-- FILTROS -->
+  <div class="filter-bar" style="margin-bottom:14px">
+    <select id="cli-filtro-status" onchange="renderClientes()" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius-sm);padding:7px 12px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
+      <option value="">Todos</option>
+      <option value="ativo">Ativos</option>
+      <option value="trial">Trial</option>
+      <option value="inativo">Inativos</option>
+    </select>
+    <select id="cli-filtro-plano" onchange="renderClientes()" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius-sm);padding:7px 12px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
+      <option value="">Todos os planos</option>
+      <option value="gratuito">Gratuito</option>
+      <option value="starter">Starter</option>
+      <option value="essencial">Essencial</option>
+      <option value="consultoria">Consultoria</option>
+    </select>
+    <input id="cli-busca" type="text" placeholder="Buscar cliente..." oninput="renderClientes()" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius-sm);padding:7px 12px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;flex:1;max-width:260px">
+  </div>
+
+  <!-- TABELA DE CLIENTES -->
+  <div class="card card-full">
+    <div id="clientes-tabela"></div>
+  </div>
+</section>
+
+<!-- PREVIEW (como o cliente vê) -->
+<section id="sec-preview" class="section-hidden">
+  <div class="page-header">
+    <div class="page-title"><h2>👁 Preview do cliente</h2><p>Visualize como o cliente vê o app</p></div>
+  </div>
+  <div class="card card-full" style="margin-bottom:16px;background:linear-gradient(135deg,rgba(96,165,250,0.06),rgba(192,132,252,0.04));border-color:rgba(96,165,250,0.2)">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+      <div style="font-size:28px">👁</div>
+      <div>
+        <div style="font-size:15px;font-weight:500">Modo Preview</div>
+        <div style="font-size:13px;color:var(--muted)">Esta é a tela que seus clientes veem quando fazem login no FinRossi</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+      <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:14px">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">O que o cliente vê</div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:5px;font-size:13px">
+          <li>✅ Dashboard com receitas/despesas</li>
+          <li>✅ Lançamentos</li>
+          <li>✅ Investimentos</li>
+          <li>✅ Metas e objetivos</li>
+          <li>✅ Calendário financeiro</li>
+          <li>✅ Notas, assinaturas, recorrentes</li>
+          <li>✅ Cartões de crédito</li>
+        </ul>
+      </div>
+      <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:14px">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">O que o cliente NÃO vê</div>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:5px;font-size:13px">
+          <li>❌ Seus perfis pessoais</li>
+          <li>❌ Painel FinRossi</li>
+          <li>❌ Lista de clientes</li>
+          <li>❌ Dados de outros clientes</li>
+          <li>❌ Configurações admin</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <!-- Simulação da tela do cliente -->
+  <div class="card card-full">
+    <h3><span class="dot" style="background:var(--blue)"></span>Simulação — tela do cliente</h3>
+    <div style="border:2px solid var(--border2);border-radius:12px;overflow:hidden;margin-top:12px">
+      <div style="background:var(--surface2);padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px">
+        <div style="width:10px;height:10px;border-radius:50%;background:#f87171"></div>
+        <div style="width:10px;height:10px;border-radius:50%;background:#fbbf24"></div>
+        <div style="width:10px;height:10px;border-radius:50%;background:#4ade80"></div>
+        <div style="font-size:12px;color:var(--muted);margin-left:8px">lucasrossi2100-boop.github.io/financeiro</div>
+      </div>
+      <div style="padding:20px;background:var(--surface)">
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px">
+          <div style="background:var(--surface2);border-radius:8px;padding:12px">
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Receitas</div>
+            <div style="font-size:18px;font-family:'DM Serif Display',serif;color:var(--green)">R$ 0,00</div>
+          </div>
+          <div style="background:var(--surface2);border-radius:8px;padding:12px">
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Despesas</div>
+            <div style="font-size:18px;font-family:'DM Serif Display',serif;color:var(--red)">R$ 0,00</div>
+          </div>
+        </div>
+        <div style="font-size:13px;color:var(--muted);text-align:center;padding:20px">
+          Cliente vê seus próprios dados aqui — separados dos seus
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
 <!-- MODAL ASSINATURA -->
 <div class="modal-overlay" id="modal-assin">
   <div class="modal">
@@ -2179,16 +2520,8 @@ function renderEmpresas(){
 // ─── ASSINATURAS ─────────────────────────────────────────────────────────────
 const ASSIN_ICONS={'Streaming':'🎬','Música':'🎵','Saúde/Academia':'💪','Educação':'📚','Software':'💻','E-commerce':'🛒','Outros':'📦'};
 
-function getAssin(){return pd().assinaturas||[];}
 function saveAssin(){lsSave(cp,'assinaturas');}
 
-function openModalAssin(id){
-  document.getElementById('assin-modal-title').textContent=id?'Editar assinatura':'Nova assinatura';
-  document.getElementById('assin-edit-id').value=id||'';
-  if(id){const a=getAssin().find(x=>x.id===id);if(a){document.getElementById('assin-nome').value=a.nome;document.getElementById('assin-val').value=a.val;document.getElementById('assin-cat').value=a.cat;document.getElementById('assin-dia').value=a.dia;document.getElementById('assin-obs').value=a.obs||'';}}
-  else{['assin-nome','assin-val','assin-dia','assin-obs'].forEach(i=>{document.getElementById(i).value=''});}
-  document.getElementById('modal-assin').classList.add('open');
-}
 function salvarAssin(){
   const nome=document.getElementById('assin-nome').value.trim();
   const val=parseFloat(document.getElementById('assin-val').value);
@@ -2212,40 +2545,6 @@ function remAssin(id){
   pd().assinaturas=getAssin().filter(a=>a.id!==id);
   saveAssin();renderAssinaturas();
 }
-function renderAssinaturas(){
-  const lista=getAssin();
-  const ativas=lista.filter(a=>a.ativa!==false);
-  const total=ativas.reduce((s,a)=>s+a.val,0);
-  const totalAnual=total*12;
-  document.getElementById('assin-metrics').innerHTML=`
-    <div class="mc"><div class="mc-label">Total mensal</div><div class="mc-val red">${fmtR(total)}</div></div>
-    <div class="mc"><div class="mc-label">Total anual</div><div class="mc-val amber">${fmtR(totalAnual)}</div></div>
-    <div class="mc"><div class="mc-label">Assinaturas ativas</div><div class="mc-val blue">${ativas.length}</div></div>
-    <div class="mc"><div class="mc-label">Total cadastradas</div><div class="mc-val">${lista.length}</div></div>
-  `;
-  const el=document.getElementById('assin-list');
-  if(!lista.length){el.innerHTML='<p class="empty">Nenhuma assinatura. Clique em "+ Nova assinatura".</p>';return;}
-  // Agrupa por categoria
-  const cats={};lista.forEach(a=>{if(!cats[a.cat])cats[a.cat]=[];cats[a.cat].push(a);});
-  el.innerHTML=Object.entries(cats).map(([cat,items])=>`
-    <div style="margin-bottom:16px">
-      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">${ASSIN_ICONS[cat]||'📦'} ${cat}</div>
-      ${items.map(a=>`
-        <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);opacity:${a.ativa===false?'0.4':'1'}">
-          <div style="flex:1">
-            <div style="font-size:13px;font-weight:500">${a.nome}${a.obs?` <span style="font-size:11px;color:var(--muted);font-weight:400">— ${a.obs}</span>`:''}</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px">Vence dia ${a.dia} de cada mês</div>
-          </div>
-          <div style="font-size:15px;font-family:'DM Serif Display',serif;color:var(--red);font-weight:500">${fmtR(a.val)}</div>
-          <div style="display:flex;gap:4px">
-            <button class="btn xs" onclick="toggleAssin('${a.id}')" title="${a.ativa===false?'Ativar':'Pausar'}">${a.ativa===false?'▶':'⏸'}</button>
-            <button class="btn xs" onclick="openModalAssin('${a.id}')">✏</button>
-            <button class="btn danger xs" onclick="remAssin('${a.id}')">✕</button>
-          </div>
-        </div>`).join('')}
-    </div>`).join('');
-}
-
 // ─── CONTAS RECORRENTES ───────────────────────────────────────────────────────
 function getRecorr(){return pd().recorrentes||[];}
 function saveRecorr(){lsSave(cp,'recorrentes');}
@@ -2293,37 +2592,6 @@ function gerarMesRecorrentes(){
   alert(`${paraGerar.length} lançamento(s) gerado(s) com sucesso!`);
   renderRecorrentes();refreshDash();
 }
-function renderRecorrentes(){
-  const lista=getRecorr();
-  const total=lista.reduce((s,r)=>s+r.val,0);
-  const el=document.getElementById('recorr-list');
-  if(!lista.length){el.innerHTML='<p class="empty">Nenhuma conta recorrente. Clique em "+ Nova conta".</p>';return;}
-  const mes=curMes();
-  el.innerHTML=`
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0 12px;border-bottom:1px solid var(--border);margin-bottom:8px">
-      <span style="font-size:13px;color:var(--muted)">Total mensal automático</span>
-      <span style="font-size:16px;font-family:'DM Serif Display',serif;color:var(--red)">${fmtR(total)}</span>
-    </div>
-    ${lista.sort((a,b)=>a.dia-b.dia).map(r=>`
-      <div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--border)">
-        <div style="width:32px;height:32px;border-radius:var(--radius-sm);background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--amber);flex-shrink:0">
-          ${r.dia}
-        </div>
-        <div style="flex:1">
-          <div style="font-size:13px;font-weight:500">${r.desc}</div>
-          <div style="font-size:11px;color:var(--muted)">${r.cat} · Todo dia ${r.dia}</div>
-        </div>
-        <div style="font-size:14px;font-family:'DM Serif Display',serif;color:var(--red)">${fmtR(r.val)}</div>
-        <span style="font-size:10px;padding:2px 7px;border-radius:20px;${r.ultimoMes===mes?'background:var(--green-s);color:var(--green)':'background:var(--surface3);color:var(--muted)'}">
-          ${r.ultimoMes===mes?'✓ Gerado':'Pendente'}
-        </span>
-        <div style="display:flex;gap:4px">
-          <button class="btn xs" onclick="openModalRecorr('${r.id}')">✏</button>
-          <button class="btn danger xs" onclick="remRecorr('${r.id}')">✕</button>
-        </div>
-      </div>`).join('')}`;
-}
-
 // ─── CALENDÁRIO FINANCEIRO ────────────────────────────────────────────────────
 let calMesAtual = new Date();
 
@@ -2331,112 +2599,6 @@ function mudaMes(d){
   calMesAtual = new Date(calMesAtual.getFullYear(), calMesAtual.getMonth()+d, 1);
   renderCalendario();
 }
-
-function renderCalendario(){
-  const ano=calMesAtual.getFullYear(), mes=calMesAtual.getMonth();
-  const mesStr=String(mes+1).padStart(2,'0');
-  const mesKey=`${ano}-${mesStr}`;
-  document.getElementById('cal-label').textContent=MONTHS[mes]+' '+ano;
-
-  // Coleta todos os eventos do mês
-  const eventos=[];
-  // Lançamentos
-  pd().lancs.filter(l=>l.data.startsWith(mesKey)).forEach(l=>{
-    eventos.push({dia:parseInt(l.data.slice(8)),label:l.desc,val:l.val,tipo:l.tipo,fonte:'lancamento'});
-  });
-  // Assinaturas ativas
-  getAssin().filter(a=>a.ativa!==false).forEach(a=>{
-    eventos.push({dia:a.dia,label:a.nome,val:a.val,tipo:'assinatura',fonte:'assinatura'});
-  });
-  // Recorrentes
-  getRecorr().forEach(r=>{
-    eventos.push({dia:r.dia,label:r.desc,val:r.val,tipo:'recorrente',fonte:'recorrente'});
-  });
-
-  // Proximos vencimentos (assinaturas + recorrentes nos próximos 15 dias)
-  const hoje_d=new Date();
-  const proximos=[...getAssin().filter(a=>a.ativa!==false),...getRecorr()].map(item=>{
-    const dia='dia' in item?item.dia:item.dia;
-    const nome='nome' in item?item.nome:item.desc;
-    const dVenc=new Date(hoje_d.getFullYear(),hoje_d.getMonth(),dia);
-    if(dVenc<hoje_d) dVenc.setMonth(dVenc.getMonth()+1);
-    const diff=Math.ceil((dVenc-hoje_d)/(1000*60*60*24));
-    return{nome,val:item.val,dia,diff,dVenc};
-  }).sort((a,b)=>a.diff-b.diff).slice(0,8);
-
-  document.getElementById('cal-proximos').innerHTML=proximos.length?proximos.map(p=>{
-    const cor=p.diff===0?'var(--red)':p.diff<=3?'var(--amber)':'var(--green)';
-    const label=p.diff===0?'Hoje':p.diff===1?'Amanhã':`Em ${p.diff} dias`;
-    return`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
-      <div style="width:36px;height:36px;border-radius:var(--radius-sm);background:var(--surface2);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0">
-        <span style="font-size:14px;font-weight:600;color:${cor};line-height:1">${p.dia}</span>
-      </div>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.nome}</div>
-        <div style="font-size:11px;color:${cor}">${label}</div>
-      </div>
-      <div style="font-size:12px;color:var(--red);font-weight:500;white-space:nowrap">${fmtR(p.val)}</div>
-    </div>`;
-  }).join(''):'<p class="empty" style="padding:12px 0">Sem vencimentos próximos</p>';
-
-  // Resumo do mês
-  const totalAssin=getAssin().filter(a=>a.ativa!==false).reduce((s,a)=>s+a.val,0);
-  const totalRecorr=getRecorr().reduce((s,r)=>s+r.val,0);
-  const recMes=pd().lancs.filter(l=>l.data.startsWith(mesKey)&&l.tipo==='receita').reduce((s,l)=>s+l.val,0);
-  const desMes=pd().lancs.filter(l=>l.data.startsWith(mesKey)&&l.tipo==='despesa').reduce((s,l)=>s+l.val,0);
-  document.getElementById('cal-resumo').innerHTML=`
-    <div style="display:flex;flex-direction:column;gap:8px">
-      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
-        <span style="font-size:12px;color:var(--muted)">Receitas lançadas</span>
-        <span style="font-size:13px;color:var(--green);font-weight:500">${fmtR(recMes)}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
-        <span style="font-size:12px;color:var(--muted)">Despesas lançadas</span>
-        <span style="font-size:13px;color:var(--red);font-weight:500">${fmtR(desMes)}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
-        <span style="font-size:12px;color:var(--muted)">Assinaturas (estimado)</span>
-        <span style="font-size:13px;color:var(--red);font-weight:500">${fmtR(totalAssin)}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;padding:8px 0">
-        <span style="font-size:12px;color:var(--muted)">Recorrentes (estimado)</span>
-        <span style="font-size:13px;color:var(--red);font-weight:500">${fmtR(totalRecorr)}</span>
-      </div>
-    </div>`;
-
-  // Grade do calendário
-  const primeiroDia=new Date(ano,mes,1).getDay();
-  const ultimoDia=new Date(ano,mes+1,0).getDate();
-  const hoje_num=hoje_d.getDate(), hoje_mes=hoje_d.getMonth(), hoje_ano=hoje_d.getFullYear();
-  const diasSem=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-  const evMap={};
-  eventos.forEach(e=>{if(!evMap[e.dia])evMap[e.dia]=[];evMap[e.dia].push(e);});
-
-  let grid=diasSem.map(d=>`<div style="text-align:center;font-size:11px;color:var(--muted);padding:6px 0;font-weight:500">${d}</div>`).join('');
-  // Espaços em branco antes do primeiro dia
-  for(let i=0;i<primeiroDia;i++) grid+=`<div></div>`;
-  for(let d=1;d<=ultimoDia;d++){
-    const isHoje=d===hoje_num&&mes===hoje_mes&&ano===hoje_ano;
-    const evs=evMap[d]||[];
-    const temDespesa=evs.some(e=>e.tipo==='despesa'||e.tipo==='assinatura'||e.tipo==='recorrente');
-    const temReceita=evs.some(e=>e.tipo==='receita');
-    grid+=`<div style="min-height:52px;padding:4px;border-radius:var(--radius-sm);border:1px solid ${isHoje?'var(--green)':'var(--border)'};background:${isHoje?'var(--green-s)':'var(--surface2)'};cursor:${evs.length?'pointer':'default'}" ${evs.length?`title="${evs.map(e=>e.label+' '+fmtR(e.val)).join('\n')}"`:''}>
-      <div style="font-size:12px;font-weight:${isHoje?'600':'400'};color:${isHoje?'var(--green)':'var(--text)'};">${d}</div>
-      ${temDespesa?`<div style="width:6px;height:6px;border-radius:50%;background:var(--red);margin-top:2px"></div>`:''}
-      ${temReceita?`<div style="width:6px;height:6px;border-radius:50%;background:var(--green);margin-top:2px"></div>`:''}
-      ${evs.slice(0,2).map(e=>`<div style="font-size:9px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px">${e.label}</div>`).join('')}
-    </div>`;
-  }
-  document.getElementById('cal-grid').innerHTML=grid;
-}
-const NOTA_CORES={
-  default:{bg:'var(--surface)',border:'var(--border)',dot:'var(--muted)'},
-  green:{bg:'rgba(74,222,128,0.06)',border:'rgba(74,222,128,0.25)',dot:'var(--green)'},
-  blue:{bg:'rgba(96,165,250,0.06)',border:'rgba(96,165,250,0.25)',dot:'var(--blue)'},
-  amber:{bg:'rgba(251,191,36,0.06)',border:'rgba(251,191,36,0.25)',dot:'var(--amber)'},
-  red:{bg:'rgba(248,113,113,0.06)',border:'rgba(248,113,113,0.25)',dot:'var(--red)'},
-  purple:{bg:'rgba(192,132,252,0.06)',border:'rgba(192,132,252,0.25)',dot:'var(--purple)'},
-};
 
 function getNotas(){return pd().notas||[];}
 async function saveNotas(){
