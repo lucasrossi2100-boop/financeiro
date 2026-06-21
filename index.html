@@ -165,7 +165,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .nav-item.active{background:var(--accent-s);color:var(--accent);font-weight:500}
 .nav-item svg{width:15px;height:15px;flex-shrink:0}
 
-.main{flex:1;padding:36px 40px;overflow-x:hidden;min-width:0}
+.main{flex:1;padding:36px 40px;overflow-x:hidden;min-width:0;min-height:100vh}
 .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:12px}
 .page-title h2{font-family:'DM Serif Display',serif;font-size:28px;letter-spacing:-.5px}
 .page-title p{font-size:12px;color:var(--muted);margin-top:4px}
@@ -1354,21 +1354,45 @@ tbody tr:hover td{background:var(--surface2)}
 </div>
 
 <!-- MODAL SENHA ADMIN -->
-<div class="modal-overlay" id="modal-senha">
-  <div class="modal" style="max-width:360px">
-    <div style="text-align:center;margin-bottom:16px">
-      <div style="font-size:32px;margin-bottom:8px">🔐</div>
-      <h3 style="font-size:18px">Acesso restrito</h3>
-      <p style="font-size:13px;color:var(--muted);margin-top:4px">Digite a senha para acessar o perfil Rossi &amp; Moraes</p>
+<div id="modal-finrossi-senha" style="display:none;position:fixed;inset:0;background:rgba(8,8,8,0.92);backdrop-filter:blur(6px);align-items:center;justify-content:center;z-index:200;padding:20px">
+  <div style="width:100%;max-width:380px">
+    <!-- Logo -->
+    <div style="text-align:center;margin-bottom:32px">
+      <div style="font-family:'DM Serif Display',serif;font-size:32px;color:#C8A96E;letter-spacing:-1px">FinRossi</div>
+      <div style="font-size:12px;color:#555;margin-top:5px">Área administrativa</div>
     </div>
-    <div class="field">
-      <label>Senha</label>
-      <input id="inp-senha" type="password" placeholder="••••••••" style="font-size:16px;height:48px;letter-spacing:2px">
+
+    <!-- Card -->
+    <div style="background:#111;border:1px solid rgba(200,169,110,0.15);border-radius:16px;padding:28px">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+        <div style="width:40px;height:40px;border-radius:10px;background:rgba(200,169,110,0.1);border:1px solid rgba(200,169,110,0.2);display:flex;align-items:center;justify-content:center;font-size:20px">💼</div>
+        <div>
+          <div style="font-size:16px;font-weight:600;color:#f0ede8">Acesso FinRossi</div>
+          <div style="font-size:12px;color:#666;margin-top:2px">Digite a senha para continuar</div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:20px">
+        <label style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Senha</label>
+        <input id="inp-senha-finrossi" type="password" placeholder="••••••••"
+          style="width:100%;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:#f5f0e8;border-radius:9px;padding:13px 14px;font-size:16px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;letter-spacing:2px"
+          onfocus="this.style.borderColor='rgba(200,169,110,0.5)'"
+          onblur="this.style.borderColor='rgba(255,255,255,0.1)'"
+          onkeydown="if(event.key==='Enter')confirmarSenhaFinRossi()">
+      </div>
+
+      <div id="msg-senha-finrossi" style="min-height:18px;font-size:13px;color:#f87171;margin-bottom:12px;display:none;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.2);border-radius:8px;padding:9px 12px"></div>
+
+      <button onclick="confirmarSenhaFinRossi()" style="width:100%;background:#C8A96E;color:#0f0f0f;border:none;border-radius:9px;padding:14px;font-size:15px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s;margin-bottom:10px" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
+        Entrar
+      </button>
+      <button onclick="fecharModalSenhaFinRossi()" style="width:100%;background:none;color:#555;border:1px solid rgba(255,255,255,0.08);border-radius:9px;padding:11px;font-size:14px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='rgba(255,255,255,0.2)';this.style.color='#888'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)';this.style.color='#555'">
+        Cancelar
+      </button>
     </div>
-    <div class="msg" id="msg-senha" style="min-height:18px;margin-top:6px"></div>
-    <div class="btn-row" style="margin-top:12px">
-      <button class="btn primary" onclick="confirmarSenha()" style="flex:1;justify-content:center;height:48px;font-size:15px">Entrar</button>
-      <button class="btn" onclick="closeModal('modal-senha')" style="height:48px">Cancelar</button>
+
+    <div style="text-align:center;margin-top:16px;font-size:12px;color:#333">
+      Acesso restrito ao administrador
     </div>
   </div>
 </div>
@@ -1560,16 +1584,42 @@ let finrossiAutenticado = false;
 
 function abrirFinRossi(){
   if(finrossiAutenticado){_setProfileFinRossi();return;}
-  const senha=prompt('🔐 Senha para acessar o FinRossi:');
+  // Abre modal estilo login
+  const overlay=document.getElementById('modal-finrossi-senha');
+  if(overlay){
+    overlay.style.display='flex';
+    const inp=document.getElementById('inp-senha-finrossi');
+    if(inp){inp.value='';setTimeout(()=>inp.focus(),120);}
+    const msg=document.getElementById('msg-senha-finrossi');
+    if(msg){msg.style.display='none';msg.textContent='';}
+  }
+}
+
+function fecharModalSenhaFinRossi(){
+  const overlay=document.getElementById('modal-finrossi-senha');
+  if(overlay) overlay.style.display='none';
+}
+
+function confirmarSenhaFinRossi(){
+  const inp=document.getElementById('inp-senha-finrossi');
+  const msg=document.getElementById('msg-senha-finrossi');
+  const senha=inp?inp.value:'';
   if(!senha) return;
   fetch(`${BACKEND_URL}/admin/clientes`,{headers:{'x-admin-token':senha}})
     .then(res=>{
-      if(res.status===401){alert('❌ Senha incorreta.');return;}
+      if(res.status===401){
+        if(msg){msg.textContent='❌ Senha incorreta. Tente novamente.';msg.style.display='block';}
+        if(inp){inp.value='';inp.focus();}
+        return;
+      }
       finrossiAutenticado=true;
       _adminToken=senha;
       localStorage.setItem('fin_admin_token',senha);
+      fecharModalSenhaFinRossi();
       _setProfileFinRossi();
-    }).catch(()=>alert('Erro de conexão com o servidor.'));
+    }).catch(()=>{
+      if(msg){msg.textContent='⚠ Erro de conexão com o servidor.';msg.style.display='block';}
+    });
 }
 
 function _setProfileFinRossi(){
@@ -1633,31 +1683,12 @@ function _setProfileInterno(p){
   refreshAll();
 }
 
-function abrirModalSenha(){
-  document.getElementById('modal-senha').classList.add('open');
-  document.getElementById('inp-senha').value='';
-  document.getElementById('msg-senha').textContent='';
-  setTimeout(()=>document.getElementById('inp-senha').focus(),100);
-}
-
-function confirmarSenha(){
-  const val=document.getElementById('inp-senha').value;
-  if(val===ADMIN_SENHA){
-    rossiAutenticado=true;
-    closeModal('modal-senha');
-    _setProfileInterno('rossi');
-  } else {
-    document.getElementById('msg-senha').textContent='Senha incorreta. Tente novamente.';
-    document.getElementById('msg-senha').style.color='var(--red)';
-    document.getElementById('inp-senha').value='';
-    document.getElementById('inp-senha').focus();
+// Enter fecha modal senha FinRossi com Escape
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape'){
+    const overlay=document.getElementById('modal-finrossi-senha');
+    if(overlay&&overlay.style.display==='flex') fecharModalSenhaFinRossi();
   }
-}
-
-// Enter no campo de senha
-document.addEventListener('DOMContentLoaded',()=>{
-  const inp=document.getElementById('inp-senha');
-  if(inp) inp.addEventListener('keydown',e=>{ if(e.key==='Enter') confirmarSenha(); });
 });
 
 const SECS=['dashboard','lancamentos','investimentos','historico','metas','objetivos','renda','empresas','notas','assinaturas','recorrentes','calendario','manual','cartoes','clientes','preview'];
@@ -3311,75 +3342,89 @@ function renderCartoes(){
   if(!grid||!gastosEl){console.warn('renderCartoes: elementos não encontrados');return;}
 
   if(!cartoes.length){
-    grid.innerHTML=`
-      <div style="grid-column:1/-1">
-        <!-- Hero vazio -->
-        <div class="card" style="text-align:center;padding:48px 24px;margin-bottom:18px;border-style:dashed">
-          <div style="font-size:52px;margin-bottom:16px">💳</div>
-          <div style="font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:10px">Nenhum cartão cadastrado ainda</div>
-          <p style="font-size:13px;color:var(--muted);max-width:420px;margin:0 auto 28px;line-height:1.8">
-            Cadastre seus cartões para controlar fatura, limite disponível e ver automaticamente quais despesas foram feitas em cada cartão.
-          </p>
-          <button class="btn primary" onclick="openModalCartao()" style="font-size:14px;padding:11px 28px">
-            + Cadastrar primeiro cartão
-          </button>
-        </div>
+    // Limpa grid e coloca conteúdo diretamente (sem depender de grid-column)
+    grid.style.display='none';
+    gastosEl.style.display='none';
+    // Usa um container irmão ou o próprio section
+    let emptyEl=document.getElementById('cartoes-empty');
+    if(!emptyEl){
+      emptyEl=document.createElement('div');
+      emptyEl.id='cartoes-empty';
+      grid.parentNode.insertBefore(emptyEl,grid);
+    }
+    emptyEl.style.display='block';
+    emptyEl.innerHTML=`
+      <!-- Hero vazio -->
+      <div class="card" style="text-align:center;padding:56px 24px;margin-bottom:18px;border-style:dashed">
+        <div style="font-size:52px;margin-bottom:16px">💳</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:10px">Nenhum cartão cadastrado ainda</div>
+        <p style="font-size:13px;color:var(--muted);max-width:420px;margin:0 auto 28px;line-height:1.8">
+          Cadastre seus cartões para controlar fatura, limite disponível e ver automaticamente quais despesas foram feitas em cada cartão.
+        </p>
+        <button class="btn primary" onclick="openModalCartao()" style="font-size:14px;padding:11px 28px">
+          + Cadastrar primeiro cartão
+        </button>
+      </div>
 
-        <!-- Como funciona -->
-        <div class="card" style="margin-bottom:18px">
-          <h3><span class="dot" style="background:var(--accent)"></span>Como funciona</h3>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:4px">
-            <div style="display:flex;gap:12px;align-items:flex-start">
-              <div style="width:28px;height:28px;border-radius:50%;background:var(--accent-s);border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--accent);flex-shrink:0">1</div>
-              <div>
-                <div style="font-size:13px;font-weight:500;margin-bottom:3px">Cadastre o cartão</div>
-                <div style="font-size:12px;color:var(--muted);line-height:1.6">Informe nome, banco, 4 dígitos finais, limite e dia de vencimento.</div>
-              </div>
+      <!-- Como funciona -->
+      <div class="card" style="margin-bottom:18px">
+        <h3><span class="dot" style="background:var(--accent)"></span>Como funciona</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:4px">
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--accent-s);border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--accent);flex-shrink:0">1</div>
+            <div>
+              <div style="font-size:13px;font-weight:500;margin-bottom:3px">Cadastre o cartão</div>
+              <div style="font-size:12px;color:var(--muted);line-height:1.6">Informe nome, banco, 4 dígitos finais, limite e dia de vencimento.</div>
             </div>
-            <div style="display:flex;gap:12px;align-items:flex-start">
-              <div style="width:28px;height:28px;border-radius:50%;background:var(--accent-s);border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--accent);flex-shrink:0">2</div>
-              <div>
-                <div style="font-size:13px;font-weight:500;margin-bottom:3px">Lance as despesas</div>
-                <div style="font-size:12px;color:var(--muted);line-height:1.6">Em <b>Lançamentos</b>, ao adicionar uma despesa selecione o cartão. O valor entra na fatura automaticamente.</div>
-              </div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--accent-s);border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--accent);flex-shrink:0">2</div>
+            <div>
+              <div style="font-size:13px;font-weight:500;margin-bottom:3px">Lance as despesas</div>
+              <div style="font-size:12px;color:var(--muted);line-height:1.6">Em <b>Lançamentos</b>, ao adicionar uma despesa selecione o cartão. O valor entra na fatura automaticamente.</div>
             </div>
-            <div style="display:flex;gap:12px;align-items:flex-start">
-              <div style="width:28px;height:28px;border-radius:50%;background:var(--accent-s);border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--accent);flex-shrink:0">3</div>
-              <div>
-                <div style="font-size:13px;font-weight:500;margin-bottom:3px">Acompanhe a fatura</div>
-                <div style="font-size:12px;color:var(--muted);line-height:1.6">Aqui você vê fatura atual, limite disponível, gastos por categoria e alerta de limite.</div>
-              </div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--accent-s);border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--accent);flex-shrink:0">3</div>
+            <div>
+              <div style="font-size:13px;font-weight:500;margin-bottom:3px">Acompanhe a fatura</div>
+              <div style="font-size:12px;color:var(--muted);line-height:1.6">Aqui você vê fatura atual, limite disponível, gastos por categoria e alerta de limite.</div>
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- O que você vai ver depois -->
-        <div class="card">
-          <h3><span class="dot" style="background:var(--blue)"></span>O que aparece aqui depois de cadastrar</h3>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:4px">
-            ${[
-              ['💳','Card por cartão','Fatura atual, limite disponível e % usado com barra de progresso'],
-              ['📊','Gastos do mês','Lista detalhada de despesas vinculadas a cada cartão'],
-              ['🍩','Distribuição','Gráfico de pizza mostrando quanto cada cartão representa'],
-              ['📈','Fatura vs Limite','Gráfico de barras comparando fatura com o limite total']
-            ].map(([icon,titulo,desc])=>`
-              <div style="background:var(--surface2);border-radius:10px;padding:14px">
-                <div style="font-size:22px;margin-bottom:8px">${icon}</div>
-                <div style="font-size:13px;font-weight:500;margin-bottom:4px">${titulo}</div>
-                <div style="font-size:11px;color:var(--muted);line-height:1.6">${desc}</div>
-              </div>`).join('')}
-          </div>
+      <!-- O que você vai ver depois -->
+      <div class="card">
+        <h3><span class="dot" style="background:var(--blue)"></span>O que aparece aqui depois de cadastrar</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:4px">
+          ${[
+            ['💳','Card por cartão','Fatura atual, limite disponível e % usado com barra de progresso'],
+            ['📊','Gastos do mês','Lista detalhada de despesas vinculadas a cada cartão'],
+            ['🍩','Distribuição','Gráfico de pizza mostrando quanto cada cartão representa'],
+            ['📈','Fatura vs Limite','Gráfico de barras comparando fatura com o limite total']
+          ].map(([icon,titulo,desc])=>`
+            <div style="background:var(--surface2);border-radius:10px;padding:14px">
+              <div style="font-size:22px;margin-bottom:8px">${icon}</div>
+              <div style="font-size:13px;font-weight:500;margin-bottom:4px">${titulo}</div>
+              <div style="font-size:11px;color:var(--muted);line-height:1.6">${desc}</div>
+            </div>`).join('')}
         </div>
       </div>`;
-    gastosEl.innerHTML='';
     destroyChart('cartao-dist');
     destroyChart('cartao-limite');
     const ctxD=document.getElementById('c-cartao-dist');
     const ctxL=document.getElementById('c-cartao-limite');
-    if(ctxD){ctxD.parentElement.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:12px;color:var(--muted)">Sem dados</div>';}
-    if(ctxL){ctxL.parentElement.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:12px;color:var(--muted)">Sem dados</div>';}
+    if(ctxD) ctxD.parentElement.innerHTML='';
+    if(ctxL) ctxL.parentElement.innerHTML='';
     return;
   }
+  // Tem cartões — esconde empty, mostra grid
+  const emptyEl=document.getElementById('cartoes-empty');
+  if(emptyEl) emptyEl.style.display='none';
+  grid.style.display='grid';
+  gastosEl.style.display='block';
+
   const lancs=pd().lancs.filter(l=>l.tipo==='despesa'&&l.data.startsWith(mes));
   grid.innerHTML=cartoes.map(c=>{
     const gatos=lancs.filter(l=>l.cartaoId===c.id).reduce((a,b)=>a+b.val,0);
