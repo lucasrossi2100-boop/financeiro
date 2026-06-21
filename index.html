@@ -43,18 +43,28 @@
     window._firebase = { db, ref, set, onValue, auth, signInWithEmailAndPassword, signOut, onAuthStateChanged, firebaseOk: true };
 
     // Monitora estado de autenticação
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       window._firebaseUser = user;
       if (user) {
         document.getElementById('tela-login').style.display = 'none';
-        document.getElementById('tela-app').style.display = 'block';
+        document.getElementById('tela-app').style.display = 'flex';
         const nomeEl = document.getElementById('user-nome');
         if (nomeEl) nomeEl.textContent = user.displayName || user.email;
-        // Configura UI conforme admin ou cliente
+        // Busca role do Firebase antes de configurar UI
+        if(user.email === 'lucasrossi2100@gmail.com'){
+          window._userRole = 'socio';
+        } else {
+          try{
+            const snap = await new Promise(res=>onValue(ref(db,`usuarios/${user.uid}/role`),res,{onlyOnce:true}));
+            window._userRole = snap.val()||'cliente';
+          }catch(e){ window._userRole='cliente'; }
+        }
+        _userRole = window._userRole;
         setTimeout(()=>setupPerfilUI(), 100);
       } else {
         document.getElementById('tela-login').style.display = 'flex';
         document.getElementById('tela-app').style.display = 'none';
+        _userRole = null;
       }
       document.getElementById('loading').style.display = 'none';
     });
@@ -64,7 +74,7 @@
     window._firebase = { firebaseOk: false };
     // Sem Firebase — mostra app direto (modo local)
     document.getElementById('tela-login').style.display = 'none';
-    document.getElementById('tela-app').style.display = 'block';
+    document.getElementById('tela-app').style.display = 'flex';
     document.getElementById('loading').style.display = 'none';
   }
   window._fbReady = true;
@@ -78,7 +88,7 @@ setTimeout(() => {
     window._fbReady = true;
     window._firebase = { firebaseOk: false };
     document.getElementById('tela-login').style.display = 'none';
-    document.getElementById('tela-app').style.display = 'block';
+    document.getElementById('tela-app').style.display = 'flex';
     document.getElementById('loading').style.display = 'none';
     document.dispatchEvent(new Event('fbReady'));
   }
@@ -92,7 +102,7 @@ setTimeout(() => {
     window._fbReady = true;
     window._firebase = { firebaseOk: false };
     document.getElementById('tela-login').style.display = 'none';
-    document.getElementById('tela-app').style.display = 'block';
+    document.getElementById('tela-app').style.display = 'flex';
     document.getElementById('loading').style.display = 'none';
     document.dispatchEvent(new Event('fbReady'));
   }
@@ -165,12 +175,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .nav-item.active{background:var(--accent-s);color:var(--accent);font-weight:500}
 .nav-item svg{width:15px;height:15px;flex-shrink:0}
 
-.main{flex:1;padding:36px 40px;overflow-x:hidden;min-width:0;min-height:100vh}
+.main{flex:1;padding:36px 40px;overflow-x:hidden;min-width:0;display:flex;flex-direction:column}
 .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:12px}
 .page-title h2{font-family:'DM Serif Display',serif;font-size:28px;letter-spacing:-.5px}
 .page-title p{font-size:12px;color:var(--muted);margin-top:4px}
 .header-actions{display:flex;gap:8px;flex-wrap:wrap}
 .section-hidden{display:none!important}
+section{flex:1;min-height:0}
 
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px}
 .mc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;transition:border-color .2s}
@@ -388,7 +399,7 @@ tbody tr:hover td{background:var(--surface2)}
 </div>
 
 <!-- APP PRINCIPAL -->
-<div id="tela-app" style="display:none;width:100%;height:100vh">
+<div id="tela-app" style="display:none;width:100%;min-height:100vh">
 <div class="app">
 <aside class="sidebar">
   <div class="sb-logo"><h1>FinRossi</h1><span id="sb-logo-sub">Painel pessoal</span></div>
@@ -1107,8 +1118,13 @@ tbody tr:hover td{background:var(--surface2)}
 
   <!-- FILTROS -->
   <div class="filter-bar" style="margin-bottom:14px">
-    <select id="cli-filtro-status" onchange="renderClientes()" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius-sm);padding:7px 12px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
+    <select id="cli-filtro-role" onchange="renderClientes()" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius-sm);padding:7px 12px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
       <option value="">Todos</option>
+      <option value="clientes">Clientes</option>
+      <option value="equipe">Equipe interna</option>
+    </select>
+    <select id="cli-filtro-status" onchange="renderClientes()" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius-sm);padding:7px 12px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
+      <option value="">Todos os status</option>
       <option value="ativo">Ativos</option>
       <option value="trial">Trial</option>
       <option value="inativo">Inativos</option>
@@ -1120,7 +1136,7 @@ tbody tr:hover td{background:var(--surface2)}
       <option value="essencial">Essencial</option>
       <option value="consultoria">Consultoria</option>
     </select>
-    <input id="cli-busca" type="text" placeholder="Buscar cliente..." oninput="renderClientes()" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius-sm);padding:7px 12px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;flex:1;max-width:260px">
+    <input id="cli-busca" type="text" placeholder="Buscar por nome ou email..." oninput="renderClientes()" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius-sm);padding:7px 12px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;flex:1;max-width:260px">
   </div>
 
   <!-- TABELA DE CLIENTES -->
@@ -1263,28 +1279,45 @@ tbody tr:hover td{background:var(--surface2)}
 <!-- MODAL NOVO CLIENTE -->
 <div class="modal-overlay" id="modal-novo-cliente">
   <div class="modal">
-    <h3>Cadastrar novo cliente</h3>
+    <h3>Cadastrar usuário</h3>
     <div class="form-row">
       <div class="field"><label>Nome</label><input id="nc-nome" type="text" placeholder="Nome completo"></div>
       <div class="field"><label>Email</label><input id="nc-email" type="email" placeholder="email@exemplo.com"></div>
     </div>
     <div class="form-row">
       <div class="field"><label>Senha</label><input id="nc-senha" type="password" placeholder="Senha de acesso"></div>
-      <div class="field"><label>Plano</label>
-        <select id="nc-plano">
-          <option value="gratuito">Gratuito (trial)</option>
-          <option value="starter">Starter — R$19,90</option>
-          <option value="essencial">Essencial — R$39,90</option>
-          <option value="consultoria">Consultoria — R$89,90</option>
+      <div class="field"><label>Role</label>
+        <select id="nc-role" onchange="toggleCamposRole()">
+          <option value="cliente">👤 Cliente</option>
+          <option value="socio">👑 Sócio</option>
+          <option value="admin">👔 Admin</option>
+          <option value="dev">💻 Dev</option>
         </select>
       </div>
     </div>
-    <div class="field"><label>Origem</label>
-      <select id="nc-origem">
-        <option value="teste">Teste gratuito (sem cobrança)</option>
-        <option value="trial">Trial 30 dias</option>
-        <option value="pagante">Pagante</option>
-      </select>
+    <div id="nc-campos-cliente">
+      <div class="form-row">
+        <div class="field"><label>Plano</label>
+          <select id="nc-plano">
+            <option value="gratuito">Gratuito (trial)</option>
+            <option value="starter">Starter — R$19,90</option>
+            <option value="essencial">Essencial — R$39,90</option>
+            <option value="consultoria">Consultoria — R$89,90</option>
+          </select>
+        </div>
+        <div class="field"><label>Origem</label>
+          <select id="nc-origem">
+            <option value="teste">🎁 Teste (sem cobrança)</option>
+            <option value="trial">⏱ Trial 30 dias</option>
+            <option value="pagante">💳 Pagante</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div id="nc-campos-equipe" style="display:none">
+      <div style="background:var(--accent-s);border:1px solid var(--accent);border-radius:var(--radius-sm);padding:10px 12px;font-size:12px;color:var(--muted);margin-bottom:8px">
+        Usuário de equipe interna — não aparece nas métricas de clientes nem MRR.
+      </div>
     </div>
     <div class="btn-row">
       <button class="btn primary" onclick="cadastrarNovoCliente()">Cadastrar</button>
@@ -1528,31 +1561,93 @@ document.addEventListener('fbReady',()=>{
 // ─── PROFILE & NAV ───────────────────────────────────────────────────────────
 // Senha do perfil admin (Rossi & Moraes)
 const ADMIN_HASH = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8'; // "password" — TROQUE ABAIXO
-// ─── ADMIN ────────────────────────────────────────────────────────────────────
+// ─── ROLES ────────────────────────────────────────────────────────────────────
 const ADMIN_EMAIL = 'lucasrossi2100@gmail.com';
 
-function isAdmin(){
-  const f=window._firebase;
-  if(!f||!f.firebaseOk) return true; // modo local = admin
-  const user=window._firebaseUser;
-  return !user || user.email===ADMIN_EMAIL;
+// Role do usuário logado (atualizado após login via Firebase)
+let _userRole = null; // 'socio' | 'admin' | 'dev' | 'cliente' | null
+
+// Busca role do Firebase para o usuário logado
+async function fetchUserRole(uid){
+  if(!uid) return null;
+  try{
+    const f=window._firebase;
+    if(!f||!f.firebaseOk) return 'socio'; // modo local = sócio
+    const snap = await new Promise(res=>f.onValue(f.ref(f.db,`usuarios/${uid}/role`),res,{onlyOnce:true}));
+    return snap.val()||'cliente';
+  }catch(e){return 'cliente';}
 }
 
+// Helpers de role
+function isSocio(){ return _userRole==='socio' || !window._firebaseUser; }
+function isEquipe(){ return ['socio','admin','dev'].includes(_userRole); }
+function isAdmin(){ // mantém compatibilidade — true para sócio (acesso total)
+  const f=window._firebase;
+  if(!f||!f.firebaseOk) return true;
+  return _userRole==='socio';
+}
+
+// Permissões por área
+const ROLE_PERMS = {
+  socio:   {pessoal:true,  finrossi:true,  clientes:true,  financeiro:true},
+  admin:   {pessoal:false, finrossi:false, clientes:true,  financeiro:false},
+  dev:     {pessoal:false, finrossi:false, clientes:true,  financeiro:false},
+  cliente: {pessoal:true,  finrossi:false, clientes:false, financeiro:false},
+};
+function canAccess(area){ return (ROLE_PERMS[_userRole]||ROLE_PERMS.cliente)[area]||false; }
+
 function setupPerfilUI(){
-  const admin=isAdmin();
-  // Sidebar perfis
+  const role = _userRole||'cliente';
+  const socio = role==='socio';
+  const equipe = isEquipe();
+
+  // Sidebar — perfis admin (Pessoal + FinRossi) só para sócio
   const sidebarPerfis=document.getElementById('sb-perfis-admin');
-  if(sidebarPerfis) sidebarPerfis.style.display=admin?'block':'none';
-  // Perfil do cliente
+  if(sidebarPerfis) sidebarPerfis.style.display=socio?'block':'none';
+
+  // Sidebar — perfil cliente (Minha conta) para cliente
   const perfilCliente=document.getElementById('sb-perfil-cliente');
-  if(perfilCliente) perfilCliente.style.display=admin?'none':'block';
-  // Se cliente, força perfil único baseado no uid
-  if(!admin&&window._firebaseUser){
+  if(perfilCliente) perfilCliente.style.display=(!socio&&!equipe)?'block':'none';
+
+  // Sidebar — bloco equipe (admin/dev) — vai para clientes direto
+  let sbEquipe=document.getElementById('sb-perfil-equipe');
+  if(!sbEquipe&&(role==='admin'||role==='dev')){
+    sbEquipe=document.createElement('div');
+    sbEquipe.id='sb-perfil-equipe';
+    const container=document.querySelector('.sb-section')||document.querySelector('.sidebar');
+    if(container) container.prepend(sbEquipe);
+  }
+  if(sbEquipe){
+    const ROLE_LABEL={admin:'👔 Admin',dev:'💻 Dev'};
+    sbEquipe.style.display=(role==='admin'||role==='dev')?'block':'none';
+    sbEquipe.innerHTML=`<div style="padding:10px 10px 14px">
+      <div style="font-size:13px;font-weight:500;color:var(--text)">${ROLE_LABEL[role]||role}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px">${window._firebaseUser?.email||''}</div>
+      <div style="margin-top:8px;font-size:11px;padding:4px 8px;background:var(--accent-s);border:1px solid var(--accent);border-radius:6px;color:var(--accent);display:inline-block">${role==='dev'?'Acesso: painel técnico':'Acesso: gestão de clientes'}</div>
+    </div>`;
+  }
+
+  // Se cliente normal, força perfil uid
+  if(role==='cliente'&&window._firebaseUser){
     const uid=window._firebaseUser.uid;
-    cp=uid; // usa uid como perfil
+    cp=uid;
     if(!DATA[uid]) DATA[uid]={lancs:[],invs:[],metas:[],objs:[],notas:[],assinaturas:[],recorrentes:[],cartoes:[]};
     const nomeEl=document.getElementById('cliente-nome-sb');
     if(nomeEl) nomeEl.textContent=window._firebaseUser.displayName||window._firebaseUser.email;
+  }
+
+  // Se admin/dev, vai direto para clientes
+  if(role==='admin'||role==='dev'){
+    // Esconde nav exceto clientes
+    document.querySelectorAll('.nav-item').forEach(b=>{
+      const oc=b.getAttribute('onclick')||'';
+      const show=oc.includes("'clientes'");
+      b.style.display=show?'flex':'none';
+    });
+    const navCli=document.getElementById('nav-clientes-item');
+    if(navCli) navCli.style.display='flex';
+    finrossiAutenticado=true; // pula senha para clientes
+    setTimeout(()=>{ cp='finrossi'; goTo('clientes'); },200);
   }
 }
 
@@ -3098,9 +3193,20 @@ function getAdminToken(){
   return _adminToken;
 }
 
+function toggleCamposRole(){
+  const role=document.getElementById('nc-role')?.value||'cliente';
+  const clienteFields=document.getElementById('nc-campos-cliente');
+  const equipeFields=document.getElementById('nc-campos-equipe');
+  if(clienteFields) clienteFields.style.display=role==='cliente'?'block':'none';
+  if(equipeFields) equipeFields.style.display=role!=='cliente'?'block':'none';
+}
+
 function openModalNovoCliente(){
   ['nc-nome','nc-email','nc-senha'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('msg-novo-cliente').textContent='';
+  const roleEl=document.getElementById('nc-role');
+  if(roleEl) roleEl.value='cliente';
+  toggleCamposRole();
   document.getElementById('modal-novo-cliente').classList.add('open');
 }
 
@@ -3108,8 +3214,9 @@ async function cadastrarNovoCliente(){
   const nome=document.getElementById('nc-nome').value.trim();
   const email=document.getElementById('nc-email').value.trim();
   const senha=document.getElementById('nc-senha').value;
-  const plano=document.getElementById('nc-plano').value;
-  const origem=document.getElementById('nc-origem').value;
+  const role=document.getElementById('nc-role')?.value||'cliente';
+  const plano=role==='cliente'?(document.getElementById('nc-plano')?.value||'gratuito'):'consultoria';
+  const origem=role==='cliente'?(document.getElementById('nc-origem')?.value||'teste'):'interno';
   const msg=document.getElementById('msg-novo-cliente');
 
   if(!nome||!email||!senha){showMsg('msg-novo-cliente','Preencha todos os campos','err');return}
@@ -3124,7 +3231,7 @@ async function cadastrarNovoCliente(){
     const res=await fetch(`${BACKEND_URL}/admin/clientes/teste`,{
       method:'POST',
       headers:{'Content-Type':'application/json','x-admin-token':token},
-      body:JSON.stringify({nome,email,senha,plano,origem})
+      body:JSON.stringify({nome,email,senha,plano,origem,role})
     });
     if(res.status===401){_adminToken='';showMsg('msg-novo-cliente','Senha admin incorreta','err');return;}
     const data=await res.json();
@@ -3162,31 +3269,35 @@ async function renderClientes(){
     const data=await res.json();
     const clientes=data.clientes||[];
 
-    // Filtros
+    // Filtros — aplicados só nos clientes reais (não equipe)
     const filtroStatus=document.getElementById('cli-filtro-status')?.value||'';
     const filtroPlano=document.getElementById('cli-filtro-plano')?.value||'';
     const busca=(document.getElementById('cli-busca')?.value||'').toLowerCase();
+    const filtroRole=document.getElementById('cli-filtro-role')?.value||'';
 
-    let lista=clientes;
+    let lista=[...clientesReais,...equipeInterna];
     if(filtroStatus) lista=lista.filter(c=>c.status===filtroStatus);
     if(filtroPlano) lista=lista.filter(c=>c.plano===filtroPlano);
+    if(filtroRole==='equipe') lista=equipeInterna;
+    else if(filtroRole==='clientes') lista=clientesReais;
     if(busca) lista=lista.filter(c=>(c.nome+c.email).toLowerCase().includes(busca));
 
-    // Métricas
-    const ativos=clientes.filter(c=>c.status==='ativo').length;
-    const trial=clientes.filter(c=>c.origem==='trial').length;
-    const inativos=clientes.filter(c=>c.status==='inativo').length;
-    const recMensal=clientes.filter(c=>c.status==='ativo'&&c.plano!=='gratuito').reduce((a,c)=>{
-      const precos={starter:19.90,essencial:39.90,consultoria:89.90};
-      return a+(precos[c.plano]||0);
-    },0);
+    // Filtra equipe interna das métricas
+    const ROLES_INTERNOS=['socio','admin','dev'];
+    const clientesReais=clientes.filter(c=>!ROLES_INTERNOS.includes(c.role));
+    const equipeInterna=clientes.filter(c=>ROLES_INTERNOS.includes(c.role));
+
+    const pagantes=clientesReais.filter(c=>c.origem==='pagante'&&c.status==='ativo');
+    const emTrial=clientesReais.filter(c=>c.origem==='trial'&&c.status!=='inativo');
+    const inativos=clientesReais.filter(c=>c.status==='inativo');
+    const mrr=pagantes.reduce((a,c)=>{ const p={starter:19.90,essencial:39.90,consultoria:89.90}; return a+(p[c.plano]||0); },0);
 
     document.getElementById('clientes-metrics').innerHTML=`
-      <div class="mc"><div class="mc-label">Total de clientes</div><div class="mc-val blue">${clientes.length}</div></div>
-      <div class="mc"><div class="mc-label">Ativos</div><div class="mc-val green">${ativos}</div></div>
-      <div class="mc"><div class="mc-label">Trial</div><div class="mc-val amber">${trial}</div></div>
-      <div class="mc"><div class="mc-label">Inativos</div><div class="mc-val red">${inativos}</div></div>
-      <div class="mc"><div class="mc-label">Receita mensal</div><div class="mc-val green">${fmtR(recMensal)}</div></div>
+      <div class="mc"><div class="mc-label">Pagantes ativos</div><div class="mc-val green">${pagantes.length}</div><div class="mc-sub">geram receita</div></div>
+      <div class="mc"><div class="mc-label">Em trial</div><div class="mc-val amber">${emTrial.length}</div><div class="mc-sub">30 dias grátis</div></div>
+      <div class="mc"><div class="mc-label">Inativos</div><div class="mc-val red">${inativos.length}</div></div>
+      <div class="mc"><div class="mc-label">MRR</div><div class="mc-val green">${fmtR(mrr)}</div><div class="mc-sub">receita mensal</div></div>
+      <div class="mc"><div class="mc-label">Equipe interna</div><div class="mc-val blue">${equipeInterna.length}</div><div class="mc-sub">fora das métricas</div></div>
     `;
 
     if(!lista.length){
@@ -3194,36 +3305,35 @@ async function renderClientes(){
       return;
     }
 
-    const PLANO_CORES={gratuito:'var(--muted)',starter:'var(--blue)',essencial:'var(--green)',consultoria:'var(--gold,#c9a84c)'};
+    const PLANO_CORES={gratuito:'var(--muted)',starter:'var(--blue)',essencial:'var(--green)',consultoria:'var(--accent)'};
     const STATUS_CORES={ativo:'var(--green)',trial:'var(--amber)',inativo:'var(--red)',pendente:'var(--amber)'};
+    const ROLE_BADGE={socio:['👑','var(--accent)','Sócio'],admin:['👔','var(--purple)','Admin'],dev:['💻','var(--blue)','Dev'],cliente:['👤','var(--muted)','Cliente']};
+    const ROLES_INTERNOS_TBL=['socio','admin','dev'];
 
     tabela.innerHTML=`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
       <thead><tr style="border-bottom:1px solid var(--border)">
         <th style="text-align:left;padding:8px 10px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Nome</th>
         <th style="text-align:left;padding:8px 10px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Email</th>
+        <th style="text-align:center;padding:8px 10px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Role</th>
         <th style="text-align:center;padding:8px 10px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Plano</th>
         <th style="text-align:center;padding:8px 10px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Status</th>
         <th style="text-align:center;padding:8px 10px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Origem</th>
         <th style="text-align:center;padding:8px 10px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Cadastro</th>
         <th style="text-align:center;padding:8px 10px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Ações</th>
       </tr></thead>
-      <tbody>${lista.map(c=>`<tr style="border-bottom:1px solid var(--border)">
-        <td style="padding:10px">${c.nome||'—'}</td>
-        <td style="padding:10px;color:var(--muted);font-size:12px">${c.email}</td>
-        <td style="padding:10px;text-align:center">
-          <span style="font-size:11px;padding:2px 8px;border-radius:20px;background:${PLANO_CORES[c.plano]||'var(--muted)'}18;color:${PLANO_CORES[c.plano]||'var(--muted)'}">${c.plano||'—'}</span>
-        </td>
-        <td style="padding:10px;text-align:center">
-          <span style="font-size:11px;padding:2px 8px;border-radius:20px;background:${STATUS_CORES[c.status]||'var(--muted)'}18;color:${STATUS_CORES[c.status]||'var(--muted)'}">${c.status||'—'}</span>
-        </td>
-        <td style="padding:10px;text-align:center;font-size:12px;color:var(--muted)">${c.origem==='teste'?'🎁 Teste':c.origem==='trial'?'⏱ Trial':'💳 Pagante'}</td>
-        <td style="padding:10px;text-align:center;font-size:12px;color:var(--muted)">${c.dataCadastro?c.dataCadastro.slice(0,10):'—'}</td>
-        <td style="padding:10px;text-align:center">
-          <button class="btn danger xs" onclick="desativarCliente('${c.uid}')" ${c.status==='inativo'?'disabled':''}>
-            ${c.status==='inativo'?'Inativo':'Desativar'}
-          </button>
-        </td>
-      </tr>`).join('')}</tbody>
+      <tbody>${lista.map(c=>{
+        const interno=ROLES_INTERNOS_TBL.includes(c.role);
+        const rb=ROLE_BADGE[c.role]||ROLE_BADGE.cliente;
+        return`<tr style="border-bottom:1px solid var(--border);${interno?'background:rgba(200,169,110,0.04)':''}">
+          <td style="padding:10px;font-weight:${interno?500:400}">${c.nome||'—'}</td>
+          <td style="padding:10px;color:var(--muted);font-size:12px">${c.email}</td>
+          <td style="padding:10px;text-align:center"><span style="font-size:11px;padding:2px 8px;border-radius:20px;background:${rb[1]}18;color:${rb[1]}">${rb[0]} ${rb[2]}</span></td>
+          <td style="padding:10px;text-align:center">${interno?'<span style="font-size:11px;color:var(--muted)">—</span>':`<span style="font-size:11px;padding:2px 8px;border-radius:20px;background:${PLANO_CORES[c.plano]||'var(--muted)'}18;color:${PLANO_CORES[c.plano]||'var(--muted)'}">${c.plano||'—'}</span>`}</td>
+          <td style="padding:10px;text-align:center"><span style="font-size:11px;padding:2px 8px;border-radius:20px;background:${STATUS_CORES[c.status]||'var(--muted)'}18;color:${STATUS_CORES[c.status]||'var(--muted)'}">${c.status||'—'}</span></td>
+          <td style="padding:10px;text-align:center;font-size:12px;color:var(--muted)">${interno?'🏢 Interno':c.origem==='teste'?'🎁 Teste':c.origem==='trial'?'⏱ Trial':'💳 Pagante'}</td>
+          <td style="padding:10px;text-align:center;font-size:12px;color:var(--muted)">${c.dataCadastro?c.dataCadastro.slice(0,10):'—'}</td>
+          <td style="padding:10px;text-align:center">${interno?'<span style="font-size:11px;color:var(--muted)">Equipe</span>':`<button class="btn danger xs" onclick="desativarCliente('${c.uid}')" ${c.status==='inativo'?'disabled':''}>${c.status==='inativo'?'Inativo':'Desativar'}</button>`}</td>
+        </tr>`;}).join('')}</tbody>
     </table></div>`;
 
   }catch(e){
