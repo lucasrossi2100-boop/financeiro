@@ -2203,12 +2203,6 @@ function renderInvs(){
     <div class="inv-item"><div class="inv-left"><div class="inv-dot" style="background:${PALETTE[idx%PALETTE.length]}"></div><div><div class="inv-name">${inv.nome}</div><div class="inv-type">${inv.tipo}${inv.rent?' · '+inv.rent:''}${inv.banco?' · '+inv.banco:''}</div></div></div>
     <div style="display:flex;align-items:center;gap:8px"><div class="inv-val">${fmtR(inv.val)}</div><button class="btn danger xs" onclick="remInv('${inv.id}')">✕</button></div></div>`).join('');
 }
-  const listEl=document.getElementById('inv-list');
-  if(!invs.length){listEl.innerHTML='<p class="empty">Nenhum investimento cadastrado</p>';return}
-  listEl.innerHTML=invs.map((inv,idx)=>`
-    <div class="inv-item"><div class="inv-left"><div class="inv-dot" style="background:${PALETTE[idx%PALETTE.length]}"></div><div><div class="inv-name">${inv.nome}</div><div class="inv-type">${inv.tipo}${inv.rent?' · '+inv.rent:''}${inv.banco?' · '+inv.banco:''}</div></div></div>
-    <div style="display:flex;align-items:center;gap:8px"><div class="inv-val">${fmtR(inv.val)}</div><button class="btn danger xs" onclick="remInv('${inv.id}')">✕</button></div></div>`).join('');
-}
 
 // ─── HISTÓRICO ────────────────────────────────────────────────────────────────
 function renderHistorico(){
@@ -2898,6 +2892,7 @@ function renderAssinaturas(){
       </div>
     </div>`;
   }).join('');
+  } // fecha if(ctxC)
   }catch(e){console.error('renderAssinaturas error:',e);}
 }
 
