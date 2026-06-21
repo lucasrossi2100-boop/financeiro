@@ -1712,16 +1712,13 @@ let finrossiAutenticado = false;
 
 function abrirFinRossi(){
   if(finrossiAutenticado){_setProfileFinRossi();return;}
-  // Tenta token salvo primeiro
-  const tokenSalvo=localStorage.getItem('fin_admin_token');
-  if(tokenSalvo){_adminToken=tokenSalvo;finrossiAutenticado=true;_setProfileFinRossi();return;}
-  // Pede senha
-  const senha=prompt('🔐 Senha FinRossi (área administrativa):');
-  if(!senha)return;
+  const senha=prompt('🔐 Senha para acessar o FinRossi:');
+  if(!senha) return;
   fetch(`${BACKEND_URL}/admin/clientes`,{headers:{'x-admin-token':senha}})
     .then(res=>{
       if(res.status===401){alert('❌ Senha incorreta.');return;}
-      finrossiAutenticado=true;_adminToken=senha;
+      finrossiAutenticado=true;
+      _adminToken=senha;
       localStorage.setItem('fin_admin_token',senha);
       _setProfileFinRossi();
     }).catch(()=>alert('Erro de conexão com o servidor.'));
@@ -1735,8 +1732,7 @@ function _setProfileFinRossi(){
     if(btn) btn.classList.toggle('active',id==='finrossi');
   });
   const sub=document.getElementById('sb-logo-sub');
-  if(sub) sub.textContent='Negócio e clientes';
-  // Mostra item Clientes no nav
+  if(sub) sub.textContent='Negócio FinRossi';
   const navCli=document.getElementById('nav-clientes-item');
   if(navCli) navCli.style.display='flex';
   goTo('dashboard');
@@ -1747,7 +1743,6 @@ function setProfile(p){
   if(p==='finrossi'){abrirFinRossi();return;}
   _setProfileInterno(p);
   finrossiAutenticado=false;
-  // Esconde item Clientes no nav
   const navCli=document.getElementById('nav-clientes-item');
   if(navCli) navCli.style.display='none';
   ['pessoal','finrossi'].forEach(id=>{
