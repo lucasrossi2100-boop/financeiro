@@ -1774,15 +1774,21 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 const SECS=['dashboard','lancamentos','investimentos','historico','metas','objetivos','renda','empresas','notas','assinaturas','recorrentes','calendario','manual','cartoes','clientes','preview'];
 function goTo(name){
-  SECS.forEach(s=>{const el=document.getElementById('sec-'+s);if(el)el.classList.toggle('section-hidden',s!==name)});
-  document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick')?.includes("'"+name+"'")));
+  SECS.forEach(s=>{
+    const el=document.getElementById('sec-'+s);
+    if(el) el.classList.toggle('section-hidden',s!==name);
+  });
+  document.querySelectorAll('.nav-item').forEach(b=>{
+    const oc=b.getAttribute('onclick');
+    if(oc) b.classList.toggle('active',oc.includes("'"+name+"'"));
+  });
   // Atualiza perfil btn ativo no admin
   ['pessoal','finrossi','clientes','preview'].forEach(p=>{
     const btn=document.getElementById('pb-'+p);
     if(btn) btn.classList.toggle('active',(name==='dashboard'&&p==='pessoal')||name===p);
   });
   const fn={dashboard:refreshDash,investimentos:renderInvs,historico:renderHistorico,metas:renderMetas,objetivos:renderObjs,renda:renderRP,empresas:renderEmpresas,notas:renderNotas,assinaturas:renderAssinaturas,recorrentes:renderRecorrentes,calendario:renderCalendario,manual:renderManual,cartoes:renderCartoes,clientes:renderClientes,preview:renderPreview};
-  if(fn[name])fn[name]();
+  if(fn[name]) fn[name]();
 }
 
 function refreshAll(){refreshDash();renderInvs();renderHistorico();renderMetas();renderObjs();populateDashMetaSel()}
@@ -3339,12 +3345,15 @@ const MANUAL_SECTIONS=[
 const BACKEND_URL = 'https://finrossi-backend-production.up.railway.app';
 const ADMIN_TOKEN = ''; // Deixe em branco — será pedido se necessário
 
-let _adminToken = '';
+let _adminToken = localStorage.getItem('fin_admin_token')||'';
 
 function getAdminToken(){
   if(_adminToken) return _adminToken;
-  const t = prompt('Digite a senha admin para continuar:');
-  if(t) _adminToken = t;
+  const t = prompt('Digite a senha admin (ADMIN_SECRET do Railway):');
+  if(t){
+    _adminToken = t;
+    localStorage.setItem('fin_admin_token', t);
+  }
   return _adminToken;
 }
 
@@ -3376,6 +3385,7 @@ async function cadastrarNovoCliente(){
       headers:{'Content-Type':'application/json','x-admin-token':token},
       body:JSON.stringify({nome,email,senha,plano,origem})
     });
+    if(res.status===401){_adminToken='';showMsg('msg-novo-cliente','Senha admin incorreta','err');return;}
     const data=await res.json();
     if(data.ok){
       showMsg('msg-novo-cliente','Cliente cadastrado com sucesso!','ok');
@@ -3399,6 +3409,14 @@ async function renderClientes(){
     const res=await fetch(`${BACKEND_URL}/admin/clientes`,{
       headers:{'x-admin-token':token}
     });
+    
+    // Se token errado, limpa e pede de novo
+    if(res.status===401){
+      _adminToken='';
+      tabela.innerHTML='<p style="color:var(--red);font-size:13px;padding:12px">❌ Senha incorreta. Clique em Clientes novamente para tentar de novo.</p>';
+      return;
+    }
+
     const data=await res.json();
     const clientes=data.clientes||[];
 
