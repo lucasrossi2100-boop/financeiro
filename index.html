@@ -1670,11 +1670,6 @@ function goTo(name){
     const oc=b.getAttribute('onclick');
     if(oc) b.classList.toggle('active',oc.includes("'"+name+"'"));
   });
-  // Atualiza perfil btn ativo no admin
-  ['pessoal','finrossi','clientes','preview'].forEach(p=>{
-    const btn=document.getElementById('pb-'+p);
-    if(btn) btn.classList.toggle('active',(name==='dashboard'&&p==='pessoal')||name===p);
-  });
   const fn={dashboard:refreshDash,investimentos:renderInvs,historico:renderHistorico,metas:renderMetas,objetivos:renderObjs,renda:renderRP,empresas:renderEmpresas,notas:renderNotas,assinaturas:renderAssinaturas,recorrentes:renderRecorrentes,calendario:renderCalendario,manual:renderManual,cartoes:renderCartoes,clientes:renderClientes,preview:renderPreview};
   if(fn[name]) fn[name]();
 }
