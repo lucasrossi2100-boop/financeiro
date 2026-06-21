@@ -1575,35 +1575,51 @@ function abrirFinRossi(){
 function _setProfileFinRossi(){
   cp='finrossi';
   if(!DATA.finrossi) DATA.finrossi={lancs:[],invs:[],metas:[],objs:[],notas:[],assinaturas:[],recorrentes:[],cartoes:[]};
-  ['pessoal','finrossi'].forEach(id=>{
-    const btn=document.getElementById('pb-'+id);
-    if(btn) btn.classList.toggle('active',id==='finrossi');
+  // Atualiza botões de perfil
+  document.querySelectorAll('.profile-btn').forEach(b=>{
+    const id=b.id.replace('pb-','');
+    b.classList.toggle('active', id==='finrossi');
   });
   const sub=document.getElementById('sb-logo-sub');
   if(sub) sub.textContent='Negócio FinRossi';
+  // Mostra Clientes no nav, esconde Renda Passiva
   const navCli=document.getElementById('nav-clientes-item');
   if(navCli) navCli.style.display='flex';
+  const navRenda=document.getElementById('nav-renda');
+  if(navRenda) navRenda.style.display='none';
   goTo('dashboard');
   refreshAll();
 }
 
 function setProfile(p){
   if(p==='finrossi'){abrirFinRossi();return;}
-  _setProfileInterno(p);
+  cp=p;
   finrossiAutenticado=false;
-  const navCli=document.getElementById('nav-clientes-item');
-  if(navCli) navCli.style.display='none';
-  ['pessoal','finrossi'].forEach(id=>{
-    const btn=document.getElementById('pb-'+id);
-    if(btn) btn.classList.toggle('active',id===p);
+  // Botões de perfil
+  document.querySelectorAll('.profile-btn').forEach(b=>{
+    const id=b.id.replace('pb-','');
+    b.classList.toggle('active', id===p);
   });
+  // Subtitle do logo
   const sub=document.getElementById('sb-logo-sub');
   if(sub) sub.textContent=p==='pessoal'?'Minhas finanças':'Painel';
+  // Nav items
+  const navCli=document.getElementById('nav-clientes-item');
+  if(navCli) navCli.style.display='none';
+  const navRenda=document.getElementById('nav-renda');
+  if(navRenda) navRenda.style.display=p==='pessoal'?'flex':'none';
+  const navEmp=document.getElementById('nav-empresas');
+  if(navEmp) navEmp.style.display='none';
+  goTo('dashboard');
+  refreshAll();
 }
 
 function _setProfileInterno(p){
   cp=p;
-  document.querySelectorAll('.profile-btn').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick').includes("'"+p+"'")));
+  document.querySelectorAll('.profile-btn').forEach(b=>{
+    const id=b.id.replace('pb-','');
+    b.classList.toggle('active', id===p);
+  });
   // Renda Passiva só no pessoal
   document.getElementById('nav-renda').style.display=p==='pessoal'?'flex':'none';
   // Empresas só no rossi
@@ -1611,7 +1627,6 @@ function _setProfileInterno(p){
   // Se saiu do rossi, volta para dashboard e reseta auth
   if(p!=='rossi'){
     rossiAutenticado=false;
-    // Garante que não fica na tela de empresas
     const empSec=document.getElementById('sec-empresas');
     if(empSec&&!empSec.classList.contains('section-hidden')) goTo('dashboard');
   }
