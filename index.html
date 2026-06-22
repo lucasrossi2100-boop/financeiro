@@ -927,59 +927,6 @@ tbody tr:hover td{background:var(--surface2)}
   <!-- LISTA DE NOTAS -->
   <div id="notas-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px"></div>
 </section>
-<section id="sec-empresas" class="section-hidden">
-<div class="page-header">
-    <div class="page-title"><h2>Dashboard Empresas</h2><p>Saúde financeira comparativa</p></div>
-    <div class="header-actions">
-      <select id="emp-mes-filtro" onchange="renderEmpresas()" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius-sm);padding:7px 12px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;height:42px">
-        <option value="">Mês atual</option>
-      </select>
-    </div>
-  </div>
-
-  <!-- COMPARATIVO LADO A LADO -->
-  <div class="grid2" id="emp-comparativo" style="margin-bottom:16px"></div>
-
-  <!-- GRÁFICOS COMPARATIVOS -->
-  <div class="grid2" style="margin-bottom:16px">
-    <div class="card">
-      <h3><span class="dot" style="background:var(--green)"></span>Receitas comparadas</h3>
-      <div class="chart-wrap" style="height:200px"><canvas id="c-emp-rec"></canvas></div>
-    </div>
-    <div class="card">
-      <h3><span class="dot" style="background:var(--red)"></span>Despesas comparadas</h3>
-      <div class="chart-wrap" style="height:200px"><canvas id="c-emp-des"></canvas></div>
-    </div>
-  </div>
-  <div class="grid2" style="margin-bottom:16px">
-    <div class="card">
-      <h3><span class="dot" style="background:var(--amber)"></span>Saldo mensal comparado</h3>
-      <div class="chart-wrap" style="height:200px"><canvas id="c-emp-saldo"></canvas></div>
-    </div>
-    <div class="card">
-      <h3><span class="dot" style="background:var(--blue)"></span>Total investido comparado</h3>
-      <div class="chart-wrap" style="height:200px"><canvas id="c-emp-inv"></canvas></div>
-    </div>
-  </div>
-
-  <!-- EVOLUÇÃO MENSAL POR EMPRESA -->
-  <div class="card card-full">
-    <h3><span class="dot" style="background:var(--purple)"></span>Evolução de receitas — últimos 6 meses</h3>
-    <div class="chart-wrap" style="height:220px"><canvas id="c-emp-evo"></canvas></div>
-  </div>
-
-  <!-- DESPESAS POR CATEGORIA POR EMPRESA -->
-  <div class="grid2" style="margin-bottom:16px">
-    <div class="card">
-      <h3><span class="dot" style="background:var(--blue)"></span>Categorias — Rossi &amp; Moraes</h3>
-      <div class="chart-wrap" style="height:200px"><canvas id="c-emp-cat-rossi"></canvas></div>
-    </div>
-    <div class="card">
-      <h3><span class="dot" style="background:var(--amber)"></span>Categorias — Usina Lins</h3>
-      <div class="chart-wrap" style="height:200px"><canvas id="c-emp-cat-usina"></canvas></div>
-    </div>
-  </div>
-</section>
 
 <!-- MANUAL DE USO -->
 <section id="sec-manual" class="section-hidden">
@@ -1262,18 +1209,6 @@ tbody tr:hover td{background:var(--surface2)}
       <div style="width:9px;height:9px;border-radius:50%;background:var(--green);flex-shrink:0"></div>
       <div><div class="po-name">Pessoal</div><div class="po-sub">Finanças pessoais</div></div>
     </div>
-    <div class="mobile-profile-opt" id="mp-rossi" onclick="setProfile('rossi');closeMobileMoreForce()">
-      <div style="width:9px;height:9px;border-radius:50%;background:var(--blue);flex-shrink:0"></div>
-      <div><div class="po-name">Rossi &amp; Moraes</div><div class="po-sub">Empresa pessoal</div></div>
-    </div>
-    <div class="mobile-profile-opt" id="mp-usina" onclick="setProfile('usina');closeMobileMoreForce()">
-      <div style="width:9px;height:9px;border-radius:50%;background:var(--amber);flex-shrink:0"></div>
-      <div><div class="po-name">Usina Lins</div><div class="po-sub">Empresa</div></div>
-    </div>
-    <div class="mobile-profile-opt" id="mp-teste" onclick="setProfile('teste');closeMobileMoreForce()">
-      <div style="width:9px;height:9px;border-radius:50%;background:var(--purple);flex-shrink:0"></div>
-      <div><div class="po-name">Teste</div><div class="po-sub">Perfil de testes</div></div>
-    </div>
     <div id="mnav-renda-opt" style="margin-top:10px;border-top:1px solid var(--border);padding-top:10px">
       <div style="font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;padding:0 4px">Tema</div>
       <div style="display:flex;gap:8px;padding:0 4px;margin-bottom:10px">
@@ -1285,9 +1220,6 @@ tbody tr:hover td{background:var(--surface2)}
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
         <div><div class="po-name">Renda Passiva</div><div class="po-sub">Calculadora de patrimônio</div></div>
       </div>
-      <div class="mobile-profile-opt" id="emp-drawer-opt" style="display:none" onclick="goTo('empresas');closeMobileMoreForce()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
-        <div><div class="po-name">Dashboard Empresas</div><div class="po-sub">Rossi & Moraes + Usina Lins</div></div>
       </div>
       <div class="mobile-profile-opt" onclick="goTo('notas');closeMobileMoreForce()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
@@ -1560,14 +1492,14 @@ tbody tr:hover td{background:var(--surface2)}
 </div>
 
 <script>
-const PNAMES={pessoal:'Pessoal',rossi:'Rossi & Moraes',usina:'Usina Lins',teste:'Teste'};
+const PNAMES={pessoal:'Pessoal',finrossi:'FinRossi'};
 const PALETTE=['#4ade80','#60a5fa','#fbbf24','#c084fc','#2dd4bf','#f87171','#fb923c','#a78bfa','#34d399'];
 const MONTHS=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 let cp='pessoal', charts={}, fbOk=false;
 let _db,_ref,_set,_get,_onValue,_remove,_push;
 
 // Dados em memória (sincronizados do Firebase ou localStorage)
-let DATA={pessoal:{lancs:[],invs:[],metas:[],objs:[],notas:[],assinaturas:[],recorrentes:[],cartoes:[]},finrossi:{lancs:[],invs:[],metas:[],objs:[],notas:[],assinaturas:[],recorrentes:[],cartoes:[]},rossi:{lancs:[],invs:[],metas:[],objs:[],notas:[],assinaturas:[],recorrentes:[],cartoes:[]},usina:{lancs:[],invs:[],metas:[],objs:[],notas:[],assinaturas:[],recorrentes:[],cartoes:[]},teste:{lancs:[],invs:[],metas:[],objs:[],notas:[],assinaturas:[],recorrentes:[],cartoes:[]}};
+let DATA={pessoal:{lancs:[],invs:[],metas:[],objs:[],notas:[],assinaturas:[],recorrentes:[],cartoes:[]},finrossi:{lancs:[],invs:[],metas:[],objs:[],notas:[],assinaturas:[],recorrentes:[],cartoes:[]}};
 
 const hoje=()=>new Date().toISOString().slice(0,10);
 const fmtR=(v)=>'R$\u00a0'+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -1582,7 +1514,7 @@ function destroyChart(id){if(charts[id]){charts[id].destroy();delete charts[id]}
 
 // ─── STORAGE ─────────────────────────────────────────────────────────────────
 function lsLoad(){
-  ['pessoal','finrossi','rossi','usina','teste'].forEach(p=>{
+  ['pessoal','finrossi'].forEach(p=>{
     ['lancs','invs','metas','objs','notas','assinaturas','recorrentes','cartoes'].forEach(t=>{
       try{const v=localStorage.getItem(`fin3_${p}_${t}`);if(v)DATA[p][t]=JSON.parse(v)}catch{}
     });
@@ -1621,8 +1553,8 @@ function initFB(){
     if(sb){sb.className='sync-badge ok';sb.innerHTML='<span class="sync-dot"></span><span class="nav-text">Sincronizado</span>';}
 
     if(isAdmin()){
-      // Admin — carrega todos os perfis
-      ['pessoal','rossi','usina','teste'].forEach(p=>{
+      // Admin — carrega todos os perfis incluindo finrossi
+      ['pessoal','finrossi'].forEach(p=>{
         try{
           _onValue(_ref(_db,`financeiro/${p}`),(snap)=>{
             try{
@@ -1858,13 +1790,7 @@ function _setProfileInterno(p){
   // Renda Passiva só no pessoal
   document.getElementById('nav-renda').style.display=p==='pessoal'?'flex':'none';
   // Empresas só no rossi
-  document.getElementById('nav-empresas').style.display=p==='rossi'?'flex':'none';
-  // Se saiu do rossi, volta para dashboard e reseta auth
-  if(p!=='rossi'){
-    rossiAutenticado=false;
-    const empSec=document.getElementById('sec-empresas');
-    if(empSec&&!empSec.classList.contains('section-hidden')) goTo('dashboard');
-  }
+  rossiAutenticado=false;
   refreshAll();
 }
 
@@ -1886,7 +1812,7 @@ function goTo(name){
     const oc=b.getAttribute('onclick');
     if(oc) b.classList.toggle('active',oc.includes("'"+name+"'"));
   });
-  const fn={dashboard:refreshDash,investimentos:renderInvs,historico:renderHistorico,metas:renderMetas,objetivos:renderObjs,renda:renderRP,empresas:renderEmpresas,notas:renderNotas,assinaturas:renderAssinaturas,recorrentes:renderRecorrentes,calendario:renderCalendario,manual:renderManual,cartoes:renderCartoes,clientes:renderClientes,preview:renderPreview};
+  const fn={dashboard:refreshDash,investimentos:renderInvs,historico:renderHistorico,metas:renderMetas,objetivos:renderObjs,renda:renderRP,notas:renderNotas,assinaturas:renderAssinaturas,recorrentes:renderRecorrentes,calendario:renderCalendario,manual:renderManual,cartoes:renderCartoes,clientes:renderClientes,preview:renderPreview};
   if(fn[name]) fn[name]();
 }
 
@@ -2656,137 +2582,11 @@ function exportarExcel(){
 }
 
 // ─── EMPRESAS DASHBOARD ───────────────────────────────────────────────────────
-function renderEmpresas(){
-  const mes = (()=>{const el=document.getElementById('emp-mes-filtro');return el&&el.value?el.value:curMes()})();
-
-  // Popula filtro de mês com todos os meses das duas empresas
-  const todasLancs = [...DATA.rossi.lancs,...DATA.usina.lancs];
-  const meses=[...new Set(todasLancs.map(l=>l.data.slice(0,7)))].sort().reverse();
-  const empSel=document.getElementById('emp-mes-filtro');
-  if(empSel){const v=empSel.value;empSel.innerHTML='<option value="">Mês atual</option>'+meses.map(m=>`<option value="${m}">${mesLbl(m+'-01')}</option>`).join('');empSel.value=v;}
-
-  const empresas=[
-    {key:'rossi',nome:'Rossi & Moraes',cor:'#60a5fa',cor2:'rgba(96,165,250,0.15)'},
-    {key:'usina',nome:'Usina Lins',cor:'#fbbf24',cor2:'rgba(251,191,36,0.15)'}
-  ];
-
-  // Calcula métricas por empresa
-  const dados=empresas.map(e=>{
-    const lancs=DATA[e.key].lancs;
-    const invs=DATA[e.key].invs;
-    const doMes=lancs.filter(l=>l.data.startsWith(mes));
-    const rec=doMes.filter(l=>l.tipo==='receita').reduce((a,b)=>a+b.val,0);
-    const des=doMes.filter(l=>l.tipo==='despesa').reduce((a,b)=>a+b.val,0);
-    const totalInv=invs.reduce((a,b)=>a+b.val,0);
-    const saldo=rec-des;
-    return{...e,rec,des,saldo,totalInv,lancs,invs,doMes};
-  });
-
-  // Cards comparativos
-  document.getElementById('emp-comparativo').innerHTML=dados.map(d=>`
-    <div class="card" style="border-color:${d.cor}22">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
-        <div style="width:10px;height:10px;border-radius:50%;background:${d.cor}"></div>
-        <div style="font-family:'DM Serif Display',serif;font-size:16px">${d.nome}</div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:10px">
-          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Receitas</div>
-          <div style="font-size:16px;font-family:'DM Serif Display',serif;color:var(--green)">${fmtR(d.rec)}</div>
-        </div>
-        <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:10px">
-          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Despesas</div>
-          <div style="font-size:16px;font-family:'DM Serif Display',serif;color:var(--red)">${fmtR(d.des)}</div>
-        </div>
-        <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:10px">
-          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Saldo</div>
-          <div style="font-size:16px;font-family:'DM Serif Display',serif;color:${d.saldo>=0?'var(--green)':'var(--red)'}">${fmtR(d.saldo)}</div>
-        </div>
-        <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:10px">
-          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Investido</div>
-          <div style="font-size:16px;font-family:'DM Serif Display',serif;color:var(--blue)">${fmtR(d.totalInv)}</div>
-        </div>
-      </div>
-      <div style="margin-top:12px">
-        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px">
-          <span>Margem</span>
-          <span>${d.rec>0?((d.saldo/d.rec)*100).toFixed(1):'0'}%</span>
-        </div>
-        <div style="background:var(--surface3);border-radius:4px;height:6px;overflow:hidden">
-          <div style="width:${Math.min(100,d.rec>0?Math.max(0,(d.saldo/d.rec)*100):0).toFixed(1)}%;height:100%;background:${d.cor};border-radius:4px"></div>
-        </div>
-      </div>
-    </div>`).join('');
-
-  // Gráfico receitas
-  destroyChart('emp-rec');
-  const ctxR=document.getElementById('c-emp-rec');
-  if(ctxR) charts['emp-rec']=new Chart(ctxR,{type:'bar',data:{labels:dados.map(d=>d.nome),datasets:[{data:dados.map(d=>d.rec),backgroundColor:dados.map(d=>d.cor+'cc'),borderColor:dados.map(d=>d.cor),borderWidth:1,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#888'},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#888',callback:v=>'R$'+v.toLocaleString('pt-BR')},grid:{color:'rgba(255,255,255,0.04)'}}}}});
-
-  // Gráfico despesas
-  destroyChart('emp-des');
-  const ctxD=document.getElementById('c-emp-des');
-  if(ctxD) charts['emp-des']=new Chart(ctxD,{type:'bar',data:{labels:dados.map(d=>d.nome),datasets:[{data:dados.map(d=>d.des),backgroundColor:['rgba(248,113,113,0.7)','rgba(248,113,113,0.4)'],borderColor:'#f87171',borderWidth:1,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#888'},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#888',callback:v=>'R$'+v.toLocaleString('pt-BR')},grid:{color:'rgba(255,255,255,0.04)'}}}}});
-
-  // Gráfico saldo
-  destroyChart('emp-saldo');
-  const ctxS=document.getElementById('c-emp-saldo');
-  if(ctxS) charts['emp-saldo']=new Chart(ctxS,{type:'bar',data:{labels:dados.map(d=>d.nome),datasets:[{data:dados.map(d=>d.saldo),backgroundColor:dados.map(d=>d.saldo>=0?'rgba(74,222,128,0.7)':'rgba(248,113,113,0.7)'),borderColor:dados.map(d=>d.saldo>=0?'#4ade80':'#f87171'),borderWidth:1,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#888'},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#888',callback:v=>'R$'+v.toLocaleString('pt-BR')},grid:{color:'rgba(255,255,255,0.04)'}}}}});
-
-  // Gráfico investimentos
-  destroyChart('emp-inv');
-  const ctxI=document.getElementById('c-emp-inv');
-  if(ctxI) charts['emp-inv']=new Chart(ctxI,{type:'doughnut',data:{labels:dados.map(d=>d.nome),datasets:[{data:dados.map(d=>d.totalInv),backgroundColor:dados.map(d=>d.cor+'cc'),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#888',font:{size:11},padding:8,boxWidth:10}}}}});
-
-  // Evolução 6 meses
-  const mesUniq=[...new Set(todasLancs.map(l=>l.data.slice(0,7)))].sort().slice(-6);
-  destroyChart('emp-evo');
-  const ctxE=document.getElementById('c-emp-evo');
-  if(ctxE) charts['emp-evo']=new Chart(ctxE,{type:'line',data:{labels:mesUniq.map(m=>mesLbl(m+'-01')),datasets:dados.map(d=>({label:d.nome,data:mesUniq.map(m=>d.lancs.filter(l=>l.data.startsWith(m)&&l.tipo==='receita').reduce((a,b)=>a+b.val,0)),borderColor:d.cor,backgroundColor:d.cor+'15',tension:.4,pointRadius:3}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#888',font:{size:11},boxWidth:10}}},scales:{x:{ticks:{color:'#888'},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#888'},grid:{color:'rgba(255,255,255,0.04)'}}}}});
-
-  // Categorias por empresa
-  ['rossi','usina'].forEach(key=>{
-    const id=`c-emp-cat-${key}`;
-    destroyChart('emp-cat-'+key);
-    const ctx=document.getElementById(id);
-    const lancs=DATA[key].lancs.filter(l=>l.data.startsWith(mes)&&l.tipo==='despesa');
-    const catMap={};lancs.forEach(l=>catMap[l.cat]=(catMap[l.cat]||0)+l.val);
-    const cL=Object.keys(catMap),cV=Object.values(catMap);
-    if(ctx){if(!cL.length){ctx.parentElement.innerHTML='<p class="empty" style="padding:40px 0">Sem dados</p>';}else{charts['emp-cat-'+key]=new Chart(ctx,{type:'doughnut',data:{labels:cL,datasets:[{data:cV,backgroundColor:PALETTE.slice(0,cL.length),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#888',font:{size:10},padding:5,boxWidth:10}}}}});}}
-  });
-}
-
 // ─── ASSINATURAS ─────────────────────────────────────────────────────────────
 const ASSIN_ICONS={'Streaming':'🎬','Música':'🎵','Saúde/Academia':'💪','Educação':'📚','Software':'💻','E-commerce':'🛒','Outros':'📦'};
 
-function saveAssin(){lsSave(cp,'assinaturas');}
-
-function salvarAssin(){
-  const nome=document.getElementById('assin-nome').value.trim();
-  const val=parseFloat(document.getElementById('assin-val').value);
-  const cat=document.getElementById('assin-cat').value;
-  const dia=parseInt(document.getElementById('assin-dia').value)||1;
-  const obs=document.getElementById('assin-obs').value.trim();
-  if(!nome){showMsg('msg-assin','Informe o nome','err');return;}
-  if(!val||val<=0){showMsg('msg-assin','Valor inválido','err');return;}
-  const id=document.getElementById('assin-edit-id').value;
-  if(!pd().assinaturas)pd().assinaturas=[];
-  if(id){const i=pd().assinaturas.findIndex(a=>a.id===id);if(i>=0)pd().assinaturas[i]={...pd().assinaturas[i],nome,val,cat,dia,obs};}
-  else{pd().assinaturas.push({id:uid(),nome,val,cat,dia,obs,ativa:true});}
-  saveAssin();closeModal('modal-assin');renderAssinaturas();
-}
-function toggleAssin(id){
-  const a=getAssin().find(x=>x.id===id);if(a)a.ativa=!a.ativa;
-  saveAssin();renderAssinaturas();
-}
-function remAssin(id){
-  if(!confirm('Excluir esta assinatura?'))return;
-  pd().assinaturas=getAssin().filter(a=>a.id!==id);
-  saveAssin();renderAssinaturas();
-}
-// ─── CONTAS RECORRENTES ───────────────────────────────────────────────────────
 function getRecorr(){return pd().recorrentes||[];}
-function saveRecorr(){lsSave(cp,'recorrentes');}
+function saveRecorr(){lsSave(cp,'recorrentes');fbSave(cp,'recorrentes');}
 
 function openModalRecorr(id){
   document.getElementById('recorr-modal-title').textContent=id?'Editar conta':'Nova conta recorrente';
@@ -2842,7 +2642,7 @@ function mudaMes(d){
 function getNotas(){return pd().notas||[];}
 async function saveNotas(){
   if(!pd().notas)pd().notas=[];
-  lsSave(cp,'notas');
+  lsSave(cp,'notas'); fbSave(cp,'notas');
   if(fbOk)try{await _set(_ref(_db,`financeiro/${cp}/notas`),pd().notas)}catch(e){}
 }
 
@@ -2922,7 +2722,7 @@ function renderNotas(){
 
 // ─── ASSINATURAS ─────────────────────────────────────────────────────────────
 function getAssin(){return pd().assinaturas||[]}
-async function saveAssin(){lsSave(cp,'assinaturas');}
+async function saveAssin(){lsSave(cp,'assinaturas');fbSave(cp,'assinaturas');}
 
 function openModalAssin(id){
   document.getElementById('massin-title').textContent=id?'Editar assinatura':'Nova assinatura';
@@ -3022,7 +2822,7 @@ function renderAssinaturas(){
 }
 
 function getRec(){return pd().recorrentes||[]}
-async function saveRec(){lsSave(cp,'recorrentes');}
+async function saveRec(){lsSave(cp,'recorrentes');fbSave(cp,'recorrentes');}
 
 function openModalRec(id){
   document.getElementById('mrec-title').textContent=id?'Editar conta':'Nova conta recorrente';
@@ -3259,7 +3059,7 @@ function mostrarDiaCalendario(dia){
   document.getElementById('cal-lista').scrollIntoView({behavior:'smooth',block:'center'});
 }
 
-function saveLancs(data){ lsSave(cp,'lancs'); }
+function saveLancs(data){ lsSave(cp,'lancs'); fbSave(cp,'lancs'); }
 
 // ─── MANUAL DE USO ────────────────────────────────────────────────────────────
 const MANUAL_SECTIONS=[
@@ -3514,7 +3314,7 @@ function goToPreview(){ goTo('preview'); }
 
 // ─── CARTÕES DE CRÉDITO ──────────────────────────────────────────────────────
 function getCartoes(){return pd().cartoes||[];}
-async function saveCartoes(){lsSave(cp,'cartoes');}
+async function saveCartoes(){lsSave(cp,'cartoes');fbSave(cp,'cartoes');}
 
 function populateCartaoSelect(){
   const cartoes=getCartoes();
@@ -3815,7 +3615,7 @@ function openMobileMore(){
   const drawer = document.getElementById('mobile-more-drawer');
   drawer.classList.add('open');
   // Atualiza perfil ativo
-  ['pessoal','rossi','usina'].forEach(p=>{
+  ['pessoal','finrossi'].forEach(p=>{
     const el = document.getElementById('mp-'+p);
     if(el) el.classList.toggle('active', p===cp);
   });
@@ -3845,13 +3645,13 @@ window.setProfile = function(p){
   setTimeout(()=>{
     const t = document.getElementById('mob-dash-title');
     if(t) t.textContent = PNAMES[cp];
-    ['pessoal','rossi','usina','teste'].forEach(id=>{
+    ['pessoal','finrossi'].forEach(id=>{
       const el = document.getElementById('mp-'+id);
       if(el) el.classList.toggle('active', id===cp);
     });
     // Empresas no drawer mobile
     const empOpt = document.getElementById('emp-drawer-opt');
-    if(empOpt) empOpt.style.display = cp==='rossi'?'flex':'none';
+    if(empOpt) empOpt.style.display='none';
   }, 100);
 };
 
@@ -4036,6 +3836,7 @@ function initNavGroups(){
 }
 
 
+function toggleSidebar(){
   const sb=document.getElementById('sidebar');
   const btn=document.getElementById('sb-toggle');
   const collapsed=sb.classList.toggle('collapsed');
