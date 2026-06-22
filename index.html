@@ -155,10 +155,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .sb-logo span{font-size:11px;color:var(--muted);font-weight:300}
 .sb-section{padding:0 10px;margin-bottom:4px}
 .sb-label{font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;padding:5px 8px 3px;display:block}
-.sync-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 8px;border-radius:20px;margin:0 18px 10px;font-weight:500}
+.sync-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 8px;border-radius:20px;margin:0 18px 10px;font-weight:500;transition:all .2s}
 .sync-badge.ok{background:var(--green-s);color:var(--green)}
 .sync-badge.local{background:var(--amber-s);color:var(--amber)}
-.sync-dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+.sidebar.collapsed .sync-badge{margin:0 auto 10px;padding:4px;border-radius:50%;width:14px;height:14px;justify-content:center}
+.sb-group-label{display:flex;align-items:center;justify-content:space-between;font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;padding:5px 8px 3px;cursor:pointer;border-radius:4px;transition:color .15s;user-select:none}
+.sb-group-label:hover{color:var(--muted)}
+.sb-group-arrow{font-size:11px;transition:transform .2s;display:inline-block}
+.sb-group-items{overflow:hidden;transition:max-height .25s ease}
+.sidebar.collapsed .sb-group-label{display:none}
 
 .profile-btn{display:block;width:100%;text-align:left;padding:8px 10px;border-radius:var(--radius-sm);font-size:12px;font-family:'DM Sans',sans-serif;border:1px solid transparent;cursor:pointer;margin-bottom:3px;transition:all .15s;background:none;color:var(--muted)}
 .profile-btn:hover{border-color:var(--border2);color:var(--text);background:var(--surface3)}
@@ -422,7 +428,10 @@ tbody tr:hover td{background:var(--surface2)}
   </div>
 
   <div class="sb-section" style="margin-top:8px" id="sb-nav-menu">
-    <span class="sb-label">Menu</span>
+    <div class="sb-group-label" onclick="toggleNavGroup('menu')">
+      <span>Menu</span><span class="sb-group-arrow" id="sb-arrow-menu">›</span>
+    </div>
+    <div class="sb-group-items" id="sb-group-menu">
     <button class="nav-item active" onclick="goTo('dashboard')" id="nav-dashboard" data-nav="dashboard">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span class="nav-text">Dashboard</span>
     </button>
@@ -448,9 +457,13 @@ tbody tr:hover td{background:var(--surface2)}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg><span class="nav-text">Clientes</span>
     </button>
   </div>
+  </div>
 
   <div class="sb-section" style="margin-top:4px" id="sb-nav-controles">
-    <span class="sb-label">Controles</span>
+    <div class="sb-group-label" onclick="toggleNavGroup('controles')">
+      <span>Controles</span><span class="sb-group-arrow" id="sb-arrow-controles">›</span>
+    </div>
+    <div class="sb-group-items" id="sb-group-controles">
     <button class="nav-item" onclick="goTo('cartoes')" id="nav-cartoes" data-nav="cartoes">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg><span class="nav-text">Cartões</span>
     </button>
@@ -469,7 +482,8 @@ tbody tr:hover td{background:var(--surface2)}
     <button class="nav-item" onclick="goTo('manual')" id="nav-manual" data-nav="manual">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg><span class="nav-text">Manual</span>
     </button>
-  </div>
+    </div><!-- /sb-group-controles -->
+  </div><!-- /sb-nav-controles -->
 
   <div style="margin-top:auto;padding:10px 8px;border-top:1px solid var(--border)">
     <button onclick="abrirConfiguracoes()" class="sb-avatar-wrap" style="display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;background:none;border:1px solid transparent;color:var(--muted);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;border-radius:var(--radius-sm);transition:all .2s;text-align:left" onmouseover="this.style.borderColor='var(--border2)';this.style.color='var(--text)';this.style.background='var(--surface2)'" onmouseout="this.style.borderColor='transparent';this.style.color='var(--muted)';this.style.background='none'">
@@ -1604,7 +1618,7 @@ function initFB(){
   if(fbOk){
     _db=f.db;_ref=f.ref;_set=f.set;_onValue=f.onValue;
     const sb=document.getElementById('sync-badge');
-    if(sb){sb.className='sync-badge ok';sb.innerHTML='<span class="sync-dot"></span>Sincronizado';}
+    if(sb){sb.className='sync-badge ok';sb.innerHTML='<span class="sync-dot"></span><span class="nav-text">Sincronizado</span>';}
 
     if(isAdmin()){
       // Admin — carrega todos os perfis
@@ -3991,7 +4005,37 @@ function isDashCardVisible(id){
 }
 
 // ─── SIDEBAR COLLAPSE ────────────────────────────────────────────────────────
-function toggleSidebar(){
+function toggleNavGroup(group){
+  const items = document.getElementById('sb-group-'+group);
+  const arrow = document.getElementById('sb-arrow-'+group);
+  if(!items) return;
+  const isOpen = items.style.maxHeight !== '0px' && items.style.maxHeight !== '';
+  if(isOpen){
+    items.style.maxHeight = items.scrollHeight+'px';
+    requestAnimationFrame(()=>{ items.style.maxHeight='0px'; });
+    if(arrow) arrow.style.transform='rotate(-90deg)';
+    localStorage.setItem('fin_navgroup_'+group, '0');
+  } else {
+    items.style.maxHeight = items.scrollHeight+'px';
+    setTimeout(()=>{ items.style.maxHeight='none'; }, 260);
+    if(arrow) arrow.style.transform='rotate(90deg)';
+    localStorage.setItem('fin_navgroup_'+group, '1');
+  }
+}
+
+function initNavGroups(){
+  ['menu','controles'].forEach(group=>{
+    const items = document.getElementById('sb-group-'+group);
+    const arrow = document.getElementById('sb-arrow-'+group);
+    const collapsed = localStorage.getItem('fin_navgroup_'+group) === '0';
+    if(items){
+      items.style.maxHeight = collapsed ? '0px' : 'none';
+      if(arrow) arrow.style.transform = collapsed ? 'rotate(-90deg)' : 'rotate(90deg)';
+    }
+  });
+}
+
+
   const sb=document.getElementById('sidebar');
   const btn=document.getElementById('sb-toggle');
   const collapsed=sb.classList.toggle('collapsed');
@@ -4005,6 +4049,7 @@ function initSidebar(){
     const btn=document.getElementById('sb-toggle');
     if(btn){btn.textContent='›';btn.title='Expandir sidebar';}
   }
+  initNavGroups();
   aplicarNavConfig();
 }
 
@@ -4173,10 +4218,3 @@ document.querySelectorAll('input[type=date]').forEach(el=>el.value=hoje());
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
