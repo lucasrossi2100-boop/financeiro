@@ -962,16 +962,7 @@ tbody tr:hover td{background:var(--surface2)}
     <div class="header-actions"><button class="btn primary" onclick="openModalAssin()">+ Nova assinatura</button></div>
   </div>
   <div class="metrics" id="assin-metrics"></div>
-  <div class="grid2" style="margin-bottom:16px">
-    <div class="card">
-      <h3><span class="dot" style="background:var(--purple)"></span>Gastos por categoria</h3>
-      <div class="chart-wrap" style="height:200px"><canvas id="c-assin-cat"></canvas></div>
-    </div>
-    <div class="card">
-      <h3><span class="dot" style="background:var(--blue)"></span>Lista de assinaturas</h3>
-      <div id="assin-list"></div>
-    </div>
-  </div>
+  <div id="assin-content"></div>
 </section>
 
 <!-- CONTAS RECORRENTES -->
@@ -2907,62 +2898,76 @@ async function remAssin(id){
 
 function renderAssinaturas(){
   try{
-  const list=getAssin();
-  const ativas=list.filter(a=>a.status!=='pausada');
-  const total=ativas.reduce((a,b)=>a+b.val,0);
-  const totalAnual=total*12;
-  const hoje_d=new Date().getDate();
+    const list=getAssin();
+    const ativas=list.filter(a=>a.status!=='pausada');
+    const total=ativas.reduce((a,b)=>a+b.val,0);
+    const hoje_d=new Date().getDate();
 
-  document.getElementById('assin-metrics').innerHTML=`
-    <div class="mc"><div class="mc-label">Total mensal</div><div class="mc-val red">${fmtR(total)}</div><div class="mc-sub">${ativas.length} ativas</div></div>
-    <div class="mc"><div class="mc-label">Total anual</div><div class="mc-val amber">${fmtR(totalAnual)}</div><div class="mc-sub">estimado</div></div>
-    <div class="mc"><div class="mc-label">Pausadas</div><div class="mc-val">${list.length-ativas.length}</div></div>
-    <div class="mc"><div class="mc-label">Total serviços</div><div class="mc-val blue">${list.length}</div></div>
-  `;
+    document.getElementById('assin-metrics').innerHTML=`
+      <div class="mc"><div class="mc-label">Total mensal</div><div class="mc-val red">${fmtR(total)}</div><div class="mc-sub">${ativas.length} ativas</div></div>
+      <div class="mc"><div class="mc-label">Total anual</div><div class="mc-val amber">${fmtR(total*12)}</div><div class="mc-sub">estimado</div></div>
+      <div class="mc"><div class="mc-label">Pausadas</div><div class="mc-val">${list.length-ativas.length}</div></div>
+      <div class="mc"><div class="mc-label">Total serviços</div><div class="mc-val blue">${list.length}</div></div>`;
 
-  // Chart categorias
-  destroyChart('assin-cat');
-  const catMap={};ativas.forEach(a=>catMap[a.cat]=(catMap[a.cat]||0)+a.val);
-  const ctxC=document.getElementById('c-assin-cat');
-  if(ctxC){const cL=Object.keys(catMap),cV=Object.values(catMap);
-    if(!cL.length){ctxC.parentElement.innerHTML='<p class="empty" style="padding:40px 0">Sem dados</p>';}else{charts['assin-cat']=new Chart(ctxC,{type:'doughnut',data:{labels:cL,datasets:[{data:cV,backgroundColor:PALETTE.slice(0,cL.length),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#888',font:{size:11},padding:6,boxWidth:10}}}}});}
+    const el=document.getElementById('assin-content');
+    if(!el) return;
 
-  const listEl=document.getElementById('assin-list');
-  if(!list.length){listEl.innerHTML=`
-    <div style="text-align:center;padding:40px 24px">
-      <div style="font-size:40px;margin-bottom:12px">📺</div>
-      <div style="font-family:'DM Serif Display',serif;font-size:17px;margin-bottom:8px">Nenhuma assinatura cadastrada</div>
-      <p style="font-size:13px;color:var(--muted);max-width:340px;margin:0 auto 20px;line-height:1.7">
-        Cadastre Netflix, Spotify, academia e outros serviços recorrentes para acompanhar quanto gasta por mês.
-      </p>
-      <button class="btn primary" onclick="openModalAssin()">+ Cadastrar assinatura</button>
-    </div>`;return}
-  const sorted=[...list].sort((a,b)=>a.dia-b.dia);
-  listEl.innerHTML=sorted.map(a=>{
-    const icon=ASSIN_ICONS[a.cat]||'📦';
-    const diasFaltam=a.dia>=hoje_d?a.dia-hoje_d:30-(hoje_d-a.dia);
-    const urgente=diasFaltam<=3;
-    const pausada=a.status==='pausada';
-    return`<div class="inv-item" style="${pausada?'opacity:.5':''}">
-      <div class="inv-left">
-        <div style="font-size:20px;width:32px;text-align:center">${icon}</div>
-        <div>
-          <div class="inv-name">${a.nome}</div>
-          <div class="inv-type">${a.cat} · dia ${a.dia}${pausada?' · <span style="color:var(--amber)">Pausada</span>':urgente?` · <span style="color:var(--red)">Vence em ${diasFaltam}d</span>`:''}</div>
-        </div>
+    if(!list.length){
+      el.innerHTML=`<div class="card" style="text-align:center;padding:56px 24px;border-style:dashed">
+        <div style="font-size:48px;margin-bottom:16px">📺</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:10px">Nenhuma assinatura cadastrada</div>
+        <p style="font-size:13px;color:var(--muted);max-width:380px;margin:0 auto 24px;line-height:1.8">
+          Cadastre Netflix, Spotify, academia e outros serviços recorrentes para acompanhar quanto gasta por mês.</p>
+        <button class="btn primary" onclick="openModalAssin()" style="font-size:14px;padding:11px 28px">+ Cadastrar assinatura</button>
+      </div>`;
+      destroyChart('assin-cat');
+      return;
+    }
+
+    el.innerHTML=`<div class="grid2" style="margin-bottom:16px">
+      <div class="card">
+        <h3><span class="dot" style="background:var(--purple)"></span>Gastos por categoria</h3>
+        <div class="chart-wrap" style="height:200px"><canvas id="c-assin-cat"></canvas></div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <div class="inv-val">${fmtR(a.val)}</div>
-        <button class="btn xs" onclick="openModalAssin('${a.id}')">✏</button>
-        <button class="btn danger xs" onclick="remAssin('${a.id}')">✕</button>
+      <div class="card">
+        <h3><span class="dot" style="background:var(--blue)"></span>Lista de assinaturas</h3>
+        <div id="assin-list"></div>
       </div>
     </div>`;
-  }).join('');
-  } // fecha if(ctxC)
+
+    destroyChart('assin-cat');
+    const catMap={};
+    ativas.forEach(a=>catMap[a.cat]=(catMap[a.cat]||0)+a.val);
+    const cL=Object.keys(catMap),cV=Object.values(catMap);
+    const ctxC=document.getElementById('c-assin-cat');
+    if(ctxC){
+      if(!cL.length){ctxC.parentElement.innerHTML='<p class="empty" style="padding:40px 0">Sem dados</p>';}
+      else{charts['assin-cat']=new Chart(ctxC,{type:'doughnut',data:{labels:cL,datasets:[{data:cV,backgroundColor:PALETTE.slice(0,cL.length),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#888',font:{size:11},padding:6,boxWidth:10}}}}});}
+    }
+
+    const listEl=document.getElementById('assin-list');
+    if(listEl){
+      listEl.innerHTML=[...list].sort((a,b)=>a.dia-b.dia).map(a=>{
+        const icon=ASSIN_ICONS[a.cat]||'📦';
+        const diasFaltam=a.dia>=hoje_d?a.dia-hoje_d:30-(hoje_d-a.dia);
+        const urgente=diasFaltam<=3, pausada=a.status==='pausada';
+        return`<div class="inv-item" style="${pausada?'opacity:.5':''}">
+          <div class="inv-left">
+            <div style="font-size:20px;width:32px;text-align:center">${icon}</div>
+            <div><div class="inv-name">${a.nome}</div>
+            <div class="inv-type">${a.cat} · dia ${a.dia}${pausada?' · <span style="color:var(--amber)">Pausada</span>':urgente?` · <span style="color:var(--red)">Vence em ${diasFaltam}d</span>`:''}</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="inv-val">${fmtR(a.val)}</div>
+            <button class="btn xs" onclick="openModalAssin('${a.id}')">✏</button>
+            <button class="btn danger xs" onclick="remAssin('${a.id}')">✕</button>
+          </div>
+        </div>`;
+      }).join('');
+    }
   }catch(e){console.error('renderAssinaturas error:',e);}
 }
 
-// ─── CONTAS RECORRENTES ───────────────────────────────────────────────────────
 function getRec(){return pd().recorrentes||[]}
 async function saveRec(){lsSave(cp,'recorrentes');}
 
