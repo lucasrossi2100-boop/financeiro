@@ -162,7 +162,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .sidebar.collapsed .sync-badge{margin:0 auto 10px;padding:4px;border-radius:50%;width:14px;height:14px;justify-content:center}
 .sb-group-label{display:flex;align-items:center;justify-content:space-between;font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;padding:5px 8px 3px;cursor:pointer;border-radius:4px;transition:color .15s;user-select:none}
 .sb-group-label:hover{color:var(--muted)}
-.sb-group-arrow{font-size:11px;transition:transform .2s;display:inline-block}
+.sb-group-arrow{font-size:11px;transition:transform .22s ease;display:inline-block;transform:rotate(90deg)}
 .sb-group-items{overflow:hidden;transition:max-height .25s ease}
 .sidebar.collapsed .sb-group-label{display:none}
 
@@ -3809,17 +3809,25 @@ function toggleNavGroup(group){
   const items = document.getElementById('sb-group-'+group);
   const arrow = document.getElementById('sb-arrow-'+group);
   if(!items) return;
-  const isOpen = items.style.maxHeight !== '0px' && items.style.maxHeight !== '';
+
+  const isOpen = items.dataset.open !== 'false';
+
   if(isOpen){
+    // Fechar: fixa a altura atual, depois anima para 0
     items.style.maxHeight = items.scrollHeight+'px';
-    requestAnimationFrame(()=>{ items.style.maxHeight='0px'; });
-    if(arrow) arrow.style.transform='rotate(-90deg)';
-    localStorage.setItem('fin_navgroup_'+group, '0');
+    items.dataset.open = 'false';
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{ items.style.maxHeight='0px'; });
+    });
+    if(arrow) arrow.style.transform='rotate(0deg)';
+    localStorage.setItem('fin_navgroup_'+group,'0');
   } else {
+    // Abrir: anima para a altura real
+    items.dataset.open = 'true';
     items.style.maxHeight = items.scrollHeight+'px';
-    setTimeout(()=>{ items.style.maxHeight='none'; }, 260);
+    setTimeout(()=>{ if(items.dataset.open==='true') items.style.maxHeight='none'; }, 260);
     if(arrow) arrow.style.transform='rotate(90deg)';
-    localStorage.setItem('fin_navgroup_'+group, '1');
+    localStorage.setItem('fin_navgroup_'+group,'1');
   }
 }
 
@@ -3829,8 +3837,9 @@ function initNavGroups(){
     const arrow = document.getElementById('sb-arrow-'+group);
     const collapsed = localStorage.getItem('fin_navgroup_'+group) === '0';
     if(items){
+      items.dataset.open = collapsed ? 'false' : 'true';
       items.style.maxHeight = collapsed ? '0px' : 'none';
-      if(arrow) arrow.style.transform = collapsed ? 'rotate(-90deg)' : 'rotate(90deg)';
+      if(arrow) arrow.style.transform = collapsed ? 'rotate(0deg)' : 'rotate(90deg)';
     }
   });
 }
