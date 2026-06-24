@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LGPD — FinRossi</title>
+<style>
+  :root{--accent:#C8A96E;--bg:#0f0f0f;--surface:#1a1a1a;--border:rgba(255,255,255,0.08);--text:#f0ede8;--muted:#888}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);line-height:1.8;font-size:15px}
+  .wrap{max-width:780px;margin:0 auto;padding:60px 24px}
+  .logo{font-size:28px;font-weight:700;color:var(--accent);margin-bottom:6px;letter-spacing:-1px}
+  .doc-title{font-size:22px;font-weight:600;margin:32px 0 6px;border-left:3px solid var(--accent);padding-left:14px}
+  .updated{font-size:13px;color:var(--muted);margin-bottom:40px}
+  h2{font-size:17px;font-weight:600;margin:32px 0 10px;color:var(--accent)}
+  p{margin-bottom:12px;color:#ccc}
+  ul{margin:0 0 14px 20px;color:#ccc}
+  li{margin-bottom:6px}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin:12px 0}
+  .card-title{font-size:14px;font-weight:600;color:var(--accent);margin-bottom:6px}
+  .footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--border);font-size:13px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+  a{color:var(--accent);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="logo">FinRossi</div>
+  <div class="doc-title">Adequação à LGPD</div>
+  <!-- EDITAR: atualize a data abaixo a cada alteração -->
+  <div class="updated">Lei Geral de Proteção de Dados — Lei 13.709/2018 · Versão 1.0</div>
+
+  <h2>1. Controlador dos dados</h2>
+  <div class="card">
+    <div class="card-title">Identificação do Controlador</div>
+    <!-- EDITAR: preencha com seus dados -->
+    <p><strong>Nome/Empresa:</strong> <!-- NOME/EMPRESA --></p>
+    <p><strong>CNPJ/CPF:</strong> <!-- CNPJ/CPF --></p>
+    <p><strong>Endereço:</strong> Ribeirão Preto, SP — Brasil</p>
+    <p><strong>E-mail de privacidade:</strong> <a href="mailto:<!-- EMAIL -->"><!-- EMAIL --></a></p>
+  </div>
+
+  <h2>2. Encarregado de Dados (DPO)</h2>
+  <p>
+    <!-- EDITAR: se tiver DPO nomeado, coloque aqui. Se não, use: -->
+    O responsável pelo tratamento de dados pessoais é <!-- NOME -->, 
+    acessível pelo e-mail <a href="mailto:<!-- EMAIL -->"><!-- EMAIL --></a>.
+  </p>
+  <!-- EDITAR: quando tiver CNPJ e crescer, nomeie um DPO formal -->
+
+  <h2>3. Finalidades do tratamento</h2>
+  <ul>
+    <li><strong>Prestação do serviço:</strong> autenticação, armazenamento e exibição dos dados financeiros do usuário</li>
+    <li><strong>Gestão da conta:</strong> comunicação sobre o serviço, cobrança e suporte</li>
+    <li><strong>Segurança:</strong> prevenção de fraudes e uso indevido</li>
+    <li><strong>Melhoria do produto:</strong> análise de uso agregado e anônimo</li>
+  </ul>
+
+  <h2>4. Bases legais utilizadas</h2>
+  <div class="card">
+    <div class="card-title">Art. 7º da LGPD — Hipóteses de tratamento</div>
+    <ul>
+      <li><strong>Inciso I — Consentimento:</strong> coleta de dados de cadastro e uso de cookies não essenciais</li>
+      <li><strong>Inciso V — Execução de contrato:</strong> dados necessários para prestar o serviço assinado</li>
+      <li><strong>Inciso VI — Exercício regular de direitos:</strong> cumprimento de obrigações legais e fiscais</li>
+      <li><strong>Inciso IX — Legítimo interesse:</strong> segurança, prevenção de fraudes e melhoria do serviço</li>
+    </ul>
+  </div>
+
+  <h2>5. Dados tratados e prazo de retenção</h2>
+  <ul>
+    <li><strong>E-mail e senha:</strong> enquanto a conta estiver ativa + 90 dias após encerramento</li>
+    <li><strong>Dados financeiros (lançamentos, metas, etc.):</strong> mesmo prazo acima</li>
+    <li><strong>Logs de acesso:</strong> 6 meses (conforme Marco Civil da Internet)</li>
+    <li><strong>Dados de pagamento:</strong> mantidos pela Asaas conforme suas políticas</li>
+  </ul>
+
+  <h2>6. Compartilhamento de dados</h2>
+  <p>Compartilhamos dados apenas com:</p>
+  <ul>
+    <li><strong>Firebase/Google:</strong> autenticação e banco de dados (necessário para o serviço)</li>
+    <li><strong>Asaas:</strong> processamento de pagamentos (dados financeiros do contrato, não do app)</li>
+    <li><strong>Railway:</strong> hospedagem do backend (dados em trânsito, criptografados)</li>
+  </ul>
+  <p>Todos os fornecedores são vinculados contratualmente ao sigilo e proteção dos dados.</p>
+
+  <h2>7. Transferência internacional</h2>
+  <p>
+    Dados são armazenados em servidores do Firebase (Google LLC) nos Estados Unidos, 
+    cobertos pelo <em>Data Processing Agreement</em> do Google, compatível com a LGPD 
+    por meio de Cláusulas Contratuais Padrão (SCCs).
+  </p>
+
+  <h2>8. Direitos do titular</h2>
+  <p>Conforme art. 18 da LGPD, você tem direito a:</p>
+  <ul>
+    <li>Confirmação da existência de tratamento</li>
+    <li>Acesso aos dados</li>
+    <li>Correção de dados incompletos, inexatos ou desatualizados</li>
+    <li>Anonimização, bloqueio ou eliminação de dados desnecessários</li>
+    <li>Portabilidade dos dados a outro fornecedor</li>
+    <li>Eliminação dos dados tratados com consentimento</li>
+    <li>Informação sobre compartilhamento com terceiros</li>
+    <li>Revogação do consentimento</li>
+  </ul>
+  <p>
+    Para exercer seus direitos, envie e-mail para <a href="mailto:<!-- EMAIL -->"><!-- EMAIL --></a> 
+    com o assunto "Direitos LGPD". Respondemos em até 15 dias úteis.
+  </p>
+
+  <h2>9. Medidas de segurança</h2>
+  <ul>
+    <li>Comunicação criptografada via HTTPS/TLS</li>
+    <li>Senhas armazenadas com hash (Firebase Auth)</li>
+    <li>Controle de acesso por roles (sócio, admin, dev, cliente)</li>
+    <li>Backups automáticos no Firebase</li>
+    <li>Acesso à infraestrutura restrito por autenticação de dois fatores</li>
+  </ul>
+
+  <h2>10. Incidentes de segurança</h2>
+  <p>
+    Em caso de incidente que possa acarretar risco ou dano relevante aos titulares, 
+    notificaremos a ANPD e os afetados dentro do prazo legal (art. 48 da LGPD).
+  </p>
+
+  <h2>11. Contato para questões de privacidade</h2>
+  <p>
+    Para exercer seus direitos ou tirar dúvidas sobre privacidade:<br>
+    E-mail: <a href="mailto:<!-- EMAIL -->"><!-- EMAIL --></a><br>
+    Prazo de resposta: até 15 dias úteis
+  </p>
+
+  <div class="footer">
+    <span>© <!-- ANO --> FinRossi. Todos os direitos reservados.</span>
+    <span>
+      <a href="privacidade.html">Privacidade</a> · 
+      <a href="termos.html">Termos de Uso</a> · 
+      <a href="contrato.html">Contrato SaaS</a> · 
+      <a href="cookies.html">Cookies</a>
+    </span>
+  </div>
+
+</div>
+</body>
+</html>

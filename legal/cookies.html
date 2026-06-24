@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Política de Cookies — FinRossi</title>
+<style>
+  :root{--accent:#C8A96E;--bg:#0f0f0f;--surface:#1a1a1a;--border:rgba(255,255,255,0.08);--text:#f0ede8;--muted:#888}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);line-height:1.8;font-size:15px}
+  .wrap{max-width:780px;margin:0 auto;padding:60px 24px}
+  .logo{font-size:28px;font-weight:700;color:var(--accent);margin-bottom:6px;letter-spacing:-1px}
+  .doc-title{font-size:22px;font-weight:600;margin:32px 0 6px;border-left:3px solid var(--accent);padding-left:14px}
+  .updated{font-size:13px;color:var(--muted);margin-bottom:40px}
+  h2{font-size:17px;font-weight:600;margin:32px 0 10px;color:var(--accent)}
+  p{margin-bottom:12px;color:#ccc}
+  ul{margin:0 0 14px 20px;color:#ccc}
+  li{margin-bottom:6px}
+  table{width:100%;border-collapse:collapse;margin:16px 0 24px;font-size:14px}
+  th{background:rgba(200,169,110,0.1);color:var(--accent);padding:10px 14px;text-align:left;border:1px solid var(--border)}
+  td{padding:10px 14px;border:1px solid var(--border);color:#ccc;vertical-align:top}
+  .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
+  .badge.essencial{background:rgba(74,222,128,.1);color:#4ade80}
+  .badge.funcional{background:rgba(96,165,250,.1);color:#60a5fa}
+  .footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--border);font-size:13px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+  a{color:var(--accent);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="logo">FinRossi</div>
+  <div class="doc-title">Política de Cookies</div>
+  <!-- EDITAR: atualize a data abaixo a cada alteração -->
+  <div class="updated">Última atualização: <!-- DATA --> · Versão 1.0</div>
+
+  <h2>1. O que são cookies</h2>
+  <p>
+    Cookies são pequenos arquivos de texto armazenados no seu dispositivo quando você 
+    acessa um site ou aplicativo. Eles permitem que o serviço lembre suas preferências 
+    e mantenha sua sessão ativa.
+  </p>
+  <p>
+    O FinRossi também utiliza <strong>localStorage</strong> — tecnologia similar ao cookie, 
+    mas que armazena dados apenas localmente no seu dispositivo, sem transmiti-los automaticamente 
+    ao servidor a cada requisição.
+  </p>
+
+  <h2>2. Cookies e armazenamento local que utilizamos</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Nome / Chave</th>
+        <th>Tipo</th>
+        <th>Finalidade</th>
+        <th>Duração</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Firebase Auth Token</td>
+        <td><span class="badge essencial">Essencial</span></td>
+        <td>Mantém sua sessão autenticada após o login</td>
+        <td>Sessão / até logout</td>
+      </tr>
+      <tr>
+        <td>fin_tema</td>
+        <td><span class="badge funcional">Funcional</span></td>
+        <td>Lembra o tema escolhido (escuro, claro, azul)</td>
+        <td>Permanente (local)</td>
+      </tr>
+      <tr>
+        <td>fin_sb_collapsed</td>
+        <td><span class="badge funcional">Funcional</span></td>
+        <td>Lembra se a sidebar está minimizada</td>
+        <td>Permanente (local)</td>
+      </tr>
+      <tr>
+        <td>fin3_{perfil}_{tipo}</td>
+        <td><span class="badge funcional">Funcional</span></td>
+        <td>Cache local dos dados financeiros para uso offline</td>
+        <td>Permanente (local)</td>
+      </tr>
+      <tr>
+        <td>fin_dash_cfg_{perfil}</td>
+        <td><span class="badge funcional">Funcional</span></td>
+        <td>Preferências de cards do dashboard</td>
+        <td>Permanente (local)</td>
+      </tr>
+      <tr>
+        <td>fin_nav_cfg_{perfil}</td>
+        <td><span class="badge funcional">Funcional</span></td>
+        <td>Preferências de itens do menu lateral</td>
+        <td>Permanente (local)</td>
+      </tr>
+      <tr>
+        <td>fin_foto_{perfil}</td>
+        <td><span class="badge funcional">Funcional</span></td>
+        <td>Foto de perfil em base64 (armazenada localmente)</td>
+        <td>Permanente (local)</td>
+      </tr>
+      <tr>
+        <td>fin_admin_token</td>
+        <td><span class="badge essencial">Essencial</span></td>
+        <td>Token de autenticação admin (apenas para administradores)</td>
+        <td>Sessão</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>3. Cookies de terceiros</h2>
+  <p>O FinRossi pode carregar recursos de terceiros que definem seus próprios cookies:</p>
+  <ul>
+    <li><strong>Google Firebase:</strong> cookies de autenticação e sessão</li>
+    <li><strong>Google Fonts:</strong> fontes tipográficas (pode registrar acesso)</li>
+    <li><strong>cdnjs.cloudflare.com:</strong> bibliotecas JS (Chart.js, XLSX)</li>
+  </ul>
+  <p>
+    Não utilizamos cookies de rastreamento, publicidade ou análise comportamental de terceiros.
+  </p>
+
+  <h2>4. Não utilizamos</h2>
+  <ul>
+    <li>❌ Cookies de publicidade ou retargeting</li>
+    <li>❌ Pixels de rastreamento (Meta Pixel, Google Analytics)</li>
+    <li>❌ Cookies de redes sociais</li>
+    <li>❌ Fingerprinting de dispositivo</li>
+  </ul>
+
+  <h2>5. Como gerenciar cookies</h2>
+  <p>
+    Os cookies essenciais (autenticação) não podem ser desativados sem comprometer o funcionamento do app.
+  </p>
+  <p>
+    Os dados funcionais (tema, preferências) ficam no <strong>localStorage</strong> do seu navegador 
+    e podem ser limpos a qualquer momento em:
+  </p>
+  <ul>
+    <li><strong>Chrome:</strong> Configurações → Privacidade → Limpar dados de navegação</li>
+    <li><strong>Firefox:</strong> Configurações → Privacidade → Limpar dados</li>
+    <li><strong>Safari:</strong> Preferências → Privacidade → Gerenciar dados de sites</li>
+  </ul>
+  <p>
+    Limpar o localStorage apagará suas preferências locais (tema, sidebar), 
+    mas não seus dados financeiros (armazenados no Firebase).
+  </p>
+
+  <h2>6. Consentimento</h2>
+  <p>
+    Ao acessar o FinRossi pela primeira vez, você consente com o uso de cookies essenciais 
+    necessários ao funcionamento. Para cookies funcionais opcionais, 
+    você pode gerenciá-los nas configurações do navegador.
+  </p>
+
+  <h2>7. Contato</h2>
+  <p>
+    Dúvidas sobre cookies: <a href="mailto:<!-- EMAIL -->"><!-- EMAIL --></a>
+  </p>
+
+  <div class="footer">
+    <span>© <!-- ANO --> FinRossi. Todos os direitos reservados.</span>
+    <span>
+      <a href="privacidade.html">Privacidade</a> · 
+      <a href="termos.html">Termos de Uso</a> · 
+      <a href="contrato.html">Contrato SaaS</a> · 
+      <a href="lgpd.html">LGPD</a>
+    </span>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Política de Privacidade — FinRossi</title>
+<style>
+  /* ── EDITAR: cores e fontes ── */
+  :root{--accent:#C8A96E;--bg:#0f0f0f;--surface:#1a1a1a;--border:rgba(255,255,255,0.08);--text:#f0ede8;--muted:#888}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);line-height:1.8;font-size:15px}
+  .wrap{max-width:780px;margin:0 auto;padding:60px 24px}
+  .logo{font-size:28px;font-weight:700;color:var(--accent);margin-bottom:6px;letter-spacing:-1px}
+  .doc-title{font-size:22px;font-weight:600;margin:32px 0 6px;border-left:3px solid var(--accent);padding-left:14px}
+  .updated{font-size:13px;color:var(--muted);margin-bottom:40px}
+  h2{font-size:17px;font-weight:600;margin:32px 0 10px;color:var(--accent)}
+  h3{font-size:15px;font-weight:600;margin:20px 0 8px}
+  p{margin-bottom:12px;color:#ccc}
+  ul{margin:0 0 14px 20px;color:#ccc}
+  li{margin-bottom:6px}
+  .alert{background:rgba(200,169,110,0.08);border:1px solid rgba(200,169,110,0.2);border-radius:10px;padding:16px 18px;margin:24px 0;font-size:14px}
+  .footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--border);font-size:13px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+  a{color:var(--accent);text-decoration:none}
+  /* ── EDITAR: remova este bloco ao publicar em modo claro ── */
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="logo">FinRossi</div>
+  <div class="doc-title">Política de Privacidade</div>
+  <!-- EDITAR: atualize a data abaixo a cada alteração -->
+  <div class="updated">Última atualização: <!-- DATA --> · Versão 1.0</div>
+
+  <div class="alert">
+    Ao utilizar o FinRossi, você concorda com esta Política de Privacidade. Leia com atenção antes de criar sua conta.
+  </div>
+
+  <h2>1. Quem somos</h2>
+  <p>
+    O FinRossi é um serviço de controle financeiro pessoal operado por <!-- NOME/CNPJ -->, 
+    com sede em Ribeirão Preto, SP. Para dúvidas sobre privacidade, entre em contato pelo e-mail 
+    <a href="mailto:<!-- EMAIL -->"><!-- EMAIL --></a>.
+  </p>
+
+  <h2>2. Quais dados coletamos</h2>
+  <h3>2.1 Dados fornecidos por você</h3>
+  <ul>
+    <li>Nome e endereço de e-mail (cadastro)</li>
+    <li>Senha (armazenada de forma criptografada via Firebase Auth)</li>
+    <li>Dados financeiros inseridos manualmente: lançamentos, investimentos, metas, cartões, notas</li>
+  </ul>
+  <h3>2.2 Dados coletados automaticamente</h3>
+  <ul>
+    <li>Data e hora de acesso</li>
+    <li>Tipo de dispositivo e navegador</li>
+    <li>Preferências de tema e configurações do app (armazenadas localmente)</li>
+  </ul>
+  <h3>2.3 Dados que NÃO coletamos</h3>
+  <ul>
+    <li>Dados bancários ou senhas bancárias</li>
+    <li>Documentos de identidade (CPF, RG)</li>
+    <li>Dados de localização em tempo real</li>
+  </ul>
+
+  <h2>3. Como usamos seus dados</h2>
+  <ul>
+    <li>Fornecer e manter o serviço FinRossi</li>
+    <li>Autenticar seu acesso com segurança</li>
+    <li>Enviar comunicações sobre o serviço (com seu consentimento)</li>
+    <li>Melhorar a experiência do usuário</li>
+    <li>Cumprir obrigações legais</li>
+  </ul>
+  <p>Não vendemos, alugamos nem compartilhamos seus dados pessoais com terceiros para fins comerciais.</p>
+
+  <h2>4. Base legal (LGPD — Lei 13.709/2018)</h2>
+  <p>O tratamento dos seus dados se baseia em:</p>
+  <ul>
+    <li><strong>Execução de contrato</strong> — para prestar o serviço contratado</li>
+    <li><strong>Consentimento</strong> — para comunicações de marketing (revogável a qualquer momento)</li>
+    <li><strong>Legítimo interesse</strong> — para segurança e melhoria do serviço</li>
+    <li><strong>Obrigação legal</strong> — quando exigido por lei</li>
+  </ul>
+
+  <h2>5. Onde armazenamos seus dados</h2>
+  <p>
+    Seus dados são armazenados no <strong>Firebase</strong> (Google LLC), com servidores nos Estados Unidos, 
+    coberto pelo adequacy framework da UE e cláusulas contratuais padrão compatíveis com a LGPD.
+  </p>
+  <p>
+    Dados de configuração (tema, preferências) são armazenados localmente no seu dispositivo (localStorage) 
+    e não são transmitidos para nossos servidores.
+  </p>
+
+  <h2>6. Por quanto tempo guardamos seus dados</h2>
+  <ul>
+    <li>Conta ativa: enquanto você utilizar o serviço</li>
+    <li>Após cancelamento: até 90 dias, para possibilidade de reativação</li>
+    <li>Após 90 dias: dados excluídos permanentemente, exceto quando exigido por lei</li>
+  </ul>
+
+  <h2>7. Seus direitos (LGPD)</h2>
+  <p>Você tem direito a:</p>
+  <ul>
+    <li><strong>Acesso</strong> — solicitar cópia dos seus dados</li>
+    <li><strong>Correção</strong> — corrigir dados incorretos ou desatualizados</li>
+    <li><strong>Exclusão</strong> — solicitar a exclusão dos seus dados</li>
+    <li><strong>Portabilidade</strong> — receber seus dados em formato estruturado</li>
+    <li><strong>Revogação do consentimento</strong> — a qualquer momento, sem penalidade</li>
+    <li><strong>Oposição</strong> — contestar o tratamento de dados</li>
+  </ul>
+  <p>Para exercer qualquer direito, entre em contato pelo e-mail <a href="mailto:<!-- EMAIL -->"><!-- EMAIL --></a>. Respondemos em até 15 dias úteis.</p>
+
+  <h2>8. Cookies</h2>
+  <p>
+    Utilizamos apenas cookies essenciais para autenticação e funcionamento do app. 
+    Consulte nossa <a href="cookies.html">Política de Cookies</a> para detalhes.
+  </p>
+
+  <h2>9. Segurança</h2>
+  <p>
+    Adotamos medidas técnicas e organizacionais para proteger seus dados, incluindo:
+    criptografia em trânsito (HTTPS/TLS), autenticação segura via Firebase Auth,
+    e acesso restrito por funções (roles) de usuário.
+  </p>
+  <p>
+    Nenhum sistema é 100% seguro. Em caso de incidente de segurança que afete seus dados, 
+    notificaremos você e a ANPD dentro dos prazos legais.
+  </p>
+
+  <h2>10. Alterações nesta política</h2>
+  <p>
+    Podemos atualizar esta política periodicamente. Quando houver alterações relevantes, 
+    notificaremos por e-mail ou aviso no app com pelo menos 10 dias de antecedência.
+    A versão vigente estará sempre disponível em 
+    <a href="privacidade.html">finrossi.com.br/legal/privacidade</a>.
+  </p>
+
+  <h2>11. Contato</h2>
+  <p>
+    <!-- NOME/EMPRESA --><br>
+    <!-- CNPJ ou CPF --><br>
+    Ribeirão Preto, SP — Brasil<br>
+    E-mail: <a href="mailto:<!-- EMAIL -->"><!-- EMAIL --></a>
+  </p>
+
+  <div class="footer">
+    <span>© <!-- ANO --> FinRossi. Todos os direitos reservados.</span>
+    <span>
+      <a href="termos.html">Termos de Uso</a> · 
+      <a href="contrato.html">Contrato SaaS</a> · 
+      <a href="cookies.html">Cookies</a> · 
+      <a href="lgpd.html">LGPD</a>
+    </span>
+  </div>
+
+</div>
+</body>
+</html>
