@@ -152,6 +152,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .sidebar-toggle{position:absolute;top:18px;right:-12px;width:22px;height:22px;border-radius:50%;background:var(--surface);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;color:var(--muted);transition:all .2s;font-size:11px}
 .sidebar-toggle:hover{background:var(--surface3);color:var(--text)}
 .sidebar-wrap{position:relative;flex-shrink:0}
+@media(max-width:640px){.sidebar-wrap{display:none!important}}
 .sb-logo{padding:0 18px 18px;border-bottom:1px solid var(--border);margin-bottom:14px}
 .sb-logo h1{font-family:'DM Serif Display',serif;font-size:18px;letter-spacing:-.3px;color:var(--accent)}
 .sb-logo span{font-size:11px;color:var(--muted);font-weight:300}
@@ -4650,7 +4651,7 @@ async function renderMinhaAssinatura(){
         consultoria mensal e muito mais.
       </p>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
-        ${plano==='gratuito'||plano==='starter'?`<a href="https://lucasrossi2100-boop.github.io/financeiro/landing.html#planos" target="_blank" class="btn primary" style="text-decoration:none">⚡ Ver planos disponíveis</a>`:''}
+        ${plano==='gratuito'||plano==='starter'?`<a href="https://finrossi.com.br/landing.html#planos" target="_blank" class="btn primary" style="text-decoration:none">⚡ Ver planos disponíveis</a>`:''}
         <a href="mailto:finrossiapp@gmail.com?subject=Upgrade de plano FinRossi" class="btn" style="text-decoration:none">✉ Falar com suporte</a>
       </div>
     </div>`:''}
@@ -4660,8 +4661,8 @@ async function renderMinhaAssinatura(){
       <h3><span class="dot" style="background:var(--purple)"></span>Precisa de ajuda?</h3>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
         <a href="mailto:finrossiapp@gmail.com?subject=Suporte FinRossi" class="btn" style="text-decoration:none;font-size:13px">✉ Enviar e-mail</a>
-        <a href="https://lucasrossi2100-boop.github.io/financeiro/legal/termos.html" target="_blank" class="btn" style="text-decoration:none;font-size:13px">📄 Termos de Uso</a>
-        <a href="https://lucasrossi2100-boop.github.io/financeiro/legal/privacidade.html" target="_blank" class="btn" style="text-decoration:none;font-size:13px">🔒 Privacidade</a>
+        <a href="https://finrossi.com.br/legal/termos.html" target="_blank" class="btn" style="text-decoration:none;font-size:13px">📄 Termos de Uso</a>
+        <a href="https://finrossi.com.br/legal/privacidade.html" target="_blank" class="btn" style="text-decoration:none;font-size:13px">🔒 Privacidade</a>
         ${plano==='consultoria'?`<a href="mailto:finrossiapp@gmail.com?subject=Agendamento reunião FinRossi" class="btn primary" style="text-decoration:none;font-size:13px">📅 Agendar reunião</a>`:''}
       </div>
     </div>
