@@ -38,6 +38,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 24px;display:fl
 .nav-links a:hover{color:var(--text)}
 .nav-cta{background:var(--gold);color:#000;padding:9px 20px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;transition:all .2s}
 .nav-cta:hover{background:var(--gold-light);transform:translateY(-1px)}
+.nav-login{color:var(--text);padding:9px 18px;border-radius:8px;font-size:14px;font-weight:500;text-decoration:none;border:1px solid rgba(255,255,255,0.12);transition:all .2s}
+.nav-login:hover{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.22)}
 
 /* HERO */
 .hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:120px 24px 80px;position:relative;overflow:hidden}
@@ -174,7 +176,10 @@ footer strong{color:var(--gold)}
     <a href="#planos">Planos</a>
     <a href="#faq">FAQ</a>
   </div>
-  <a href="#planos" class="nav-cta">Começar agora</a>
+  <div style="display:flex;align-items:center;gap:10px">
+    <a href="https://lucasrossi2100-boop.github.io/financeiro/" class="nav-login">Entrar</a>
+    <a href="#planos" class="nav-cta">Começar agora</a>
+  </div>
 </nav>
 
 <!-- HERO -->
@@ -188,7 +193,8 @@ footer strong{color:var(--gold)}
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         Começar grátis
       </a>
-      <a href="#funcionalidades" class="btn-secondary">Ver funcionalidades</a>
+      <a href="https://lucasrossi2100-boop.github.io/financeiro/" class="btn-secondary">Já tenho conta →</a>
+      <a href="#funcionalidades" class="btn-secondary" style="opacity:.7">Ver funcionalidades</a>
     </div>
     <div class="hero-stats">
       <div class="stat"><span class="stat-num">100%</span><span class="stat-label">Online — celular e notebook</span></div>
@@ -491,6 +497,9 @@ footer strong{color:var(--gold)}
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         Criar conta grátis
       </a>
+      <a href="https://lucasrossi2100-boop.github.io/financeiro/" class="btn-secondary">
+        Já tenho conta →
+      </a>
     </div>
   </div>
 </section>
@@ -499,6 +508,13 @@ footer strong{color:var(--gold)}
 <footer>
   <p><strong>FinRossi</strong> — Controle financeiro pessoal simples e inteligente</p>
   <p style="margin-top:8px">© 2025 FinRossi · Todos os direitos reservados</p>
+  <p style="margin-top:12px;font-size:12px">
+    <a href="legal/privacidade.html" style="color:var(--muted2);text-decoration:none;margin:0 8px" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--muted2)'">Política de Privacidade</a>·
+    <a href="legal/termos.html" style="color:var(--muted2);text-decoration:none;margin:0 8px" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--muted2)'">Termos de Uso</a>·
+    <a href="legal/contrato.html" style="color:var(--muted2);text-decoration:none;margin:0 8px" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--muted2)'">Contrato SaaS</a>·
+    <a href="legal/lgpd.html" style="color:var(--muted2);text-decoration:none;margin:0 8px" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--muted2)'">LGPD</a>·
+    <a href="legal/cookies.html" style="color:var(--muted2);text-decoration:none;margin:0 8px" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--muted2)'">Cookies</a>
+  </p>
 </footer>
 
 <script>
@@ -510,75 +526,138 @@ function toggleFaq(btn){
   if(!isOpen){a.classList.add('open');btn.classList.add('open');}
 }
 
-function assinar(plano){
-  if(plano==='gratuito'){
-    abrirModalCadastro(plano);
-    return;
-  }
-  abrirModalCadastro(plano);
-}
-
 // ─── Config ───────────────────────────────────────────────────────────────────
 const BACKEND_URL = 'https://finrossi-backend-production.up.railway.app';
-const PLANO_LABEL = {gratuito:'Grátis — 30 dias',starter:'Starter — R$19,90/mês',essencial:'Essencial — R$39,90/mês',consultoria:'Consultoria — R$89,90/mês'};
+
+const PLANO_MENSAL  = {starter:19.90, essencial:39.90, consultoria:89.90};
+const PLANO_ANUAL   = {starter:191.04, essencial:383.04, consultoria:863.04};
+const PLANO_NOME    = {gratuito:'Gratuito', starter:'Starter', essencial:'Essencial', consultoria:'Consultoria'};
+
+let _periodoAtual = 'mensal'; // 'mensal' | 'anual'
+
+function setPeriodo(p){
+  _periodoAtual = p;
+  document.getElementById('toggle-mensal').style.background = p==='mensal'?'#C8A96E':'transparent';
+  document.getElementById('toggle-mensal').style.color = p==='mensal'?'#0f0f0f':'#888';
+  document.getElementById('toggle-anual').style.background = p==='anual'?'#C8A96E':'transparent';
+  document.getElementById('toggle-anual').style.color = p==='anual'?'#0f0f0f':'#888';
+}
+
+function assinar(plano){
+  abrirModalCadastro(plano, _periodoAtual);
+}
 
 // ─── Modal de cadastro ────────────────────────────────────────────────────────
-function abrirModalCadastro(plano){
-  document.getElementById('modal-plano-nome').textContent = PLANO_LABEL[plano]||plano;
+function abrirModalCadastro(plano, periodo){
+  const isGratuito = plano === 'gratuito';
+  const isAnual = periodo === 'anual' && !isGratuito;
+  const valor = isGratuito ? null : isAnual ? PLANO_ANUAL[plano] : PLANO_MENSAL[plano];
+
   document.getElementById('modal-plano-input').value = plano;
-  document.getElementById('modal-nome').value = '';
-  document.getElementById('modal-email').value = '';
-  document.getElementById('modal-senha').value = '';
-  document.getElementById('modal-msg').textContent = '';
-  document.getElementById('modal-msg').style.display = 'none';
-  document.getElementById('modal-cadastro').style.display = 'flex';
+  document.getElementById('modal-periodo-input').value = isAnual ? 'anual' : 'mensal';
+  document.getElementById('modal-plano-nome').textContent =
+    isGratuito ? 'Gratuito — 30 dias grátis' :
+    `${PLANO_NOME[plano]} — ${isAnual ? 'R$'+valor.toFixed(2)+'/ano (20% off)' : 'R$'+valor.toFixed(2)+'/mês'}`;
+
+  // Métodos de pagamento
+  const metodos = document.getElementById('modal-metodos');
+  if(metodos){
+    metodos.style.display = isGratuito ? 'none' : 'block';
+    // Anual: só Pix | Mensal: cartão + boleto
+    document.getElementById('metodo-cartao').style.display = isAnual ? 'none' : '';
+    document.getElementById('metodo-boleto').style.display = isAnual ? 'none' : '';
+    document.getElementById('metodo-pix').style.display = isAnual ? '' : 'none';
+    document.getElementById('metodo-pix-anual').style.display = isAnual ? '' : 'none';
+    if(isAnual){
+      document.getElementById('metodo-pix').checked = true;
+    } else {
+      document.getElementById('metodo-cartao').checked = true;
+    }
+  }
+
+  ['modal-nome','modal-email','modal-senha'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('modal-msg').style.display='none';
+  document.getElementById('modal-form').style.display='block';
+  document.getElementById('modal-sucesso').style.display='none';
+  document.getElementById('modal-pix-area').style.display='none';
+  document.getElementById('modal-cadastro').style.display='flex';
   setTimeout(()=>document.getElementById('modal-nome').focus(), 120);
 }
 
 function fecharModal(){
-  document.getElementById('modal-cadastro').style.display = 'none';
+  document.getElementById('modal-cadastro').style.display='none';
 }
 
 async function confirmarCadastro(){
-  const nome  = document.getElementById('modal-nome').value.trim();
-  const email = document.getElementById('modal-email').value.trim();
-  const senha = document.getElementById('modal-senha').value;
-  const plano = document.getElementById('modal-plano-input').value;
-  const msg   = document.getElementById('modal-msg');
-  const btn   = document.getElementById('btn-confirmar');
+  const nome   = document.getElementById('modal-nome').value.trim();
+  const email  = document.getElementById('modal-email').value.trim();
+  const senha  = document.getElementById('modal-senha').value;
+  const plano  = document.getElementById('modal-plano-input').value;
+  const periodo= document.getElementById('modal-periodo-input').value;
+  const msg    = document.getElementById('modal-msg');
+  const btn    = document.getElementById('btn-confirmar');
 
-  if(!nome||!email||!senha){
-    showModalMsg('Preencha todos os campos.','err'); return;
-  }
-  if(senha.length < 6){
-    showModalMsg('A senha deve ter pelo menos 6 caracteres.','err'); return;
-  }
+  const metodoEl = document.querySelector('input[name="metodo"]:checked');
+  const metodo   = metodoEl ? metodoEl.value : 'cartao';
 
-  btn.textContent = 'Criando conta...';
-  btn.disabled = true;
+  if(!nome||!email||!senha){ showModalMsg('Preencha todos os campos.','err'); return; }
+  if(senha.length < 6){ showModalMsg('A senha deve ter pelo menos 6 caracteres.','err'); return; }
+
+  btn.textContent='Criando conta...'; btn.disabled=true;
 
   try{
-    const res = await fetch(`${BACKEND_URL}/cadastrar`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({nome, email, senha, plano, origem: plano==='gratuito'?'trial':'pagante'})
-    });
-    const data = await res.json();
+    let endpoint, body;
 
-    if(!res.ok){
-      showModalMsg(data.erro||'Erro ao criar conta.','err');
-      btn.textContent='Criar conta'; btn.disabled=false; return;
+    if(plano === 'gratuito'){
+      endpoint = '/cadastrar';
+      body = {nome, email, senha};
+    } else if(periodo === 'anual'){
+      endpoint = '/assinar-anual';
+      body = {nome, email, senha, plano};
+    } else {
+      endpoint = '/assinar';
+      body = {nome, email, senha, plano, metodoPagamento: metodo};
     }
 
-    // Sucesso
+    const res  = await fetch(BACKEND_URL+endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const data = await res.json();
+
+    if(!res.ok){ showModalMsg(data.erro||'Erro ao criar conta.','err'); btn.textContent='Criar conta'; btn.disabled=false; return; }
+
+    // Anual com Pix — mostra QR Code
+    if(periodo==='anual' && data.pix){
+      document.getElementById('modal-form').style.display='none';
+      document.getElementById('modal-pix-area').style.display='block';
+      document.getElementById('pix-copia-cola').textContent = data.pix.copiaEcola;
+      document.getElementById('pix-valor').textContent = 'R$ '+data.valor.toFixed(2).replace('.',',');
+      document.getElementById('pix-plano').textContent = PLANO_NOME[plano]+' Anual';
+      if(data.pix.qrCode){
+        document.getElementById('pix-qr-img').src='data:image/png;base64,'+data.pix.qrCode;
+        document.getElementById('pix-qr-img').style.display='block';
+      }
+      return;
+    }
+
+    // Mensal ou gratuito — sucesso simples
     document.getElementById('modal-form').style.display='none';
     document.getElementById('modal-sucesso').style.display='block';
-    document.getElementById('modal-sucesso-plano').textContent = PLANO_LABEL[plano]||plano;
+    document.getElementById('modal-sucesso-plano').textContent =
+      plano==='gratuito' ? 'Gratuito — 30 dias' :
+      PLANO_NOME[plano]+(periodo==='anual'?' Anual':' Mensal');
 
   }catch(e){
     showModalMsg('Erro de conexão. Tente novamente.','err');
     btn.textContent='Criar conta'; btn.disabled=false;
   }
+}
+
+function copiarPix(){
+  const txt = document.getElementById('pix-copia-cola').textContent;
+  navigator.clipboard.writeText(txt).then(()=>{
+    const btn = document.getElementById('btn-copiar-pix');
+    btn.textContent='✓ Copiado!'; btn.style.background='#4ade80'; btn.style.color='#000';
+    setTimeout(()=>{ btn.textContent='Copiar código'; btn.style.background='#C8A96E'; btn.style.color='#0f0f0f'; },2000);
+  });
 }
 
 function showModalMsg(texto, tipo){
@@ -635,6 +714,7 @@ document.querySelectorAll('.feature-card,.plan-card,.step').forEach(el=>{
         </div>
       </div>
       <input type="hidden" id="modal-plano-input">
+      <input type="hidden" id="modal-periodo-input">
 
       <!-- Formulário -->
       <div id="modal-form">
@@ -642,43 +722,66 @@ document.querySelectorAll('.feature-card,.plan-card,.step').forEach(el=>{
           <label style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px">Nome completo</label>
           <input id="modal-nome" type="text" placeholder="Seu nome"
             style="width:100%;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:#f5f0e8;border-radius:9px;padding:11px 13px;font-size:14px;font-family:inherit;outline:none;transition:border-color .2s"
-            onfocus="this.style.borderColor='rgba(200,169,110,0.5)'"
-            onblur="this.style.borderColor='rgba(255,255,255,0.1)'"
+            onfocus="this.style.borderColor='rgba(200,169,110,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'"
             onkeydown="if(event.key==='Enter')document.getElementById('modal-email').focus()">
         </div>
         <div style="margin-bottom:14px">
           <label style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px">Email</label>
           <input id="modal-email" type="email" placeholder="seu@email.com"
             style="width:100%;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:#f5f0e8;border-radius:9px;padding:11px 13px;font-size:14px;font-family:inherit;outline:none;transition:border-color .2s"
-            onfocus="this.style.borderColor='rgba(200,169,110,0.5)'"
-            onblur="this.style.borderColor='rgba(255,255,255,0.1)'"
+            onfocus="this.style.borderColor='rgba(200,169,110,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'"
             onkeydown="if(event.key==='Enter')document.getElementById('modal-senha').focus()">
         </div>
-        <div style="margin-bottom:18px">
+        <div style="margin-bottom:14px">
           <label style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px">Senha</label>
           <input id="modal-senha" type="password" placeholder="Mínimo 6 caracteres"
             style="width:100%;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:#f5f0e8;border-radius:9px;padding:11px 13px;font-size:14px;font-family:inherit;outline:none;transition:border-color .2s"
-            onfocus="this.style.borderColor='rgba(200,169,110,0.5)'"
-            onblur="this.style.borderColor='rgba(255,255,255,0.1)'"
+            onfocus="this.style.borderColor='rgba(200,169,110,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'"
             onkeydown="if(event.key==='Enter')confirmarCadastro()">
+        </div>
+
+        <!-- Métodos de pagamento -->
+        <div id="modal-metodos" style="margin-bottom:16px">
+          <label style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:8px">Forma de pagamento</label>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <label id="metodo-cartao" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:9px;cursor:pointer">
+              <input type="radio" name="metodo" value="cartao" style="accent-color:#C8A96E"> <span style="font-size:13px">💳 Cartão de crédito (mensal automático)</span>
+            </label>
+            <label id="metodo-boleto" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:9px;cursor:pointer">
+              <input type="radio" name="metodo" value="boleto" style="accent-color:#C8A96E"> <span style="font-size:13px">📄 Boleto bancário (mensal)</span>
+            </label>
+            <label id="metodo-pix" style="display:none;align-items:center;gap:10px;padding:10px 12px;background:rgba(200,169,110,0.08);border:1px solid rgba(200,169,110,0.3);border-radius:9px;cursor:pointer">
+              <input type="radio" name="metodo" value="pix" style="accent-color:#C8A96E"> <span style="font-size:13px">📱 Pix</span>
+            </label>
+            <div id="metodo-pix-anual" style="display:none;font-size:11px;color:#888;padding:6px 4px">
+              ✓ Você receberá um QR Code Pix após o cadastro. Sua conta é ativada assim que o pagamento for confirmado.
+            </div>
+          </div>
         </div>
 
         <div id="modal-msg" style="display:none;font-size:13px;padding:9px 12px;border-radius:8px;margin-bottom:12px;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.2)"></div>
 
         <button id="btn-confirmar" onclick="confirmarCadastro()"
           style="width:100%;background:#C8A96E;color:#0f0f0f;border:none;border-radius:9px;padding:13px;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;margin-bottom:10px;transition:opacity .2s"
-          onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
-          Criar conta
-        </button>
+          onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">Criar conta</button>
         <button onclick="fecharModal()"
-          style="width:100%;background:none;color:#555;border:1px solid rgba(255,255,255,0.08);border-radius:9px;padding:11px;font-size:14px;font-family:inherit;cursor:pointer;transition:all .2s"
-          onmouseover="this.style.borderColor='rgba(255,255,255,0.2)';this.style.color='#888'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)';this.style.color='#555'">
-          Cancelar
-        </button>
+          style="width:100%;background:none;color:#555;border:1px solid rgba(255,255,255,0.08);border-radius:9px;padding:11px;font-size:14px;font-family:inherit;cursor:pointer">Cancelar</button>
+        <div style="text-align:center;margin-top:14px;font-size:11px;color:#444">Ao criar sua conta você concorda com nossos <a href="legal/termos.html" target="_blank" style="color:#666">termos de uso</a> e <a href="legal/privacidade.html" target="_blank" style="color:#666">política de privacidade</a>.</div>
+      </div>
 
-        <div style="text-align:center;margin-top:14px;font-size:11px;color:#444">
-          Ao criar sua conta você concorda com nossos termos de uso.
-        </div>
+      <!-- Área QR Code Pix -->
+      <div id="modal-pix-area" style="display:none;text-align:center">
+        <div style="font-size:36px;margin-bottom:12px">📱</div>
+        <div style="font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:6px;color:#f0ede8">Pague com Pix</div>
+        <div style="font-size:13px;color:#888;margin-bottom:4px">Plano: <span id="pix-plano" style="color:#C8A96E;font-weight:500"></span></div>
+        <div style="font-size:20px;font-weight:600;color:#C8A96E;margin-bottom:16px" id="pix-valor"></div>
+        <img id="pix-qr-img" style="display:none;width:180px;height:180px;border-radius:8px;margin:0 auto 16px;border:2px solid #C8A96E">
+        <div style="font-size:11px;color:#666;margin-bottom:6px">Ou copie o código Pix copia e cola:</div>
+        <div style="background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:10px 12px;font-size:10px;color:#888;word-break:break-all;margin-bottom:12px;max-height:60px;overflow:hidden" id="pix-copia-cola"></div>
+        <button id="btn-copiar-pix" onclick="copiarPix()"
+          style="width:100%;background:#C8A96E;color:#0f0f0f;border:none;border-radius:9px;padding:12px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;margin-bottom:10px">Copiar código</button>
+        <div style="font-size:12px;color:#555;margin-bottom:12px">Após o pagamento, sua conta será ativada automaticamente.</div>
+        <button onclick="irParaApp()" style="width:100%;background:none;color:#888;border:1px solid rgba(255,255,255,0.1);border-radius:9px;padding:10px;font-size:13px;font-family:inherit;cursor:pointer">Já paguei — acessar o app →</button>
       </div>
 
       <!-- Sucesso -->
@@ -687,14 +790,9 @@ document.querySelectorAll('.feature-card,.plan-card,.step').forEach(el=>{
         <div style="font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:10px;color:#f0ede8">Conta criada!</div>
         <div style="font-size:13px;color:#888;margin-bottom:6px">Plano ativado:</div>
         <div style="font-size:15px;font-weight:500;color:#C8A96E;margin-bottom:24px" id="modal-sucesso-plano">—</div>
-        <p style="font-size:13px;color:#666;line-height:1.7;margin-bottom:24px">
-          Sua conta está pronta. Acesse o app com o email e senha que você cadastrou.
-        </p>
         <button onclick="irParaApp()"
           style="width:100%;background:#C8A96E;color:#0f0f0f;border:none;border-radius:9px;padding:13px;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer"
-          onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
-          Acessar o FinRossi →
-        </button>
+          onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">Acessar o FinRossi →</button>
       </div>
 
     </div>
