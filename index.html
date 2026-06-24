@@ -62,6 +62,8 @@
         _userRole = window._userRole;
         setTimeout(()=>setupPerfilUI(), 100);
         setTimeout(()=>initSidebar(), 150);
+        setTimeout(()=>initAvatar(), 300);
+        setTimeout(()=>{ loadCategorias(); populateCatSelects(); }, 200);
       } else {
         document.getElementById('tela-login').style.display = 'flex';
         document.getElementById('tela-app').style.display = 'none';
@@ -425,6 +427,14 @@ tbody tr:hover td{background:var(--surface2)}
         <div style="font-size:11px;color:var(--muted)">Meus dados financeiros</div>
       </div>
     </div>
+    <!-- Nav exclusivo para clientes -->
+    <div id="sb-nav-cliente-extra" style="display:none;margin-top:8px">
+      <span class="sb-label">Minha conta</span>
+      <button class="nav-item" onclick="goTo('minha-assinatura')" id="nav-minha-assinatura" data-nav="minha-assinatura">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        <span class="nav-text">Minha Assinatura</span>
+      </button>
+    </div>
   </div>
 
   <div class="sb-section" style="margin-top:8px" id="sb-nav-menu">
@@ -482,6 +492,9 @@ tbody tr:hover td{background:var(--surface2)}
     <button class="nav-item" onclick="goTo('manual')" id="nav-manual" data-nav="manual">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg><span class="nav-text">Manual</span>
     </button>
+    <button class="nav-item" onclick="goTo('preview')" id="nav-preview" data-nav="preview" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><span class="nav-text">Review Planos</span>
+    </button>
     </div><!-- /sb-group-controles -->
   </div><!-- /sb-nav-controles -->
 
@@ -532,11 +545,20 @@ tbody tr:hover td{background:var(--surface2)}
 
   <div id="dash-parcelas-section"></div>
   <div class="grid2">
-    <div class="card"><h3><span class="dot" style="background:var(--green)"></span>Receitas vs Despesas (mês)</h3><div class="chart-wrap" style="height:190px"><canvas id="c-rv"></canvas></div></div>
-    <div class="card"><h3><span class="dot" style="background:var(--blue)"></span>Despesas por categoria</h3><div class="chart-wrap" style="height:190px"><canvas id="c-cat"></canvas></div></div>
+    <div class="card" id="dash-card-chart-bar">
+      <h3><span class="dot" style="background:var(--green)"></span>Receitas vs Despesas — últimos 6 meses</h3>
+      <div class="chart-wrap" style="height:220px"><canvas id="c-rv"></canvas></div>
+    </div>
+    <div class="card" id="dash-card-chart-cat">
+      <h3><span class="dot" style="background:var(--blue)"></span>Despesas por categoria</h3>
+      <div class="chart-wrap" style="height:220px"><canvas id="c-cat"></canvas></div>
+    </div>
   </div>
   <div class="grid2">
-    <div class="card"><h3><span class="dot" style="background:var(--amber)"></span>Evolução mensal</h3><div class="chart-wrap" style="height:170px"><canvas id="c-evo"></canvas></div></div>
+    <div class="card" id="dash-card-chart-ev">
+      <h3><span class="dot" style="background:var(--accent)"></span>Evolução do saldo — últimos 6 meses</h3>
+      <div class="chart-wrap" style="height:200px"><canvas id="c-evo"></canvas></div>
+    </div>
     <div class="card">
       <h3><span class="dot" style="background:var(--purple)"></span>Meta selecionada</h3>
       <select id="dash-meta-sel" onchange="renderDashMeta()" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius-sm);padding:5px 10px;font-size:12px;font-family:'DM Sans',sans-serif;outline:none;width:100%;margin-bottom:10px"><option value="">— Selecione uma meta —</option></select>
@@ -570,7 +592,13 @@ tbody tr:hover td{background:var(--surface2)}
         <div class="field"><label>Data</label><input id="r-data" type="date"></div>
       </div>
       <div class="form-row">
-        <div class="field"><label>Categoria</label><select id="r-cat"><option>Salário</option><option>Freelance</option><option>Aluguel recebido</option><option>Dividendos</option><option>Venda</option><option>Outros</option></select></div>
+        <div class="field">
+          <label style="display:flex;align-items:center;justify-content:space-between">
+            Categoria
+            <button type="button" onclick="abrirGerenciarCats('receita')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;padding:0;display:flex;align-items:center;gap:3px" title="Gerenciar categorias">⚙ editar</button>
+          </label>
+          <select id="r-cat"></select>
+        </div>
         <div class="field"><label>Observação</label><input id="r-obs" type="text" placeholder="Opcional"></div>
       </div>
       <div class="btn-row"><button class="btn primary" onclick="addLanc('receita')">Adicionar receita</button><button class="btn" onclick="clearForm('r')">Limpar</button></div>
@@ -586,7 +614,13 @@ tbody tr:hover td{background:var(--surface2)}
         <div class="field"><label>Data 1ª parcela</label><input id="d-data" type="date"></div>
       </div>
       <div class="form-row quad">
-        <div class="field"><label>Categoria</label><select id="d-cat"><option>Moradia</option><option>Alimentação</option><option>Saúde</option><option>Transporte</option><option>Educação</option><option>Lazer</option><option>Parcela</option><option>Serviços</option><option>Outros</option></select></div>
+        <div class="field">
+          <label style="display:flex;align-items:center;justify-content:space-between">
+            Categoria
+            <button type="button" onclick="abrirGerenciarCats('despesa')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;padding:0;display:flex;align-items:center;gap:3px" title="Gerenciar categorias">⚙ editar</button>
+          </label>
+          <select id="d-cat"></select>
+        </div>
         <div class="field"><label>Tipo de pagamento</label>
           <select id="d-parcelado" onchange="toggleParcelado()">
             <option value="avista">À vista</option>
@@ -994,66 +1028,90 @@ tbody tr:hover td{background:var(--surface2)}
 <!-- PREVIEW (como o cliente vê) -->
 <section id="sec-preview" class="section-hidden">
   <div class="page-header">
-    <div class="page-title"><h2>👁 Preview do cliente</h2><p>Visualize como o cliente vê o app</p></div>
+    <div class="page-title"><h2>👁 Review de Planos</h2><p>Visualize exatamente o que cada cliente vê</p></div>
   </div>
-  <div class="card card-full" style="margin-bottom:16px;background:linear-gradient(135deg,rgba(96,165,250,0.06),rgba(192,132,252,0.04));border-color:rgba(96,165,250,0.2)">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-      <div style="font-size:28px">👁</div>
-      <div>
-        <div style="font-size:15px;font-weight:500">Modo Preview</div>
-        <div style="font-size:13px;color:var(--muted)">Esta é a tela que seus clientes veem quando fazem login no FinRossi</div>
+
+  <!-- Seletor de plano -->
+  <div class="card card-full" style="margin-bottom:20px">
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+      <div style="font-size:13px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Simular plano:</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap" id="preview-plan-btns">
+        <button onclick="setPreviewPlano('gratuito')" id="prev-btn-gratuito" class="btn" style="font-size:12px">🆓 Gratuito</button>
+        <button onclick="setPreviewPlano('starter')" id="prev-btn-starter" class="btn" style="font-size:12px">⚡ Starter</button>
+        <button onclick="setPreviewPlano('essencial')" id="prev-btn-essencial" class="btn" style="font-size:12px">✨ Essencial</button>
+        <button onclick="setPreviewPlano('consultoria')" id="prev-btn-consultoria" class="btn primary" style="font-size:12px">👑 Consultoria</button>
       </div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
-      <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:14px">
-        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">O que o cliente vê</div>
-        <ul style="list-style:none;display:flex;flex-direction:column;gap:5px;font-size:13px">
-          <li>✅ Dashboard com receitas/despesas</li>
-          <li>✅ Lançamentos</li>
-          <li>✅ Investimentos</li>
-          <li>✅ Metas e objetivos</li>
-          <li>✅ Calendário financeiro</li>
-          <li>✅ Notas, assinaturas, recorrentes</li>
-          <li>✅ Cartões de crédito</li>
-        </ul>
-      </div>
-      <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:14px">
-        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">O que o cliente NÃO vê</div>
-        <ul style="list-style:none;display:flex;flex-direction:column;gap:5px;font-size:13px">
-          <li>❌ Seus perfis pessoais</li>
-          <li>❌ Painel FinRossi</li>
-          <li>❌ Lista de clientes</li>
-          <li>❌ Dados de outros clientes</li>
-          <li>❌ Configurações admin</li>
-        </ul>
-      </div>
+      <div id="preview-plano-badge" style="margin-left:auto;font-size:12px;padding:4px 12px;border-radius:20px;background:var(--accent-s);color:var(--accent);font-weight:500"></div>
     </div>
   </div>
-  <!-- Simulação da tela do cliente -->
-  <div class="card card-full">
-    <h3><span class="dot" style="background:var(--blue)"></span>Simulação — tela do cliente</h3>
-    <div style="border:2px solid var(--border2);border-radius:12px;overflow:hidden;margin-top:12px">
-      <div style="background:var(--surface2);padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px">
-        <div style="width:10px;height:10px;border-radius:50%;background:#f87171"></div>
-        <div style="width:10px;height:10px;border-radius:50%;background:#fbbf24"></div>
-        <div style="width:10px;height:10px;border-radius:50%;background:#4ade80"></div>
-        <div style="font-size:12px;color:var(--muted);margin-left:8px">lucasrossi2100-boop.github.io/financeiro</div>
+
+  <!-- Descrição do plano selecionado -->
+  <div id="preview-plano-desc" style="margin-bottom:20px"></div>
+
+  <!-- Simulação visual da sidebar do cliente -->
+  <div class="grid2" style="align-items:start">
+    <!-- Sidebar simulada -->
+    <div class="card" style="padding:0;overflow:hidden">
+      <div style="padding:14px 16px;border-bottom:1px solid var(--border);background:var(--surface2)">
+        <div style="font-size:13px;font-weight:500;color:var(--accent);font-family:'DM Serif Display',serif">FinRossi</div>
+        <div style="font-size:11px;color:var(--muted)">Visão do cliente</div>
       </div>
-      <div style="padding:20px;background:var(--surface)">
-        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px">
-          <div style="background:var(--surface2);border-radius:8px;padding:12px">
-            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Receitas</div>
-            <div style="font-size:18px;font-family:'DM Serif Display',serif;color:var(--green)">R$ 0,00</div>
-          </div>
-          <div style="background:var(--surface2);border-radius:8px;padding:12px">
-            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Despesas</div>
-            <div style="font-size:18px;font-family:'DM Serif Display',serif;color:var(--red)">R$ 0,00</div>
-          </div>
-        </div>
-        <div style="font-size:13px;color:var(--muted);text-align:center;padding:20px">
-          Cliente vê seus próprios dados aqui — separados dos seus
-        </div>
-      </div>
+      <div style="padding:10px 8px" id="preview-sidebar"></div>
+    </div>
+
+    <!-- Painel de permissões -->
+    <div class="card">
+      <h3><span class="dot" style="background:var(--accent)"></span>Permissões do plano</h3>
+      <div id="preview-permissions" style="display:flex;flex-direction:column;gap:6px;margin-top:4px"></div>
+    </div>
+  </div>
+
+  <!-- Limitações detalhadas -->
+  <div class="card card-full" style="margin-top:20px">
+    <h3><span class="dot" style="background:var(--blue)"></span>Comparativo de planos</h3>
+    <div style="overflow-x:auto;margin-top:8px">
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead>
+          <tr style="border-bottom:1px solid var(--border)">
+            <th style="text-align:left;padding:10px;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px">Funcionalidade</th>
+            <th style="text-align:center;padding:10px;color:var(--muted);font-size:11px;text-transform:uppercase">Gratuito</th>
+            <th style="text-align:center;padding:10px;color:var(--muted);font-size:11px;text-transform:uppercase">Starter</th>
+            <th style="text-align:center;padding:10px;color:var(--muted);font-size:11px;text-transform:uppercase">Essencial</th>
+            <th style="text-align:center;padding:10px;color:var(--accent);font-size:11px;text-transform:uppercase">Consultoria</th>
+          </tr>
+        </thead>
+        <tbody id="preview-comparativo"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- MODAL GERENCIAR CATEGORIAS -->
+<div class="modal-overlay" id="modal-cats">
+  <div class="modal" style="max-width:420px">
+    <h3 id="cats-modal-title">Categorias de Despesa</h3>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Personalize as categorias do seu perfil. As padrão não podem ser removidas.</p>
+    <div id="cats-lista" style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;max-height:280px;overflow-y:auto"></div>
+    <div style="display:flex;gap:8px">
+      <input id="cats-nova" type="text" placeholder="Nova categoria..." style="flex:1;background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius-sm);padding:8px 11px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none" onkeydown="if(event.key==='Enter')adicionarCategoria()" onfocus="this.style.borderColor='rgba(200,169,110,0.5)'" onblur="this.style.borderColor='var(--border2)'">
+      <button class="btn primary" onclick="adicionarCategoria()">+ Adicionar</button>
+    </div>
+    <div id="cats-msg" style="font-size:12px;min-height:16px;margin-top:6px"></div>
+    <div class="btn-row" style="margin-top:12px">
+      <button class="btn primary" onclick="salvarCategorias()" style="flex:1;justify-content:center">Salvar</button>
+      <button class="btn" onclick="closeModal('modal-cats')">Fechar</button>
+    </div>
+  </div>
+</div>
+<!-- MINHA ASSINATURA (visível só para clientes) -->
+<section id="sec-minha-assinatura" class="section-hidden">
+  <div class="page-header">
+    <div class="page-title"><h2>Minha Assinatura</h2><p>Plano, pagamentos e status da conta</p></div>
+  </div>
+  <div id="assinatura-content">
+    <div style="text-align:center;padding:60px 0;color:var(--muted)">
+      <div style="font-size:32px;margin-bottom:12px">⏳</div>
+      <div>Carregando informações...</div>
     </div>
   </div>
 </section>
@@ -1160,8 +1218,34 @@ tbody tr:hover td{background:var(--surface2)}
       <div style="height:1px;background:var(--border);margin:18px 0"></div>
 
       <div style="margin-bottom:14px">
-        <div style="font-size:13px;font-weight:500;margin-bottom:4px">Itens do Menu lateral</div>
-        <div style="font-size:12px;color:var(--muted);line-height:1.6">Mostre ou oculte itens da sidebar. Dashboard e Lançamentos são fixos.</div>
+        <div style="font-size:13px;font-weight:500;margin-bottom:4px">Categorias personalizadas</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:12px">Crie categorias próprias de despesa e receita. Ficam salvas no seu perfil.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <button onclick="abrirGerenciarCats('despesa')" style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius-sm);cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;transition:all .15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)'">
+            <span style="font-size:16px">🏷️</span>
+            <div style="text-align:left">
+              <div style="font-size:12px;font-weight:500">Despesas</div>
+              <div id="cfg-cats-desp-count" style="font-size:11px;color:var(--muted)">carregando...</div>
+            </div>
+          </button>
+          <button onclick="abrirGerenciarCats('receita')" style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius-sm);cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;transition:all .15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)'">
+            <span style="font-size:16px">💰</span>
+            <div style="text-align:left">
+              <div style="font-size:12px;font-weight:500">Receitas</div>
+              <div id="cfg-cats-rec-count" style="font-size:11px;color:var(--muted)">carregando...</div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <div style="height:1px;background:var(--border);margin:18px 0"></div>
+
+      <div style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="font-size:13px;font-weight:500">Itens do Menu lateral</div>
+          <div style="font-size:11px;padding:3px 8px;border-radius:10px;background:var(--accent-s);color:var(--accent)" id="cfg-nav-perfil-badge"></div>
+        </div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-top:3px">Cada perfil tem suas próprias preferências de menu.</div>
       </div>
       <div id="cfg-nav-cards"></div>
 
@@ -1563,6 +1647,7 @@ function initFB(){
                 ['lancs','invs','metas','objs','notas','assinaturas','recorrentes','cartoes'].forEach(t=>{
                   if(val[t]!==undefined){DATA[p][t]=Array.isArray(val[t])?val[t]:Object.values(val[t]||{});lsSave(p,t);}
                 });
+                if(val.categorias) DATA[p].categorias=val.categorias;
               }
               if(p===cp) refreshAll();
             }catch(e){console.warn('snap err',e)}
@@ -1669,13 +1754,18 @@ function setupPerfilUI(){
     </div>`;
   }
 
-  // Se cliente normal, força perfil uid
+  // Preview só para sócio
+  const navPreview=document.getElementById('nav-preview');
+  if(navPreview) navPreview.style.display=socio?'':'none';
   if(role==='cliente'&&window._firebaseUser){
     const uid=window._firebaseUser.uid;
     cp=uid;
     if(!DATA[uid]) DATA[uid]={lancs:[],invs:[],metas:[],objs:[],notas:[],assinaturas:[],recorrentes:[],cartoes:[]};
     const nomeEl=document.getElementById('cliente-nome-sb');
     if(nomeEl) nomeEl.textContent=window._firebaseUser.displayName||window._firebaseUser.email;
+    // Mostra nav de assinatura para clientes
+    const navExtra=document.getElementById('sb-nav-cliente-extra');
+    if(navExtra) navExtra.style.display='block';
   }
 
   // Se admin/dev, vai direto para clientes
@@ -1755,6 +1845,7 @@ function _setProfileFinRossi(){
   const navRenda=document.getElementById('nav-renda');
   if(navRenda) navRenda.style.display='none';
   goTo('dashboard');
+  aplicarNavConfig();
   refreshAll();
 }
 
@@ -1778,6 +1869,7 @@ function setProfile(p){
   const navEmp=document.getElementById('nav-empresas');
   if(navEmp) navEmp.style.display='none';
   goTo('dashboard');
+  aplicarNavConfig();
   refreshAll();
 }
 
@@ -1802,7 +1894,7 @@ document.addEventListener('keydown', e=>{
   }
 });
 
-const SECS=['dashboard','lancamentos','investimentos','historico','metas','objetivos','renda','empresas','notas','assinaturas','recorrentes','calendario','manual','cartoes','clientes','preview'];
+const SECS=['dashboard','lancamentos','investimentos','historico','metas','objetivos','renda','empresas','notas','assinaturas','recorrentes','calendario','manual','cartoes','clientes','preview','minha-assinatura'];
 function goTo(name){
   SECS.forEach(s=>{
     const el=document.getElementById('sec-'+s);
@@ -1812,11 +1904,176 @@ function goTo(name){
     const oc=b.getAttribute('onclick');
     if(oc) b.classList.toggle('active',oc.includes("'"+name+"'"));
   });
-  const fn={dashboard:refreshDash,investimentos:renderInvs,historico:renderHistorico,metas:renderMetas,objetivos:renderObjs,renda:renderRP,notas:renderNotas,assinaturas:renderAssinaturas,recorrentes:renderRecorrentes,calendario:renderCalendario,manual:renderManual,cartoes:renderCartoes,clientes:renderClientes,preview:renderPreview};
+  const fn={dashboard:refreshDash,investimentos:renderInvs,historico:renderHistorico,metas:renderMetas,objetivos:renderObjs,renda:renderRP,notas:renderNotas,assinaturas:renderAssinaturas,recorrentes:renderRecorrentes,calendario:renderCalendario,manual:renderManual,cartoes:renderCartoes,clientes:renderClientes,preview:renderPreview,'minha-assinatura':renderMinhaAssinatura};
   if(fn[name]) fn[name]();
 }
 
-function refreshAll(){refreshDash();renderInvs();renderHistorico();renderMetas();renderObjs();populateDashMetaSel()}
+function refreshAll(){refreshDash();renderInvs();renderHistorico();renderMetas();renderObjs();populateDashMetaSel();populateCatSelects();}
+
+// ─── CATEGORIAS PERSONALIZADAS ────────────────────────────────────────────────
+const CATS_DEFAULT = {
+  despesa: ['Moradia','Alimentação','Saúde','Transporte','Educação','Lazer','Parcela','Serviços','Outros'],
+  receita: ['Salário','Freelance','Aluguel recebido','Dividendos','Venda','Outros'],
+};
+
+function getCats(tipo){
+  const perfil = pd();
+  if(!perfil.categorias) perfil.categorias = {despesa:[],receita:[]};
+  const desativadas = perfil.categorias[tipo+'_off'] || [];
+  const extras = (perfil.categorias[tipo] || []).filter(c=>!CATS_DEFAULT[tipo].includes(c));
+  const todas = [...CATS_DEFAULT[tipo], ...extras];
+  // Retorna apenas as ativas
+  return todas.filter(c=>!desativadas.includes(c));
+}
+
+function populateCatSelects(){
+  // Despesa
+  const dCat = document.getElementById('d-cat');
+  if(dCat){
+    const cur = dCat.value;
+    dCat.innerHTML = getCats('despesa').map(c=>`<option value="${c}">${c}</option>`).join('');
+    if(cur) dCat.value = cur;
+  }
+  // Receita
+  const rCat = document.getElementById('r-cat');
+  if(rCat){
+    const cur = rCat.value;
+    rCat.innerHTML = getCats('receita').map(c=>`<option value="${c}">${c}</option>`).join('');
+    if(cur) rCat.value = cur;
+  }
+  // Histórico
+  const hCat = document.getElementById('h-cat');
+  if(hCat){
+    const cur = hCat.value;
+    const todas = [...new Set([...getCats('despesa'),...getCats('receita')])];
+    hCat.innerHTML = '<option value="">Todas as categorias</option>'+todas.map(c=>`<option value="${c}">${c}</option>`).join('');
+    if(cur) hCat.value = cur;
+  }
+  // Assinaturas e Recorrentes
+  const assinCat = document.getElementById('assin-cat');
+  if(assinCat){
+    const cur = assinCat.value;
+    assinCat.innerHTML = getCats('despesa').map(c=>`<option value="${c}">${c}</option>`).join('');
+    if(cur) assinCat.value = cur;
+  }
+  const recCat = document.getElementById('rec-cat');
+  if(recCat){
+    const cur = recCat.value;
+    recCat.innerHTML = getCats('despesa').map(c=>`<option value="${c}">${c}</option>`).join('');
+    if(cur) recCat.value = cur;
+  }
+}
+
+let _catsEditandoTipo = 'despesa';
+let _catsTemp = []; // {nome, ativa, padrao}
+
+function abrirGerenciarCats(tipo){
+  _catsEditandoTipo = tipo;
+  const perfil = pd();
+  if(!perfil.categorias) perfil.categorias = {despesa:[],receita:[]};
+  const padrao = CATS_DEFAULT[tipo];
+  const desativadas = perfil.categorias[tipo+'_off'] || [];
+  const extras = perfil.categorias[tipo] || [];
+
+  // Monta lista: padrão (com flag ativa) + personalizadas
+  _catsTemp = [
+    ...padrao.map(n=>({nome:n, ativa:!desativadas.includes(n), padrao:true})),
+    ...extras.filter(n=>!padrao.includes(n)).map(n=>({nome:n, ativa:!desativadas.includes(n), padrao:false}))
+  ];
+
+  document.getElementById('cats-modal-title').textContent = tipo==='despesa' ? '🏷️ Categorias de Despesa' : '🏷️ Categorias de Receita';
+  document.getElementById('cats-nova').value = '';
+  document.getElementById('cats-msg').textContent = '';
+  renderCatsLista();
+  document.getElementById('modal-cats').classList.add('open');
+  setTimeout(()=>document.getElementById('cats-nova').focus(), 100);
+}
+
+function renderCatsLista(){
+  const el = document.getElementById('cats-lista');
+  if(!el) return;
+
+  el.innerHTML = _catsTemp.map((cat,idx)=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface2);border:1px solid ${cat.ativa?'var(--border)':'rgba(248,113,113,0.2)'};border-radius:var(--radius-sm);opacity:${cat.ativa?1:.6}">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:13px;${cat.ativa?'':'text-decoration:line-through;color:var(--muted)'}">${cat.nome}</span>
+        ${cat.padrao?`<span style="font-size:10px;color:var(--muted2);background:var(--surface3);padding:1px 6px;border-radius:10px">padrão</span>`:''}
+        ${!cat.ativa?`<span style="font-size:10px;color:var(--red);background:rgba(248,113,113,0.1);padding:1px 6px;border-radius:10px">inativa</span>`:''}
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <!-- Toggle ativa/inativa -->
+        <div onclick="toggleCat(${idx})" title="${cat.ativa?'Desativar':'Ativar'}"
+          style="width:34px;height:18px;border-radius:9px;background:${cat.ativa?'var(--accent)':'var(--surface3)'};border:1px solid ${cat.ativa?'var(--accent)':'var(--border2)'};cursor:pointer;transition:all .2s;position:relative;flex-shrink:0">
+          <div style="position:absolute;top:2px;left:${cat.ativa?'17px':'2px'};width:12px;height:12px;border-radius:50%;background:#fff;transition:left .2s"></div>
+        </div>
+        <!-- Botão remover (só para personalizadas) -->
+        ${!cat.padrao?`<button onclick="removerCat(${idx})" title="Remover" style="background:none;border:none;color:var(--muted2);cursor:pointer;font-size:14px;line-height:1;padding:2px 4px;transition:color .15s" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--muted2)'">✕</button>`:'<span style="width:22px"></span>'}
+      </div>
+    </div>`).join('');
+}
+
+function toggleCat(idx){
+  if(_catsTemp[idx]) _catsTemp[idx].ativa = !_catsTemp[idx].ativa;
+  renderCatsLista();
+}
+
+function removerCat(idx){
+  if(_catsTemp[idx] && !_catsTemp[idx].padrao) _catsTemp.splice(idx,1);
+  renderCatsLista();
+}
+
+function adicionarCategoria(){
+  const input = document.getElementById('cats-nova');
+  const msg = document.getElementById('cats-msg');
+  const nova = input.value.trim();
+  if(!nova){ msg.textContent='Digite um nome.'; msg.style.color='var(--red)'; return; }
+  if(_catsTemp.some(c=>c.nome.toLowerCase()===nova.toLowerCase())){
+    msg.textContent='Essa categoria já existe.'; msg.style.color='var(--amber)'; return;
+  }
+  _catsTemp.push({nome:nova, ativa:true, padrao:false});
+  input.value = '';
+  msg.textContent = `✓ "${nova}" adicionada.`; msg.style.color='var(--green)';
+  renderCatsLista();
+}
+
+function removerCategoria(cat){ /* legado */ }
+function removerCatByIdx(idx){ removerCat(parseInt(idx)); }
+
+function salvarCategorias(){
+  const perfil = pd();
+  if(!perfil.categorias) perfil.categorias = {despesa:[],receita:[]};
+  const tipo = _catsEditandoTipo;
+
+  // Separar: extras (não padrão), desativadas (todas as inativas)
+  const extras = _catsTemp.filter(c=>!c.padrao).map(c=>c.nome);
+  const desativadas = _catsTemp.filter(c=>!c.ativa).map(c=>c.nome);
+
+  perfil.categorias[tipo] = extras;
+  perfil.categorias[tipo+'_off'] = desativadas;
+
+  // Salva no localStorage e Firebase
+  try{ localStorage.setItem(`fin3_${cp}_categorias`, JSON.stringify(perfil.categorias)); }catch(e){}
+  if(window._db && window._set && window._ref) window._set(window._ref(window._db,`financeiro/${cp}/categorias`), perfil.categorias);
+  populateCatSelects();
+  closeModal('modal-cats');
+
+  // Atualiza contagem no modal de configurações
+  const dCount = document.getElementById('cfg-cats-desp-count');
+  const rCount = document.getElementById('cfg-cats-rec-count');
+  if(dCount){ const extras=(pd().categorias?.despesa||[]).length; const off=(pd().categorias?.despesa_off||[]).length; dCount.textContent=`${CATS_DEFAULT.despesa.length} padrão${extras?` + ${extras} suas`:''}${off?` · ${off} inativa(s)`:''}`; }
+  if(rCount){ const extras=(pd().categorias?.receita||[]).length; const off=(pd().categorias?.receita_off||[]).length; rCount.textContent=`${CATS_DEFAULT.receita.length} padrão${extras?` + ${extras} suas`:''}${off?` · ${off} inativa(s)`:''}`; }
+}
+
+// Carrega categorias do localStorage no lsLoad
+function loadCategorias(){
+  const p = cp;
+  try{
+    const v = localStorage.getItem(`fin3_${p}_categorias`);
+    if(v){ if(!DATA[p]) DATA[p]={lancs:[],invs:[],metas:[],objs:[],notas:[],assinaturas:[],recorrentes:[],cartoes:[]}; DATA[p].categorias=JSON.parse(v); }
+  }catch(e){}
+}
+
+
 
 function syncMesFiltro(origem){
   const v=origem==='mob'
@@ -2002,23 +2259,70 @@ function refreshDash(){
     parcSec.innerHTML='';
   }
 
+  // ── Gráfico 1: Barras agrupadas — Receitas vs Despesas últimos 6 meses ──
+  const mesUniq=[...new Set(lancs.map(l=>l.data.slice(0,7)))].sort().slice(-6);
+  if(!mesUniq.includes(mes)) mesUniq.push(mes);
+  mesUniq.sort();
+  const evoR=mesUniq.map(m=>lancs.filter(l=>l.data.startsWith(m)&&l.tipo==='receita').reduce((a,b)=>a+b.val,0));
+  const evoD=mesUniq.map(m=>lancs.filter(l=>l.data.startsWith(m)&&l.tipo==='despesa').reduce((a,b)=>a+b.val,0));
+  const evoS=mesUniq.map((m,i)=>evoR[i]-evoD[i]);
+
   destroyChart('rv');
   const ctxRV=document.getElementById('c-rv');
-  if(ctxRV)charts['rv']=new Chart(ctxRV,{type:'bar',data:{labels:['Receitas','Despesas'],datasets:[{data:[rec,des],backgroundColor:['rgba(74,222,128,.7)','rgba(248,113,113,.7)'],borderColor:['#4ade80','#f87171'],borderWidth:1,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#888'},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#888',callback:v=>'R$'+v.toLocaleString('pt-BR')},grid:{color:'rgba(255,255,255,0.04)'}}}}});
+  if(ctxRV) charts['rv']=new Chart(ctxRV,{
+    type:'bar',
+    data:{
+      labels:mesUniq.map(m=>mesLbl(m+'-01')),
+      datasets:[
+        {label:'Receitas',data:evoR,backgroundColor:'rgba(74,222,128,.75)',borderRadius:5,borderSkipped:false},
+        {label:'Despesas',data:evoD,backgroundColor:'rgba(248,113,113,.75)',borderRadius:5,borderSkipped:false}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#888',font:{size:11},boxWidth:10,padding:12}}},
+      scales:{
+        x:{ticks:{color:'#888',font:{size:10}},grid:{color:'rgba(255,255,255,0.03)'}},
+        y:{ticks:{color:'#888',font:{size:10},callback:v=>'R$'+v.toLocaleString('pt-BR')},grid:{color:'rgba(255,255,255,0.04)'}}
+      }
+    }
+  });
 
+  // ── Gráfico 2: Donut — Despesas por categoria ──
   const catMap={};
   doMes.filter(l=>l.tipo==='despesa').forEach(l=>catMap[l.cat]=(catMap[l.cat]||0)+l.val);
   destroyChart('cat');
   const ctxCat=document.getElementById('c-cat');
   const cL=Object.keys(catMap),cV=Object.values(catMap);
-  if(ctxCat){if(!cL.length){ctxCat.parentElement.innerHTML='<p class="empty" style="padding:40px 0">Sem despesas</p>';}else{charts['cat']=new Chart(ctxCat,{type:'doughnut',data:{labels:cL,datasets:[{data:cV,backgroundColor:PALETTE.slice(0,cL.length),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#888',font:{size:11},padding:6,boxWidth:10}}}}});}}
+  if(ctxCat){
+    if(!cL.length){ctxCat.parentElement.innerHTML='<p class="empty" style="padding:60px 0;text-align:center">Sem despesas este mês</p>';}
+    else{charts['cat']=new Chart(ctxCat,{type:'doughnut',data:{labels:cL,datasets:[{data:cV,backgroundColor:PALETTE.slice(0,cL.length),borderWidth:0,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'right',labels:{color:'#888',font:{size:11},padding:8,boxWidth:10}}}}});}
+  }
 
-  const mesUniq=[...new Set(lancs.map(l=>l.data.slice(0,7)))].sort().slice(-6);
-  const evoR=mesUniq.map(m=>lancs.filter(l=>l.data.startsWith(m)&&l.tipo==='receita').reduce((a,b)=>a+b.val,0));
-  const evoD=mesUniq.map(m=>lancs.filter(l=>l.data.startsWith(m)&&l.tipo==='despesa').reduce((a,b)=>a+b.val,0));
+  // ── Gráfico 3: Linha — Saldo + Receitas + Despesas ──
   destroyChart('evo');
   const ctxE=document.getElementById('c-evo');
-  if(ctxE)charts['evo']=new Chart(ctxE,{type:'line',data:{labels:mesUniq.map(m=>mesLbl(m+'-01')),datasets:[{label:'Receitas',data:evoR,borderColor:'#4ade80',backgroundColor:'rgba(74,222,128,.06)',tension:.4,pointRadius:3},{label:'Despesas',data:evoD,borderColor:'#f87171',backgroundColor:'rgba(248,113,113,.06)',tension:.4,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#888',font:{size:11},boxWidth:10}}},scales:{x:{ticks:{color:'#888'},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'#888'},grid:{color:'rgba(255,255,255,0.04)'}}}}});
+  if(ctxE) charts['evo']=new Chart(ctxE,{
+    type:'line',
+    data:{
+      labels:mesUniq.map(m=>mesLbl(m+'-01')),
+      datasets:[
+        {label:'Saldo',data:evoS,borderColor:'#C8A96E',backgroundColor:'rgba(200,169,110,.08)',tension:.4,pointRadius:4,pointBackgroundColor:'#C8A96E',borderWidth:2,fill:true},
+        {label:'Receitas',data:evoR,borderColor:'#4ade80',backgroundColor:'transparent',tension:.4,pointRadius:3,borderWidth:1.5,borderDash:[5,4]},
+        {label:'Despesas',data:evoD,borderColor:'#f87171',backgroundColor:'transparent',tension:.4,pointRadius:3,borderWidth:1.5,borderDash:[5,4]}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{labels:{color:'#888',font:{size:11},boxWidth:10,padding:10}},
+        tooltip:{callbacks:{label:ctx=>' '+ctx.dataset.label+': '+fmtR(ctx.parsed.y)}}
+      },
+      scales:{
+        x:{ticks:{color:'#888',font:{size:10}},grid:{color:'rgba(255,255,255,0.03)'}},
+        y:{ticks:{color:'#888',font:{size:10},callback:v=>'R$'+v.toLocaleString('pt-BR')},grid:{color:'rgba(255,255,255,0.04)'}}
+      }
+    }
+  });
 
   populateDashMetaSel();renderDashMeta();
   renderTodosMeses();
@@ -3219,7 +3523,12 @@ async function renderClientes(){
     const data=await res.json();
     const clientes=data.clientes||[];
 
-    // Filtros — aplicados só nos clientes reais (não equipe)
+    // Separa equipe interna de clientes reais
+    const ROLES_INTERNOS=['socio','admin','dev'];
+    const clientesReais=clientes.filter(c=>!ROLES_INTERNOS.includes(c.role));
+    const equipeInterna=clientes.filter(c=>ROLES_INTERNOS.includes(c.role));
+
+    // Filtros
     const filtroStatus=document.getElementById('cli-filtro-status')?.value||'';
     const filtroPlano=document.getElementById('cli-filtro-plano')?.value||'';
     const busca=(document.getElementById('cli-busca')?.value||'').toLowerCase();
@@ -3231,11 +3540,6 @@ async function renderClientes(){
     if(filtroRole==='equipe') lista=equipeInterna;
     else if(filtroRole==='clientes') lista=clientesReais;
     if(busca) lista=lista.filter(c=>(c.nome+c.email).toLowerCase().includes(busca));
-
-    // Filtra equipe interna das métricas
-    const ROLES_INTERNOS=['socio','admin','dev'];
-    const clientesReais=clientes.filter(c=>!ROLES_INTERNOS.includes(c.role));
-    const equipeInterna=clientes.filter(c=>ROLES_INTERNOS.includes(c.role));
 
     const pagantes=clientesReais.filter(c=>c.origem==='pagante'&&c.status==='ativo');
     const emTrial=clientesReais.filter(c=>c.origem==='trial'&&c.status!=='inativo');
@@ -3305,9 +3609,154 @@ async function desativarCliente(uid){
   }catch(e){alert('Erro de conexão')}
 }
 
-function renderPreview(){ 
-  // Preview não precisa de autenticação — exibe conteúdo estático
-  // Seção já renderizada no HTML
+// ─── PREVIEW DE PLANOS ────────────────────────────────────────────────────────
+const PLANOS_CONFIG = {
+  gratuito: {
+    label: 'Gratuito', preco: 'R$ 0', cor: 'var(--muted)', dias: 30,
+    limites: { lancamentos: 20, investimentos: false, metas: false, cartoes: false, assinaturas: false, recorrentes: false, calendario: false, notas: false, renda: false, 'minha-assinatura': true },
+    edicao: 'nenhuma',
+    desc: 'Acesso por 30 dias com até 20 lançamentos. Sem investimentos, metas ou controles avançados.'
+  },
+  starter: {
+    label: 'Starter', preco: 'R$ 19,90/mês', cor: 'var(--blue)', dias: null,
+    limites: { lancamentos: true, investimentos: true, metas: false, cartoes: false, assinaturas: false, recorrentes: false, calendario: false, notas: false, renda: false, 'minha-assinatura': true },
+    edicao: 'visualizacao',
+    desc: 'Lançamentos ilimitados, gráficos e investimentos simples. Sem metas, objetivos ou controles.'
+  },
+  essencial: {
+    label: 'Essencial', preco: 'R$ 39,90/mês', cor: 'var(--green)', dias: null,
+    limites: { lancamentos: true, investimentos: true, metas: true, cartoes: true, assinaturas: true, recorrentes: true, calendario: true, notas: true, renda: true, 'minha-assinatura': true },
+    edicao: 'observacao',
+    desc: 'Acesso completo ao app. Pode adicionar observações. Sem edição direta pelo consultor.'
+  },
+  consultoria: {
+    label: 'Consultoria', preco: 'R$ 89,90/mês', cor: 'var(--accent)', dias: null,
+    limites: { lancamentos: true, investimentos: true, metas: true, cartoes: true, assinaturas: true, recorrentes: true, calendario: true, notas: true, renda: true, 'minha-assinatura': true },
+    edicao: 'completa',
+    desc: 'Tudo do Essencial + acesso do consultor para edição, reunião mensal e relatório.'
+  }
+};
+
+const NAV_PREVIEW = [
+  {id:'dashboard',         icon:'▦', label:'Dashboard'},
+  {id:'lancamentos',       icon:'+', label:'Lançamentos'},
+  {id:'investimentos',     icon:'⚡',label:'Investimentos'},
+  {id:'historico',         icon:'⏱', label:'Histórico'},
+  {id:'metas',             icon:'◎', label:'Metas'},
+  {id:'objetivos',         icon:'✓', label:'Objetivos'},
+  {id:'renda',             icon:'$', label:'Renda Passiva'},
+  {id:'cartoes',           icon:'▭', label:'Cartões'},
+  {id:'assinaturas',       icon:'◇', label:'Assinaturas'},
+  {id:'recorrentes',       icon:'↻', label:'Recorrentes'},
+  {id:'calendario',        icon:'▦', label:'Calendário'},
+  {id:'notas',             icon:'▤', label:'Notas'},
+  {id:'minha-assinatura',  icon:'💳', label:'Minha Assinatura'},
+];
+
+const PERMS_TABLE = [
+  {label:'Lançamentos ilimitados',   g:true,   s:true,  e:true,  c:true},
+  {label:'Gráficos no Dashboard',    g:'20 lanç',s:true, e:true,  c:true},
+  {label:'Investimentos',            g:false,  s:true,  e:true,  c:true},
+  {label:'Metas financeiras',        g:false,  s:false, e:true,  c:true},
+  {label:'Objetivos',                g:false,  s:false, e:true,  c:true},
+  {label:'Renda Passiva',            g:false,  s:false, e:true,  c:true},
+  {label:'Cartões de crédito',       g:false,  s:false, e:true,  c:true},
+  {label:'Assinaturas',              g:false,  s:false, e:true,  c:true},
+  {label:'Contas recorrentes',       g:false,  s:false, e:true,  c:true},
+  {label:'Calendário financeiro',    g:false,  s:false, e:true,  c:true},
+  {label:'Notas',                    g:false,  s:false, e:true,  c:true},
+  {label:'Adicionar observação',     g:false,  s:false, e:true,  c:true},
+  {label:'Edição pelo consultor',    g:false,  s:false, e:false, c:true},
+  {label:'Reunião mensal',           g:false,  s:false, e:false, c:true},
+  {label:'Relatório mensal',         g:false,  s:false, e:false, c:true},
+  {label:'WhatsApp direto',          g:false,  s:false, e:false, c:true},
+  {label:'Acesso a "Minha Assinatura"', g:true,  s:true,  e:true,  c:true},
+  {label:'Período gratuito (dias)',  g:'30d',  s:false, e:false, c:false},
+];
+
+let _previewPlano = 'consultoria';
+
+function setPreviewPlano(plano){
+  _previewPlano = plano;
+  renderPreview();
+  // Atualiza botões
+  ['gratuito','starter','essencial','consultoria'].forEach(p=>{
+    const btn = document.getElementById('prev-btn-'+p);
+    if(btn) btn.className = 'btn' + (p===plano?' primary':'');
+  });
+}
+
+function renderPreview(){
+  const plano = _previewPlano;
+  const cfg = PLANOS_CONFIG[plano];
+  if(!cfg) return;
+
+  // Badge
+  const badge = document.getElementById('preview-plano-badge');
+  if(badge){ badge.textContent=cfg.label+' — '+cfg.preco; badge.style.color=cfg.cor; badge.style.background=cfg.cor+'18'; badge.style.borderColor=cfg.cor+'44'; }
+
+  // Descrição
+  const desc = document.getElementById('preview-plano-desc');
+  if(desc) desc.innerHTML=`<div class="card" style="border-left:3px solid ${cfg.cor};padding:14px 18px;display:flex;align-items:center;gap:12px">
+    <div style="font-size:24px">${plano==='gratuito'?'🆓':plano==='starter'?'⚡':plano==='essencial'?'✨':'👑'}</div>
+    <div><div style="font-size:14px;font-weight:500;color:${cfg.cor};margin-bottom:3px">Plano ${cfg.label} — ${cfg.preco}</div>
+    <div style="font-size:13px;color:var(--muted)">${cfg.desc}</div>
+    ${cfg.dias?`<div style="font-size:12px;margin-top:4px;color:var(--amber)">⏱ Expira em ${cfg.dias} dias após o cadastro</div>`:''}</div>
+  </div>`;
+
+  // Sidebar simulada
+  const sb = document.getElementById('preview-sidebar');
+  if(sb){
+    sb.innerHTML = NAV_PREVIEW.map(item=>{
+      const visivel = cfg.limites[item.id] !== false;
+      return`<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;margin-bottom:2px;opacity:${visivel?1:.3};${visivel?'':'text-decoration:line-through'}">
+        <span style="font-size:12px;width:16px;text-align:center;color:var(--muted)">${item.icon}</span>
+        <span style="font-size:13px;color:${visivel?'var(--text)':'var(--muted2)'}">${item.label}</span>
+        ${!visivel?`<span style="margin-left:auto;font-size:9px;background:var(--red-s);color:var(--red);padding:1px 5px;border-radius:10px">bloqueado</span>`:''}
+      </div>`;
+    }).join('');
+  }
+
+  // Permissões
+  const perms = document.getElementById('preview-permissions');
+  if(perms){
+    const edicaoLabel = {nenhuma:'❌ Somente visualização',visualizacao:'👁 Somente visualização',observacao:'📝 Pode adicionar observações',completa:'✏️ Edição completa pelo consultor'};
+    const items = [
+      {label:'Lançamentos', ok: cfg.limites.lancamentos, detail: cfg.limites.lancamentos===20?'limite de 20':'ilimitados'},
+      {label:'Investimentos', ok: cfg.limites.investimentos},
+      {label:'Metas e Objetivos', ok: cfg.limites.metas},
+      {label:'Cartões de crédito', ok: cfg.limites.cartoes},
+      {label:'Assinaturas e Recorrentes', ok: cfg.limites.assinaturas},
+      {label:'Calendário e Notas', ok: cfg.limites.calendario},
+      {label:'Renda Passiva', ok: cfg.limites.renda},
+    ];
+    perms.innerHTML = items.map(i=>`
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--surface2);border-radius:6px">
+        <span style="font-size:13px">${i.label}${i.detail?` <span style="font-size:11px;color:var(--muted)">(${i.detail})</span>`:''}</span>
+        <span style="font-size:13px">${i.ok?'✅':'❌'}</span>
+      </div>`).join('')+
+      `<div style="margin-top:10px;padding:10px;background:var(--accent-s);border:1px solid var(--accent);border-radius:8px;font-size:12px;color:var(--text)">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Nível de edição</div>
+        ${edicaoLabel[cfg.edicao]}
+      </div>`;
+  }
+
+  // Tabela comparativa
+  const tbody = document.getElementById('preview-comparativo');
+  if(tbody){
+    const cell = (v,active)=>{
+      if(v===true) return`<td style="text-align:center;padding:9px;${active?'font-weight:600':''}">✅</td>`;
+      if(v===false) return`<td style="text-align:center;padding:9px;color:var(--muted2)">—</td>`;
+      return`<td style="text-align:center;padding:9px;font-size:12px;color:var(--amber)">${v}</td>`;
+    };
+    tbody.innerHTML = PERMS_TABLE.map(row=>`<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:9px 10px;font-size:13px">${row.label}</td>
+      ${cell(row.g, plano==='gratuito')}
+      ${cell(row.s, plano==='starter')}
+      ${cell(row.e, plano==='essencial')}
+      ${cell(row.c, plano==='consultoria')}
+    </tr>`).join('');
+  }
 }
 
 function goToPreview(){ goTo('preview'); }
@@ -3704,6 +4153,22 @@ function abrirConfiguracoes(){
   renderDashConfigCards();
   renderNavConfigCards();
 
+  // Badge do perfil no nav config
+  const badge = document.getElementById('cfg-nav-perfil-badge');
+  if(badge) badge.textContent = cp==='finrossi' ? '💼 FinRossi' : '👤 Pessoal';
+
+  // Contagem de categorias
+  const dCount = document.getElementById('cfg-cats-desp-count');
+  const rCount = document.getElementById('cfg-cats-rec-count');
+  if(dCount){
+    const extras = (pd().categorias?.despesa||[]).length;
+    dCount.textContent = `${CATS_DEFAULT.despesa.length} padrão${extras?` + ${extras} suas`:''}`;
+  }
+  if(rCount){
+    const extras = (pd().categorias?.receita||[]).length;
+    rCount.textContent = `${CATS_DEFAULT.receita.length} padrão${extras?` + ${extras} suas`:''}`;
+  }
+
   atualizarTemaAtivo();
   cfgTab('conta');
   document.getElementById('modal-config').style.display = 'flex';
@@ -3727,16 +4192,72 @@ function cfgTab(tab){
 function carregarFoto(event){
   const file = event.target.files[0];
   if(!file) return;
+  // Comprime para max 200KB antes de salvar
   const reader = new FileReader();
   reader.onload = e => {
-    const dataUrl = e.target.result;
-    localStorage.setItem('fin_foto_'+cp, dataUrl);
-    const preview = document.getElementById('cfg-foto-preview');
-    if(preview) preview.innerHTML=`<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover">`;
-    const avatar = document.getElementById('sb-avatar');
-    if(avatar) avatar.innerHTML=`<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const maxSize = 200;
+      let w = img.width, h = img.height;
+      if(w > h){ h = Math.round(h*maxSize/w); w = maxSize; }
+      else { w = Math.round(w*maxSize/h); h = maxSize; }
+      canvas.width=w; canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+      // Salva
+      localStorage.setItem('fin_foto_'+cp, dataUrl);
+      // Salva no Firebase também
+      if(window._db && window._set && window._ref){
+        try{ window._set(window._ref(window._db,`usuarios/${window._firebaseUser?.uid}/foto`), dataUrl); }catch(e){}
+      }
+      // Atualiza UI
+      aplicarFotoAvatar(dataUrl);
+      const preview = document.getElementById('cfg-foto-preview');
+      if(preview) preview.innerHTML=`<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover">`;
+    };
+    img.src = e.target.result;
   };
   reader.readAsDataURL(file);
+}
+
+function aplicarFotoAvatar(dataUrl){
+  const avatar = document.getElementById('sb-avatar');
+  if(avatar){
+    if(dataUrl){
+      avatar.innerHTML=`<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+    } else {
+      const user = window._firebaseUser;
+      const nome = user?.displayName || localStorage.getItem('fin_nome_display') || 'U';
+      avatar.innerHTML = '';
+      avatar.textContent = nome[0].toUpperCase();
+    }
+  }
+}
+
+function initAvatar(){
+  const foto = localStorage.getItem('fin_foto_'+cp);
+  if(foto){
+    aplicarFotoAvatar(foto);
+  } else if(window._firebaseUser?.uid && window._db && window._ref && window._onValue){
+    // Tenta carregar foto do Firebase
+    try{
+      window._onValue(window._ref(window._db,`usuarios/${window._firebaseUser.uid}/foto`), snap=>{
+        const url = snap.val();
+        if(url){
+          localStorage.setItem('fin_foto_'+cp, url);
+          aplicarFotoAvatar(url);
+          const preview = document.getElementById('cfg-foto-preview');
+          if(preview) preview.innerHTML=`<img src="${url}" style="width:100%;height:100%;object-fit:cover">`;
+        }
+      },{onlyOnce:true});
+    }catch(e){}
+  }
+  // Atualiza nome na sidebar
+  const user = window._firebaseUser;
+  const nome = user?.displayName || localStorage.getItem('fin_nome_display') || user?.email?.split('@')[0] || '';
+  const nomeEl = document.getElementById('user-nome');
+  if(nomeEl && nome) nomeEl.textContent = nome;
 }
 
 // ─── Dashboard Config ─────────────────────────────────────────────────────────
@@ -3804,7 +4325,151 @@ function isDashCardVisible(id){
   return getDashConfig()[id] !== false;
 }
 
-// ─── SIDEBAR COLLAPSE ────────────────────────────────────────────────────────
+// ─── MINHA ASSINATURA (cliente) ───────────────────────────────────────────────
+async function renderMinhaAssinatura(){
+  const el = document.getElementById('assinatura-content');
+  if(!el) return;
+
+  el.innerHTML=`<div style="text-align:center;padding:60px 0;color:var(--muted)"><div style="font-size:32px;margin-bottom:12px">⏳</div><div>Carregando...</div></div>`;
+
+  const uid = window._firebaseUser?.uid;
+  if(!uid){ el.innerHTML='<p class="empty">Usuário não autenticado.</p>'; return; }
+
+  // Busca dados do usuário no Firebase
+  let dadosUsuario = null;
+  try{
+    if(window._db && window._ref && window._onValue){
+      dadosUsuario = await new Promise(res=>{
+        window._onValue(window._ref(window._db,`usuarios/${uid}`), snap=>res(snap.val()), {onlyOnce:true});
+      });
+    }
+  }catch(e){ console.warn('renderMinhaAssinatura:', e); }
+
+  const PLANO_INFO = {
+    gratuito:    {label:'Gratuito',    cor:'var(--muted)',   icone:'🆓', preco:'R$ 0,00',    desc:'Acesso por 30 dias, até 20 lançamentos'},
+    starter:     {label:'Starter',     cor:'var(--blue)',    icone:'⚡', preco:'R$ 19,90/mês',desc:'Lançamentos ilimitados + investimentos'},
+    essencial:   {label:'Essencial',   cor:'var(--green)',   icone:'✨', preco:'R$ 39,90/mês',desc:'Acesso completo ao app'},
+    consultoria: {label:'Consultoria', cor:'var(--accent)',  icone:'👑', preco:'R$ 89,90/mês',desc:'Tudo + consultoria mensal e suporte'},
+  };
+
+  const STATUS_INFO = {
+    ativo:   {label:'Ativo',    cor:'var(--green)',  bg:'var(--green-s)',  icone:'✅'},
+    trial:   {label:'Trial',   cor:'var(--amber)',  bg:'var(--amber-s)',  icone:'⏱'},
+    inativo: {label:'Inativo', cor:'var(--red)',    bg:'var(--red-s)',    icone:'❌'},
+  };
+
+  const plano   = dadosUsuario?.plano  || 'gratuito';
+  const status  = dadosUsuario?.status || 'trial';
+  const origem  = dadosUsuario?.origem || 'trial';
+  const dataCad = dadosUsuario?.dataCadastro?.slice(0,10) || '—';
+  const trialFim = dadosUsuario?.trialFim?.slice(0,10);
+
+  const pi = PLANO_INFO[plano]  || PLANO_INFO.gratuito;
+  const si = STATUS_INFO[status] || STATUS_INFO.inativo;
+
+  // Calcula dias restantes no trial
+  let trialInfo = '';
+  if(status==='trial' && trialFim){
+    const dias = Math.ceil((new Date(trialFim)-new Date()) / 86400000);
+    trialInfo = dias > 0
+      ? `<div style="margin-top:8px;font-size:13px;color:var(--amber)">⏱ ${dias} dia${dias!==1?'s':''} restante${dias!==1?'s':''} no período gratuito</div>`
+      : `<div style="margin-top:8px;font-size:13px;color:var(--red)">⚠ Período gratuito encerrado — escolha um plano abaixo</div>`;
+  }
+
+  el.innerHTML = `
+    <!-- Card principal do plano -->
+    <div class="card card-full" style="margin-bottom:20px;border-color:${pi.cor}44;background:linear-gradient(135deg,${pi.cor}08,transparent)">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div style="display:flex;align-items:center;gap:16px">
+          <div style="font-size:40px">${pi.icone}</div>
+          <div>
+            <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">Plano atual</div>
+            <div style="font-size:22px;font-family:'DM Serif Display',serif;color:${pi.cor}">${pi.label}</div>
+            <div style="font-size:13px;color:var(--muted);margin-top:2px">${pi.desc}</div>
+            ${trialInfo}
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:20px;font-weight:600;color:${pi.cor}">${pi.preco}</div>
+          <div style="margin-top:8px;display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;background:${si.bg};color:${si.cor};font-size:12px;font-weight:500">
+            ${si.icone} ${si.label}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Informações da conta -->
+    <div class="grid2" style="margin-bottom:20px">
+      <div class="card">
+        <h3><span class="dot" style="background:var(--blue)"></span>Informações da conta</h3>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px">
+          <div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 0;border-bottom:1px solid var(--border)">
+            <span style="color:var(--muted)">Nome</span>
+            <span>${window._firebaseUser?.displayName || localStorage.getItem('fin_nome_display') || '—'}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 0;border-bottom:1px solid var(--border)">
+            <span style="color:var(--muted)">Email</span>
+            <span>${window._firebaseUser?.email || '—'}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 0;border-bottom:1px solid var(--border)">
+            <span style="color:var(--muted)">Cadastro</span>
+            <span>${dataCad}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 0">
+            <span style="color:var(--muted)">Origem</span>
+            <span>${origem==='pagante'?'💳 Pagante':origem==='trial'?'⏱ Trial':'🎁 Teste gratuito'}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="dot" style="background:var(--green)"></span>O que está incluído</h3>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px">
+          ${[
+            ['Lançamentos', plano==='gratuito'?'Até 20':'Ilimitados', true],
+            ['Investimentos', plano==='gratuito'?false:true, plano!=='gratuito'],
+            ['Metas e Objetivos', ['essencial','consultoria'].includes(plano), ['essencial','consultoria'].includes(plano)],
+            ['Cartões e Assinaturas', ['essencial','consultoria'].includes(plano), ['essencial','consultoria'].includes(plano)],
+            ['Calendário e Notas', ['essencial','consultoria'].includes(plano), ['essencial','consultoria'].includes(plano)],
+            ['Consultoria mensal', plano==='consultoria', plano==='consultoria'],
+            ['Suporte WhatsApp', plano==='consultoria', plano==='consultoria'],
+          ].map(([label, detalhe, ok])=>`
+            <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px">
+              <span style="color:${ok?'var(--text)':'var(--muted2)'}">${label}</span>
+              <span>${ok?(typeof detalhe==='string'?`<span style="color:var(--muted);font-size:12px">${detalhe}</span>`:'✅'):'—'}</span>
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <!-- Upgrade / Suporte -->
+    ${plano!=='consultoria'?`
+    <div class="card card-full" style="margin-bottom:20px;border-color:rgba(200,169,110,0.2);background:rgba(200,169,110,0.04)">
+      <h3><span class="dot" style="background:var(--accent)"></span>Quer mais recursos?</h3>
+      <p style="font-size:13px;color:var(--muted);margin:8px 0 16px;line-height:1.7">
+        Faça upgrade do seu plano para desbloquear metas, cartões, calendário financeiro, 
+        consultoria mensal e muito mais.
+      </p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        ${plano==='gratuito'||plano==='starter'?`<a href="https://lucasrossi2100-boop.github.io/financeiro/landing.html#planos" target="_blank" class="btn primary" style="text-decoration:none">⚡ Ver planos disponíveis</a>`:''}
+        <a href="mailto:lucasrossi2100@gmail.com?subject=Upgrade de plano FinRossi" class="btn" style="text-decoration:none">✉ Falar com suporte</a>
+      </div>
+    </div>`:''}
+
+    <!-- Suporte -->
+    <div class="card card-full">
+      <h3><span class="dot" style="background:var(--purple)"></span>Precisa de ajuda?</h3>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+        <a href="mailto:lucasrossi2100@gmail.com?subject=Suporte FinRossi" class="btn" style="text-decoration:none;font-size:13px">✉ Enviar e-mail</a>
+        <a href="https://lucasrossi2100-boop.github.io/financeiro/legal/termos.html" target="_blank" class="btn" style="text-decoration:none;font-size:13px">📄 Termos de Uso</a>
+        <a href="https://lucasrossi2100-boop.github.io/financeiro/legal/privacidade.html" target="_blank" class="btn" style="text-decoration:none;font-size:13px">🔒 Privacidade</a>
+        ${plano==='consultoria'?`<a href="mailto:lucasrossi2100@gmail.com?subject=Agendamento reunião FinRossi" class="btn primary" style="text-decoration:none;font-size:13px">📅 Agendar reunião</a>`:''}
+      </div>
+    </div>
+  `;
+}
+
+
 function toggleNavGroup(group){
   const items = document.getElementById('sb-group-'+group);
   const arrow = document.getElementById('sb-arrow-'+group);
@@ -3947,10 +4612,17 @@ async function salvarNome(){
 
   // Atualiza UI
   const inicial = nome[0].toUpperCase();
-  document.getElementById('cfg-avatar').textContent = inicial;
-  document.getElementById('sb-avatar').textContent = inicial;
   document.getElementById('cfg-nome-display').textContent = nome;
   document.getElementById('user-nome').textContent = nome;
+  // Só atualiza avatar com inicial se não tiver foto
+  const fotoSalva = localStorage.getItem('fin_foto_'+cp);
+  if(!fotoSalva){
+    document.getElementById('sb-avatar').textContent = inicial;
+    document.getElementById('cfg-avatar')?.textContent && (document.getElementById('cfg-avatar').textContent = inicial);
+  }
+  // Atualiza preview no modal
+  const preview = document.getElementById('cfg-foto-preview');
+  if(preview && !fotoSalva) preview.textContent = inicial;
 
   msg.textContent = '✓ Nome atualizado!';
   msg.style.color = 'var(--green)';
@@ -4015,12 +4687,13 @@ async function fazerLogout(){
 }
 
 // ─── PWA SERVICE WORKER ──────────────────────────────────────────────────────
-// sw.js desativado temporariamente
-// if ('serviceWorker' in navigator) {
-//   window.addEventListener('load', () => {
-//     navigator.serviceWorker.register('sw.js').catch(e => console.log('SW erro:', e));
-//   });
-// }
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/financeiro/sw.js')
+      .then(r => console.log('[SW] registrado:', r.scope))
+      .catch(e => console.log('[SW] erro:', e));
+  });
+}
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 initTema();
