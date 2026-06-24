@@ -185,6 +185,30 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .page-title h2{font-family:'DM Serif Display',serif;font-size:28px;letter-spacing:-.5px}
 .page-title p{font-size:12px;color:var(--muted);margin-top:4px}
 .header-actions{display:flex;gap:8px;flex-wrap:wrap}
+/* ── DATE PICKER CUSTOMIZADO ── */
+.dp-wrap{position:relative;display:inline-block;width:100%}
+.dp-input{background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius-sm);padding:8px 36px 8px 11px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;width:100%;cursor:pointer;transition:border-color .15s;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dp-input.open{border-color:var(--accent)}
+.dp-icon{position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted);font-size:14px}
+.dp-popup{position:absolute;top:calc(100% + 6px);left:0;z-index:9999;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);box-shadow:0 8px 32px rgba(0,0,0,.5);padding:14px;width:268px;display:none}
+.dp-popup.open{display:block}
+.dp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.dp-month-label{font-size:14px;font-weight:500;color:var(--text);padding:3px 8px;border-radius:6px}
+.dp-nav{display:flex;gap:4px}
+.dp-nav button{background:none;border:1px solid var(--border2);color:var(--muted);border-radius:6px;width:26px;height:26px;cursor:pointer;font-size:13px;transition:all .15s;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif}
+.dp-nav button:hover{border-color:var(--accent);color:var(--accent)}
+.dp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.dp-day-name{text-align:center;font-size:10px;color:var(--muted);padding:4px 0;text-transform:uppercase;letter-spacing:.3px}
+.dp-day{text-align:center;font-size:12px;padding:7px 2px;border-radius:6px;cursor:pointer;color:var(--text);border:none;background:none;font-family:'DM Sans',sans-serif;transition:all .15s;width:100%}
+.dp-day:hover:not(.selected){background:var(--surface3)}
+.dp-day.other-month{color:var(--muted2)}
+.dp-day.today{color:var(--accent);font-weight:600;position:relative}
+.dp-day.today::after{content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--accent)}
+.dp-day.selected{background:var(--accent)!important;color:#0f0f0f!important;font-weight:600}
+.dp-footer{display:flex;justify-content:space-between;margin-top:10px;padding-top:8px;border-top:1px solid var(--border)}
+.dp-footer button{background:none;border:none;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;padding:3px 8px;border-radius:4px;transition:all .15s}
+.dp-clear{color:var(--muted)}.dp-clear:hover{color:var(--red);background:var(--red-s)}
+.dp-today-btn{color:var(--accent)}.dp-today-btn:hover{background:var(--accent-s)}
 .section-hidden{display:none!important}
 
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px}
@@ -588,16 +612,30 @@ tbody tr:hover td{background:var(--surface2)}
       <h3><span class="dot" style="background:var(--green)"></span>Nova receita</h3>
       <div class="form-row tri">
         <div class="field"><label>Descrição</label><input id="r-desc" type="text" placeholder="Salário, Freelance..."></div>
-        <div class="field"><label>Valor (R$)</label><input id="r-val" type="number" placeholder="0,00" min="0" step="0.01"></div>
-        <div class="field"><label>Data</label><input id="r-data" type="date"></div>
+        <div class="field"><label>Valor (R$)</label><input id="r-val" type="text" inputmode="decimal" placeholder="0,00" oninput="maskCurrency(this)" class="currency-input"></div>
+        <div class="field"><label>Data</label>
+          <div class="dp-wrap" id="dp-wrap-r-data">
+            <button type="button" class="dp-input" id="dp-btn-r-data" onclick="dpToggle('r-data')"></button>
+            <span class="dp-icon">📅</span>
+            <input type="hidden" id="r-data">
+            <div class="dp-popup" id="dp-popup-r-data"></div>
+          </div>
+        </div>
       </div>
       <div class="form-row">
-        <div class="field">
-          <label style="display:flex;align-items:center;justify-content:space-between">
-            Categoria
-            <button type="button" onclick="abrirGerenciarCats('receita')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;padding:0;display:flex;align-items:center;gap:3px" title="Gerenciar categorias">⚙ editar</button>
+        <div class="field"><label>Categoria
+            <button type="button" onclick="abrirGerenciarCats('receita')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;padding:0;display:flex;align-items:center;gap:3px;float:right" title="Gerenciar categorias">⚙ editar</button>
           </label>
           <select id="r-cat"></select>
+        </div>
+        <div class="field"><label>Método de recebimento</label>
+          <select id="r-metodo">
+            <option value="pix">Pix</option>
+            <option value="transferencia">Transferência</option>
+            <option value="dinheiro">Dinheiro</option>
+            <option value="deposito">Depósito</option>
+            <option value="outro">Outro</option>
+          </select>
         </div>
         <div class="field"><label>Observação</label><input id="r-obs" type="text" placeholder="Opcional"></div>
       </div>
@@ -610,8 +648,15 @@ tbody tr:hover td{background:var(--surface2)}
       <h3><span class="dot" style="background:var(--red)"></span>Nova despesa</h3>
       <div class="form-row tri">
         <div class="field"><label>Descrição</label><input id="d-desc" type="text" placeholder="Aluguel, Farmácia..."></div>
-        <div class="field"><label>Valor total (R$)</label><input id="d-val" type="number" placeholder="0,00" min="0" step="0.01" oninput="calcParcela()"></div>
-        <div class="field"><label>Data 1ª parcela</label><input id="d-data" type="date"></div>
+        <div class="field"><label>Valor total (R$)</label><input id="d-val" type="text" inputmode="decimal" placeholder="0,00" oninput="maskCurrency(this);calcParcela()" class="currency-input"></div>
+        <div class="field"><label>Data 1ª parcela</label>
+          <div class="dp-wrap" id="dp-wrap-d-data">
+            <button type="button" class="dp-input" id="dp-btn-d-data" onclick="dpToggle('d-data')"></button>
+            <span class="dp-icon">📅</span>
+            <input type="hidden" id="d-data">
+            <div class="dp-popup" id="dp-popup-d-data"></div>
+          </div>
+        </div>
       </div>
       <div class="form-row quad">
         <div class="field">
@@ -621,7 +666,18 @@ tbody tr:hover td{background:var(--surface2)}
           </label>
           <select id="d-cat"></select>
         </div>
-        <div class="field"><label>Tipo de pagamento</label>
+        <div class="field"><label>Método de pagamento</label>
+          <select id="d-metodo" onchange="toggleMetodoPagamento()">
+            <option value="pix">Pix</option>
+            <option value="debito">Débito</option>
+            <option value="credito">Crédito</option>
+            <option value="dinheiro">Dinheiro</option>
+            <option value="boleto">Boleto</option>
+            <option value="transferencia">Transferência</option>
+            <option value="outro">Outro</option>
+          </select>
+        </div>
+        <div class="field" id="d-parcelado-wrap"><label>Pagamento</label>
           <select id="d-parcelado" onchange="toggleParcelado()">
             <option value="avista">À vista</option>
             <option value="parcelado">Parcelado</option>
@@ -651,13 +707,20 @@ tbody tr:hover td{background:var(--surface2)}
       <h3><span class="dot" style="background:var(--blue)"></span>Novo investimento</h3>
       <div class="form-row quad">
         <div class="field"><label>Nome</label><input id="i-nome" type="text" placeholder="Nubank Caixinha"></div>
-        <div class="field"><label>Valor (R$)</label><input id="i-val" type="number" placeholder="0,00" min="0" step="0.01"></div>
+        <div class="field"><label>Valor (R$)</label><input id="i-val" type="text" inputmode="decimal" placeholder="0,00" oninput="maskCurrency(this)" class="currency-input"></div>
         <div class="field"><label>Tipo</label><select id="i-tipo"><option>Renda Fixa — CDB</option><option>Renda Fixa — Tesouro Direto</option><option>Renda Fixa — LCI/LCA</option><option>Renda Fixa — Poupança</option><option>Renda Fixa — CDI</option><option>Renda Variável — Ações</option><option>Renda Variável — FII</option><option>Criptomoedas</option><option>Outros</option></select></div>
         <div class="field"><label>Rentabilidade</label><input id="i-rent" type="text" placeholder="115% CDI"></div>
       </div>
       <div class="form-row">
         <div class="field"><label>Banco / Plataforma</label><input id="i-banco" type="text" placeholder="Nubank, Inter..."></div>
-        <div class="field"><label>Data</label><input id="i-data" type="date"></div>
+        <div class="field"><label>Data</label>
+          <div class="dp-wrap" id="dp-wrap-i-data">
+            <button type="button" class="dp-input" id="dp-btn-i-data" onclick="dpToggle('i-data')"></button>
+            <span class="dp-icon">📅</span>
+            <input type="hidden" id="i-data">
+            <div class="dp-popup" id="dp-popup-i-data"></div>
+          </div>
+        </div>
       </div>
       <div class="btn-row"><button class="btn primary" onclick="addInv()">Adicionar investimento</button><button class="btn" onclick="clearForm('i')">Limpar</button></div>
       <div class="msg" id="msg-i"></div>
@@ -1344,6 +1407,50 @@ tbody tr:hover td{background:var(--surface2)}
 
 
 
+<!-- MODAL EDITAR LANÇAMENTO -->
+<div class="modal-overlay" id="modal-editar-lanc">
+  <div class="modal">
+    <h3 id="mel-title">Editar lançamento</h3>
+    <input type="hidden" id="mel-id">
+    <div class="form-row">
+      <div class="field"><label>Descrição</label><input id="mel-desc" type="text" placeholder="Descrição"></div>
+      <div class="field"><label>Valor (R$)</label><input id="mel-val" type="text" inputmode="decimal" placeholder="0,00" oninput="maskCurrency(this)" class="currency-input"></div>
+    </div>
+    <div class="form-row">
+      <div class="field"><label>Data</label>
+        <div class="dp-wrap" id="dp-wrap-mel-data">
+          <button type="button" class="dp-input" id="dp-btn-mel-data" onclick="dpToggle('mel-data')"></button>
+          <span class="dp-icon">📅</span>
+          <input type="hidden" id="mel-data">
+          <div class="dp-popup" id="dp-popup-mel-data"></div>
+        </div>
+      </div>
+      <div class="field"><label>Categoria</label><select id="mel-cat"></select></div>
+    </div>
+    <div class="form-row">
+      <div class="field"><label>Método de pagamento</label>
+        <select id="mel-metodo">
+          <option value="">—</option>
+          <option value="pix">Pix</option>
+          <option value="debito">Débito</option>
+          <option value="credito">Crédito</option>
+          <option value="dinheiro">Dinheiro</option>
+          <option value="boleto">Boleto</option>
+          <option value="transferencia">Transferência</option>
+          <option value="deposito">Depósito</option>
+          <option value="outro">Outro</option>
+        </select>
+      </div>
+      <div class="field"><label>Observação</label><input id="mel-obs" type="text" placeholder="Opcional"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn primary" onclick="salvarEdicaoLanc()">Salvar</button>
+      <button class="btn" onclick="closeModal('modal-editar-lanc')">Cancelar</button>
+    </div>
+    <div class="msg" id="msg-mel"></div>
+  </div>
+</div>
+
 <!-- MODAL ASSINATURA -->
 <div class="modal-overlay" id="modal-assin">
   <div class="modal">
@@ -1568,7 +1675,14 @@ tbody tr:hover td{background:var(--surface2)}
     <div class="form-row tri">
       <div class="field"><label>Período</label><select id="obj-periodo"><option value="hoje">Hoje</option><option value="semana">Esta semana</option><option value="mes">Este mês</option></select></div>
       <div class="field"><label>Prioridade</label><select id="obj-prioridade"><option value="alta">Alta</option><option value="media">Média</option><option value="baixa">Baixa</option></select></div>
-      <div class="field"><label>Data limite</label><input id="obj-data" type="date"></div>
+      <div class="field"><label>Data limite</label>
+        <div class="dp-wrap" id="dp-wrap-obj-data">
+          <button type="button" class="dp-input" id="dp-btn-obj-data" onclick="dpToggle('obj-data')"></button>
+          <span class="dp-icon">📅</span>
+          <input type="hidden" id="obj-data">
+          <div class="dp-popup" id="dp-popup-obj-data"></div>
+        </div>
+      </div>
     </div>
     <div class="btn-row"><button class="btn primary" onclick="salvarObj()">Salvar</button><button class="btn" onclick="closeModal('modal-obj')">Cancelar</button></div>
     <div class="msg" id="msg-obj"></div>
@@ -2425,6 +2539,41 @@ function switchTab(t){
   document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',['receita','despesa','investimento'][i]===t));
   document.querySelectorAll('.tab-pane').forEach(p=>p.classList.toggle('active',p.id==='tab-'+t));
 }
+// ─── MÁSCARA DE MOEDA ─────────────────────────────────────────────────────────
+function maskCurrency(el){
+  let v = el.value.replace(/\D/g,'');
+  if(!v){ el.value=''; return; }
+  v = (parseInt(v)/100).toFixed(2);
+  el.value = parseFloat(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function parseCurrency(el){
+  if(!el) return 0;
+  const v = typeof el==='string' ? el : el.value;
+  return parseFloat(v.replace(/\./g,'').replace(',','.')) || 0;
+}
+
+function toggleMetodoPagamento(){
+  const metodo = document.getElementById('d-metodo')?.value;
+  const cartaoRow = document.querySelector('#d-cartao')?.closest('.form-row');
+  // Se método é crédito, seleciona cartão automaticamente e mostra parcelado
+  if(metodo==='credito'){
+    if(cartaoRow) cartaoRow.style.display='';
+  } else {
+    // Limpa seleção de cartão se não é crédito
+    const cartaoSel = document.getElementById('d-cartao');
+    if(cartaoSel) cartaoSel.value='';
+    if(cartaoRow) cartaoRow.style.display='';
+  }
+  // Parcelado só faz sentido em crédito
+  const parcWrap = document.getElementById('d-parcelado-wrap');
+  if(parcWrap) parcWrap.style.display = metodo==='credito' ? '' : 'none';
+  if(metodo!=='credito'){
+    const parc = document.getElementById('d-parcelado');
+    if(parc) parc.value='avista';
+    toggleParcelado();
+  }
+}
+
 function toggleParcelado(){
   const isParc=document.getElementById('d-parcelado').value==='parcelado';
   document.getElementById('d-parcelas-wrap').style.display=isParc?'flex':'none';
@@ -2433,7 +2582,7 @@ function toggleParcelado(){
   calcParcela();
 }
 function calcParcela(){
-  const val=parseFloat(document.getElementById('d-val').value)||0;
+  const val=parseCurrency(document.getElementById('d-val'));
   const n=parseInt(document.getElementById('d-parcelas').value)||0;
   const isParc=document.getElementById('d-parcelado').value==='parcelado';
   if(!isParc||!val||n<2){document.getElementById('d-parcela-preview').style.display='none';return}
@@ -2445,10 +2594,11 @@ function calcParcela(){
 function addLanc(tipo){
   const p=tipo==='receita'?'r':'d';
   const desc=document.getElementById(p+'-desc').value.trim();
-  const val=parseFloat(document.getElementById(p+'-val').value);
+  const val=parseCurrency(document.getElementById(p+'-val'));
   const data=document.getElementById(p+'-data').value||hoje();
   const cat=document.getElementById(p+'-cat').value;
   const obs=document.getElementById(p+'-obs').value.trim();
+  const metodo=document.getElementById(p+'-metodo')?.value||'';
   if(!desc){showMsg('msg-'+p,'Informe a descrição','err');return}
   if(!val||val<=0){showMsg('msg-'+p,'Valor inválido','err');return}
 
@@ -2464,29 +2614,65 @@ function addLanc(tipo){
       for(let i=0;i<nParc;i++){
         const d=new Date(yr,mo-1+i,dy);
         const dataParc=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-        pd().lancs.push({id:uid(),tipo,desc,val:valParc,data:dataParc,cat,obs,parcelado:true,parcela:i+1,totalParcelas:nParc,valorTotal:val,groupId:gid,cartaoId});
+        pd().lancs.push({id:uid(),tipo,desc,val:valParc,data:dataParc,cat,obs,metodo,parcelado:true,parcela:i+1,totalParcelas:nParc,valorTotal:val,groupId:gid,cartaoId});
       }
       saveCollection('lancs');clearForm(p);showMsg('msg-d',`${nParc} parcelas de ${fmtR(valParc)} adicionadas!`,'ok');refreshDash();renderHistorico();
       return;
     }
-    pd().lancs.push({id:uid(),tipo,desc,val,data,cat,obs,cartaoId});
+    pd().lancs.push({id:uid(),tipo,desc,val,data,cat,obs,metodo,cartaoId});
     saveCollection('lancs');clearForm(p);showMsg('msg-d','Despesa adicionada!','ok');refreshDash();renderHistorico();
     return;
   }
 
-  pd().lancs.push({id:uid(),tipo,desc,val,data,cat,obs});
-  saveCollection('lancs');clearForm(p);showMsg('msg-'+p,tipo==='receita'?'Receita adicionada!':'Despesa adicionada!','ok');refreshDash();
+  pd().lancs.push({id:uid(),tipo,desc,val,data,cat,obs,metodo});
+  saveCollection('lancs');clearForm(p);showMsg('msg-'+p,tipo==='receita'?'Receita adicionada!':'Despesa adicionada!','ok');refreshDash();renderHistorico();
 }
 function addInv(){
   const nome=document.getElementById('i-nome').value.trim();
-  const val=parseFloat(document.getElementById('i-val').value);
+  const val=parseCurrency(document.getElementById('i-val'));
   if(!nome){showMsg('msg-i','Informe o nome','err');return}
   if(!val||val<=0){showMsg('msg-i','Valor inválido','err');return}
   pd().invs.push({id:uid(),nome,val,tipo:document.getElementById('i-tipo').value,rent:document.getElementById('i-rent').value.trim(),banco:document.getElementById('i-banco').value.trim(),data:document.getElementById('i-data').value||hoje()});
   saveCollection('invs');clearForm('i');showMsg('msg-i','Investimento adicionado!','ok');renderInvs();refreshDash();
 }
-async function remLanc(id){
-  pd().lancs=pd().lancs.filter(l=>l.id!==id);
+function editarLanc(id){
+  const l=pd().lancs.find(x=>x.id===id);
+  if(!l) return;
+  document.getElementById('mel-id').value=id;
+  document.getElementById('mel-desc').value=l.desc||'';
+  // Valor formatado
+  const valEl=document.getElementById('mel-val');
+  valEl.value=l.val.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  dpInit('mel-data', l.data||hoje());
+  // Popula categorias
+  const cats=getCats(l.tipo);
+  const catSel=document.getElementById('mel-cat');
+  catSel.innerHTML=cats.map(c=>`<option value="${c}" ${c===l.cat?'selected':''}>${c}</option>`).join('');
+  document.getElementById('mel-metodo').value=l.metodo||'';
+  document.getElementById('mel-obs').value=l.obs||'';
+  document.getElementById('msg-mel').textContent='';
+  document.getElementById('modal-editar-lanc').classList.add('open');
+}
+
+async function salvarEdicaoLanc(){
+  const id=document.getElementById('mel-id').value;
+  const desc=document.getElementById('mel-desc').value.trim();
+  const val=parseCurrency(document.getElementById('mel-val'));
+  const data=document.getElementById('mel-data').value||hoje();
+  const cat=document.getElementById('mel-cat').value;
+  const metodo=document.getElementById('mel-metodo').value;
+  const obs=document.getElementById('mel-obs').value.trim();
+  if(!desc){showMsg('msg-mel','Informe a descrição','err');return}
+  if(!val||val<=0){showMsg('msg-mel','Valor inválido','err');return}
+  const idx=pd().lancs.findIndex(x=>x.id===id);
+  if(idx<0){showMsg('msg-mel','Lançamento não encontrado','err');return}
+  pd().lancs[idx]={...pd().lancs[idx],desc,val,data,cat,metodo,obs};
+  await saveCollection('lancs');
+  refreshDash();renderHistorico();
+  closeModal('modal-editar-lanc');
+}
+
+async function remLanc(id){  pd().lancs=pd().lancs.filter(l=>l.id!==id);
   refreshDash();
   renderHistorico();
   saveCollection('lancs');
@@ -2507,14 +2693,14 @@ async function limparTudo(){
 function clearForm(p){
   if(p==='r'||p==='d'){
     ['desc','val','obs'].forEach(f=>{const el=document.getElementById(p+'-'+f);if(el)el.value=''});
-    const dt=document.getElementById(p+'-data');if(dt)dt.value=hoje();
+    dpInit(p+'-data', hoje());
     if(p==='d'){
       const sel=document.getElementById('d-parcelado');if(sel)sel.value='avista';
       const pw=document.getElementById('d-parcelas-wrap');if(pw)pw.style.display='none';
       const pp=document.getElementById('d-parcela-preview');if(pp)pp.style.display='none';
       const pn=document.getElementById('d-parcelas');if(pn)pn.value='';
     }
-  } else{['nome','val','rent','banco'].forEach(f=>{const el=document.getElementById('i-'+f);if(el)el.value=''});const dt=document.getElementById('i-data');if(dt)dt.value=hoje()}
+  } else{['nome','val','rent','banco'].forEach(f=>{const el=document.getElementById('i-'+f);if(el)el.value=''});dpInit('i-data',hoje());}
 }
 
 // ─── INVESTIMENTOS ────────────────────────────────────────────────────────────
@@ -2560,9 +2746,22 @@ function renderHistorico(){
   if(filtroCat)lista=lista.filter(l=>l.cat===filtroCat);
   const tbody=document.getElementById('h-tbody');
   if(!lista.length){tbody.innerHTML='<tr><td colspan="7"><p class="empty">Nenhum lançamento</p></td></tr>';return}
+  const METODO_ICON={'pix':'Pix','debito':'Déb','credito':'Cré','dinheiro':'Din','boleto':'Bol','transferencia':'Trf','deposito':'Dep','outro':'Outro','':'—'};
   tbody.innerHTML=lista.map(l=>{
     const parcTag=l.parcelado?`<span style="font-size:10px;background:var(--amber-s);color:var(--amber);padding:1px 6px;border-radius:10px;margin-left:4px">${l.parcela}/${l.totalParcelas}</span>`:'';
-    return`<tr><td style="color:var(--muted);font-size:12px">${l.data.split('-').reverse().join('/')}</td><td><span class="badge ${l.tipo}">${l.tipo.charAt(0).toUpperCase()+l.tipo.slice(1)}</span></td><td style="font-weight:500">${l.desc}${parcTag}</td><td style="color:var(--muted);font-size:12px">${l.cat}</td><td style="text-align:right;font-weight:500;color:${l.tipo==='receita'?'var(--green)':'var(--red)'}">${fmtR(l.val)}</td><td style="color:var(--muted);font-size:12px">${l.obs||'—'}</td><td><button class="btn danger xs" onclick="remLanc('${l.id}')">✕</button></td></tr>`;
+    const metTag=l.metodo?`<span style="font-size:10px;background:var(--surface3);color:var(--muted);padding:1px 6px;border-radius:10px;margin-left:4px">${METODO_ICON[l.metodo]||l.metodo}</span>`:'';
+    return`<tr>
+      <td style="color:var(--muted);font-size:12px">${l.data.split('-').reverse().join('/')}</td>
+      <td><span class="badge ${l.tipo}">${l.tipo.charAt(0).toUpperCase()+l.tipo.slice(1)}</span></td>
+      <td style="font-weight:500">${l.desc}${parcTag}${metTag}</td>
+      <td style="color:var(--muted);font-size:12px">${l.cat}</td>
+      <td style="text-align:right;font-weight:500;color:${l.tipo==='receita'?'var(--green)':'var(--red)'}">${fmtR(l.val)}</td>
+      <td style="color:var(--muted);font-size:12px">${l.obs||'—'}</td>
+      <td style="display:flex;gap:4px">
+        <button class="btn xs" onclick="editarLanc('${l.id}')" title="Editar">✏</button>
+        <button class="btn danger xs" onclick="remLanc('${l.id}')">✕</button>
+      </td>
+    </tr>`;
   }).join('');
 }
 
@@ -2705,8 +2904,8 @@ function toggleObjDash(){
 function openModalObj(id){
   document.getElementById('mo-title').textContent=id?'Editar objetivo':'Novo objetivo';
   document.getElementById('obj-edit-id').value=id||'';
-  if(id){const o=pd().objs.find(x=>x.id===id);if(o){document.getElementById('obj-desc').value=o.desc;document.getElementById('obj-periodo').value=o.periodo;document.getElementById('obj-prioridade').value=o.prioridade;document.getElementById('obj-data').value=o.data||''}}
-  else{document.getElementById('obj-desc').value='';document.getElementById('obj-data').value=hoje()}
+  if(id){const o=pd().objs.find(x=>x.id===id);if(o){document.getElementById('obj-desc').value=o.desc;document.getElementById('obj-periodo').value=o.periodo;document.getElementById('obj-prioridade').value=o.prioridade;dpSetValue('obj-data',o.data||hoje())}}
+  else{document.getElementById('obj-desc').value='';dpInit('obj-data',hoje())}
   document.getElementById('modal-obj').classList.add('open');
 }
 async function salvarObj(){
@@ -4452,7 +4651,7 @@ async function renderMinhaAssinatura(){
       </p>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
         ${plano==='gratuito'||plano==='starter'?`<a href="https://lucasrossi2100-boop.github.io/financeiro/landing.html#planos" target="_blank" class="btn primary" style="text-decoration:none">⚡ Ver planos disponíveis</a>`:''}
-        <a href="mailto:lucasrossi2100@gmail.com?subject=Upgrade de plano FinRossi" class="btn" style="text-decoration:none">✉ Falar com suporte</a>
+        <a href="mailto:finrossiapp@gmail.com?subject=Upgrade de plano FinRossi" class="btn" style="text-decoration:none">✉ Falar com suporte</a>
       </div>
     </div>`:''}
 
@@ -4460,10 +4659,10 @@ async function renderMinhaAssinatura(){
     <div class="card card-full">
       <h3><span class="dot" style="background:var(--purple)"></span>Precisa de ajuda?</h3>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
-        <a href="mailto:lucasrossi2100@gmail.com?subject=Suporte FinRossi" class="btn" style="text-decoration:none;font-size:13px">✉ Enviar e-mail</a>
+        <a href="mailto:finrossiapp@gmail.com?subject=Suporte FinRossi" class="btn" style="text-decoration:none;font-size:13px">✉ Enviar e-mail</a>
         <a href="https://lucasrossi2100-boop.github.io/financeiro/legal/termos.html" target="_blank" class="btn" style="text-decoration:none;font-size:13px">📄 Termos de Uso</a>
         <a href="https://lucasrossi2100-boop.github.io/financeiro/legal/privacidade.html" target="_blank" class="btn" style="text-decoration:none;font-size:13px">🔒 Privacidade</a>
-        ${plano==='consultoria'?`<a href="mailto:lucasrossi2100@gmail.com?subject=Agendamento reunião FinRossi" class="btn primary" style="text-decoration:none;font-size:13px">📅 Agendar reunião</a>`:''}
+        ${plano==='consultoria'?`<a href="mailto:finrossiapp@gmail.com?subject=Agendamento reunião FinRossi" class="btn primary" style="text-decoration:none;font-size:13px">📅 Agendar reunião</a>`:''}
       </div>
     </div>
   `;
@@ -4682,8 +4881,208 @@ async function fazerLogout(){
     const f=window._firebase;
     if(f&&f.firebaseOk) await f.signOut(f.auth);
   }catch(e){console.warn('logout err',e)}
+
+  // Reset completo do estado
+  cp = 'pessoal';
+  _userRole = null;
+  window._userRole = null;
+  window._firebaseUser = null;
+  finrossiAutenticado = false;
+  rossiAutenticado = false;
+  _adminToken = null;
+
+  // Limpa dados em memória
+  DATA = {
+    pessoal:  {lancs:[],invs:[],metas:[],objs:[],notas:[],assinaturas:[],recorrentes:[],cartoes:[]},
+    finrossi: {lancs:[],invs:[],metas:[],objs:[],notas:[],assinaturas:[],recorrentes:[],cartoes:[]}
+  };
+
+  // Destroi todos os gráficos
+  Object.keys(charts).forEach(k=>{ try{ charts[k].destroy(); }catch(e){} });
+  charts = {};
+
+  // Reseta avatar
+  const avatar = document.getElementById('sb-avatar');
+  if(avatar){ avatar.innerHTML=''; avatar.textContent='?'; }
+
+  // Reseta nome
+  const nomeEl = document.getElementById('user-nome');
+  if(nomeEl) nomeEl.textContent='Carregando...';
+
+  // Reseta sidebar para estado padrão
+  const sbLogoSub = document.getElementById('sb-logo-sub');
+  if(sbLogoSub) sbLogoSub.textContent='Painel pessoal';
+
+  // Fecha modal de config se estiver aberto
+  const modalCfg = document.getElementById('modal-config');
+  if(modalCfg) modalCfg.style.display='none';
+
+  // Reseta botões de perfil
+  document.querySelectorAll('.profile-btn').forEach(b=>{
+    b.classList.remove('active');
+    if(b.id==='pb-pessoal') b.classList.add('active');
+  });
+
+  // Esconde nav extras
+  const navCli = document.getElementById('nav-clientes-item');
+  if(navCli) navCli.style.display='none';
+  const navExtra = document.getElementById('sb-nav-cliente-extra');
+  if(navExtra) navExtra.style.display='none';
+  const navPreview = document.getElementById('nav-preview');
+  if(navPreview) navPreview.style.display='none';
+
+  // Limpa sync badge
+  const sb = document.getElementById('sync-badge');
+  if(sb){ sb.className='sync-badge local'; sb.innerHTML='<span class="sync-dot"></span><span class="nav-text">Modo local</span>'; }
+
+  // Volta para login
   document.getElementById('tela-login').style.display='flex';
   document.getElementById('tela-app').style.display='none';
+
+  // Limpa campos de login
+  const emailInp = document.getElementById('login-email');
+  const senhaInp = document.getElementById('login-senha');
+  if(emailInp) emailInp.value='';
+  if(senhaInp) senhaInp.value='';
+  const msgLogin = document.getElementById('login-msg');
+  if(msgLogin) msgLogin.textContent='';
+}
+
+// ─── DATE PICKER CUSTOMIZADO ─────────────────────────────────────────────────
+const DP_STATE = {}; // { id: { year, month, value } }
+const DP_MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const DP_DIAS  = ['D','S','T','Q','Q','S','S'];
+
+function dpInit(id, value){
+  const d = value ? new Date(value+'T12:00:00') : new Date();
+  DP_STATE[id] = { year: d.getFullYear(), month: d.getMonth(), value: value||'' };
+  dpSetValue(id, value||hoje());
+}
+
+function dpSetValue(id, value){
+  if(!value) return;
+  const [y,m,day] = value.split('-').map(Number);
+  DP_STATE[id] = DP_STATE[id] || {};
+  DP_STATE[id].value = value;
+  DP_STATE[id].year  = y;
+  DP_STATE[id].month = m-1;
+  const btn = document.getElementById('dp-btn-'+id);
+  const inp = document.getElementById(id);
+  if(btn) btn.textContent = `${String(day).padStart(2,'0')}/${String(m).padStart(2,'0')}/${y}`;
+  if(inp) inp.value = value;
+}
+
+function dpToggle(id){
+  const popup = document.getElementById('dp-popup-'+id);
+  const btn   = document.getElementById('dp-btn-'+id);
+  if(!popup) return;
+  const isOpen = popup.classList.contains('open');
+  // Fecha todos os outros
+  document.querySelectorAll('.dp-popup.open').forEach(p=>{ p.classList.remove('open'); });
+  document.querySelectorAll('.dp-input.open').forEach(b=>{ b.classList.remove('open'); });
+  if(!isOpen){
+    if(!DP_STATE[id]) dpInit(id, hoje());
+    dpRender(id);
+    popup.classList.add('open');
+    btn.classList.add('open');
+  }
+}
+
+function dpRender(id){
+  const state = DP_STATE[id];
+  if(!state) return;
+  const popup = document.getElementById('dp-popup-'+id);
+  if(!popup) return;
+  const { year, month, value } = state;
+  const hoje_d = new Date();
+  const primeiro = new Date(year, month, 1);
+  const ultimo   = new Date(year, month+1, 0);
+  const startDow = primeiro.getDay();
+
+  let cells = '';
+  // Dias do mês anterior
+  for(let i=0; i<startDow; i++){
+    const d = new Date(year, month, -startDow+i+1);
+    cells += `<button class="dp-day other-month" onclick="dpSelect('${id}','${year}',${month+1},${d.getDate()})">${d.getDate()}</button>`;
+  }
+  // Dias do mês atual
+  for(let d=1; d<=ultimo.getDate(); d++){
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = d===hoje_d.getDate() && month===hoje_d.getMonth() && year===hoje_d.getFullYear();
+    const isSel   = dateStr === value;
+    cells += `<button class="dp-day${isToday?' today':''}${isSel?' selected':''}" onclick="dpSelect('${id}','${year}',${month+1},${d})">${d}</button>`;
+  }
+  // Dias do próximo mês
+  const remaining = 42 - startDow - ultimo.getDate();
+  for(let d=1; d<=remaining; d++){
+    cells += `<button class="dp-day other-month" onclick="dpSelect('${id}','${year}',${month+2},${d})">${d}</button>`;
+  }
+
+  popup.innerHTML = `
+    <div class="dp-header">
+      <span class="dp-month-label">${DP_MESES[month]} de ${year}</span>
+      <div class="dp-nav">
+        <button onclick="dpNav('${id}',-1)">‹</button>
+        <button onclick="dpNav('${id}',1)">›</button>
+      </div>
+    </div>
+    <div class="dp-grid">
+      ${DP_DIAS.map(d=>`<div class="dp-day-name">${d}</div>`).join('')}
+      ${cells}
+    </div>
+    <div class="dp-footer">
+      <button class="dp-clear" onclick="dpClear('${id}')">Limpar</button>
+      <button class="dp-today-btn" onclick="dpGoToday('${id}')">Hoje</button>
+    </div>`;
+}
+
+function dpNav(id, dir){
+  const s = DP_STATE[id];
+  s.month += dir;
+  if(s.month > 11){ s.month=0; s.year++; }
+  if(s.month < 0 ){ s.month=11; s.year--; }
+  dpRender(id);
+}
+
+function dpSelect(id, year, month, day){
+  const dateStr = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+  // Se clicar em dia de outro mês, navega para ele
+  const s = DP_STATE[id];
+  const m = parseInt(month)-1;
+  if(m !== s.month){ s.month=m; s.year=parseInt(year); }
+  dpSetValue(id, dateStr);
+  // Fecha popup
+  document.getElementById('dp-popup-'+id)?.classList.remove('open');
+  document.getElementById('dp-btn-'+id)?.classList.remove('open');
+}
+
+function dpClear(id){
+  DP_STATE[id].value = '';
+  const btn = document.getElementById('dp-btn-'+id);
+  const inp = document.getElementById(id);
+  if(btn) btn.textContent = 'Selecionar data';
+  if(inp) inp.value = '';
+  document.getElementById('dp-popup-'+id)?.classList.remove('open');
+  document.getElementById('dp-btn-'+id)?.classList.remove('open');
+}
+
+function dpGoToday(id){
+  dpSelect(id, new Date().getFullYear(), new Date().getMonth()+1, new Date().getDate());
+}
+
+// Fecha ao clicar fora
+document.addEventListener('click', e=>{
+  if(!e.target.closest('.dp-wrap')){
+    document.querySelectorAll('.dp-popup.open').forEach(p=>p.classList.remove('open'));
+    document.querySelectorAll('.dp-input.open').forEach(b=>b.classList.remove('open'));
+  }
+});
+
+// Init dos pickers na inicialização
+function initDatePickers(){
+  ['r-data','d-data','i-data','obj-data'].forEach(id=>{
+    dpInit(id, hoje());
+  });
 }
 
 // ─── PWA SERVICE WORKER ──────────────────────────────────────────────────────
@@ -4697,7 +5096,7 @@ if ('serviceWorker' in navigator) {
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 initTema();
-document.querySelectorAll('input[type=date]').forEach(el=>el.value=hoje());
+initDatePickers();
 </script>
 </body>
 </html>
