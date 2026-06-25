@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FinRossi — Controle financeiro pessoal simples e inteligente</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-192.png">
 <meta name="description" content="Controle suas receitas, despesas, investimentos e metas em um só lugar. Simples, inteligente e acessível.">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 <style>
@@ -601,6 +604,7 @@ async function confirmarCadastro(){
   const metodo   = metodoEl ? metodoEl.value : 'cartao';
 
   if(!nome||!email||!senha){ showModalMsg('Preencha todos os campos.','err'); return; }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)){ showModalMsg('Email inválido — verifique o formato.','err'); return; }
   if(senha.length < 6){ showModalMsg('A senha deve ter pelo menos 6 caracteres.','err'); return; }
 
   btn.textContent='Criando conta...'; btn.disabled=true;
