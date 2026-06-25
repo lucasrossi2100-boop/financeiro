@@ -6,8 +6,12 @@
 <title>FinRossi — Controle Financeiro</title>
 
 <!-- PWA -->
-<!-- PWA manifest removido temporariamente -->
-<!-- <link rel="manifest" href="manifest.json"> -->
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f0f0f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FinRossi">
 <meta name="theme-color" content="#0f0f0f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -63,6 +67,7 @@
         setTimeout(()=>setupPerfilUI(), 100);
         setTimeout(()=>initSidebar(), 150);
         setTimeout(()=>initAvatar(), 300);
+        setTimeout(()=>mostrarPWABanner(), 4000);
         setTimeout(()=>{ loadCategorias(); populateCatSelects(); }, 200);
       } else {
         document.getElementById('tela-login').style.display = 'flex';
@@ -210,6 +215,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .dp-footer button{background:none;border:none;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;padding:3px 8px;border-radius:4px;transition:all .15s}
 .dp-clear{color:var(--muted)}.dp-clear:hover{color:var(--red);background:var(--red-s)}
 .dp-today-btn{color:var(--accent)}.dp-today-btn:hover{background:var(--accent-s)}
+@keyframes slidePWA{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
 .section-hidden{display:none!important}
 
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px}
@@ -352,25 +358,33 @@ tbody tr:hover td{background:var(--surface2)}
   .app{flex-direction:column;padding-bottom:68px}
   .main{padding:12px 14px}
   .sidebar{display:none!important}
+  .sidebar-wrap{display:none!important}
   .page-header{display:none!important}
   .grid2,.grid3,.rp-scenarios{grid-template-columns:1fr}
   .form-row,.form-row.tri,.form-row.quad,.form-row.five{grid-template-columns:1fr}
-  .field input,.field select{height:46px;font-size:15px;padding:0 12px}
-  .btn{height:42px;font-size:14px;padding:0 14px}
-  .btn.sm{height:36px;font-size:13px;padding:0 10px}
-  .btn.xs{height:30px;font-size:12px;padding:0 8px}
-  .btn.primary{height:50px;font-size:15px}
+  .field input,.field select,.field textarea{height:48px;font-size:16px!important;padding:0 12px}
+  .field textarea{height:auto;min-height:80px;padding:12px}
+  .dp-input{font-size:16px!important;height:48px}
+  .currency-input{font-size:16px!important}
+  .btn{height:44px;font-size:14px;padding:0 14px}
+  .btn.sm{height:38px;font-size:13px;padding:0 10px}
+  .btn.xs{height:32px;font-size:12px;padding:0 8px}
+  .btn.primary{height:52px;font-size:16px}
   .metrics{grid-template-columns:1fr 1fr}
   .mc-val{font-size:17px}
-  .card{padding:12px}
+  .card{padding:14px}
   .obj-view-toggle{height:38px}
-  .tbl-wrap{-webkit-overflow-scrolling:touch}
-  table{min-width:460px}
-  .modal{padding:16px;border-radius:16px 16px 0 0;position:fixed;bottom:0;left:0;right:0;width:100%!important;max-height:88vh;border-bottom:none}
+  .tbl-wrap{-webkit-overflow-scrolling:touch;overflow-x:auto}
+  table{min-width:500px;font-size:12px}
+  .modal{padding:18px;border-radius:16px 16px 0 0;position:fixed;bottom:0;left:0;right:0;width:100%!important;max-height:90vh;overflow-y:auto;border-bottom:none}
   .modal-overlay{align-items:flex-end}
   .rp-scenarios{gap:10px}
   .tabs{overflow-x:auto;-webkit-overflow-scrolling:touch}
   .tab-btn{white-space:nowrap}
+  .dp-popup{width:calc(100vw - 28px);max-width:320px}
+  h2{font-size:20px}
+  .mc-label{font-size:10px}
+  select,input{font-size:16px!important}
 }
 
 @media(max-width:360px){
@@ -402,7 +416,7 @@ tbody tr:hover td{background:var(--surface2)}
 
       <div style="margin-bottom:14px">
         <label style="font-size:12px;color:#888;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Email</label>
-        <input id="login-email" type="email" placeholder="seu@email.com" style="width:100%;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:#f5f0e8;border-radius:8px;padding:12px 14px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='rgba(201,168,76,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+        <input id="login-email" type="email" placeholder="seu@email.com" style="width:100%;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:#f5f0e8;border-radius:8px;padding:12px 14px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='rgba(201,168,76,0.5)'" onblur="this.style.borderColor=this.value&&!validarEmail(this.value)?'rgba(248,113,113,0.6)':'rgba(255,255,255,0.1)'">
       </div>
 
       <div style="margin-bottom:20px">
@@ -897,6 +911,7 @@ tbody tr:hover td{background:var(--surface2)}
 </section>
 
 <section id="sec-assinaturas" class="section-hidden">
+  <div class="mobile-topbar mobile-topbar visible" id="mob-top-assinaturas"><div style="font-family:'DM Serif Display',serif;font-size:20px">Assinaturas</div><button class="btn primary sm" onclick="openModalAssin()" style="height:36px;font-size:13px">+ Nova</button></div>
   <div class="page-header">
     <div class="page-title"><h2>Assinaturas</h2><p>Controle de serviços recorrentes</p></div>
     <div class="header-actions"><button class="btn primary" onclick="openModalAssin()">+ Nova assinatura</button></div>
@@ -907,6 +922,7 @@ tbody tr:hover td{background:var(--surface2)}
 
 <!-- CONTAS RECORRENTES -->
 <section id="sec-recorrentes" class="section-hidden">
+  <div class="mobile-topbar visible" id="mob-top-recorrentes"><div style="font-family:'DM Serif Display',serif;font-size:20px">Recorrentes</div><button class="btn primary sm" onclick="openModalRec()" style="height:36px;font-size:13px">+ Nova</button></div>
   <div class="page-header">
     <div class="page-title"><h2>Contas Recorrentes</h2><p>Cadastre uma vez, lança todo mês automaticamente</p></div>
     <div class="header-actions"><button class="btn primary" onclick="openModalRec()">+ Nova conta</button></div>
@@ -928,6 +944,7 @@ tbody tr:hover td{background:var(--surface2)}
 
 <!-- CALENDÁRIO FINANCEIRO -->
 <section id="sec-calendario" class="section-hidden">
+  <div class="mobile-topbar visible" id="mob-top-calendario"><div style="font-family:'DM Serif Display',serif;font-size:20px">Calendário</div></div>
   <div class="page-header">
     <div class="page-title"><h2>Calendário Financeiro</h2><p>Próximos vencimentos e pagamentos</p></div>
     <div class="header-actions">
@@ -964,6 +981,7 @@ tbody tr:hover td{background:var(--surface2)}
 </section>
 
 <section id="sec-notas" class="section-hidden">
+  <div class="mobile-topbar visible" id="mob-top-notas"><div style="font-family:'DM Serif Display',serif;font-size:20px">Notas</div></div>
   <div class="page-header">
     <div class="page-title"><h2>Notas</h2><p id="notas-sub">Bloco de anotações pessoal</p></div>
     <div class="header-actions">
@@ -1028,6 +1046,7 @@ tbody tr:hover td{background:var(--surface2)}
 
 <!-- MANUAL DE USO -->
 <section id="sec-manual" class="section-hidden">
+  <div class="mobile-topbar visible" id="mob-top-manual"><div style="font-family:'DM Serif Display',serif;font-size:20px">Manual</div></div>
   <div class="page-header">
     <div class="page-title"><h2>📖 Manual de Uso</h2><p>Aprenda a usar o FinRossi</p></div>
     <div class="header-actions">
@@ -1169,6 +1188,7 @@ tbody tr:hover td{background:var(--surface2)}
 </div>
 <!-- MINHA ASSINATURA (visível só para clientes) -->
 <section id="sec-minha-assinatura" class="section-hidden">
+  <div class="mobile-topbar visible" id="mob-top-minha-assinatura"><div style="font-family:'DM Serif Display',serif;font-size:20px">Minha Assinatura</div></div>
   <div class="page-header">
     <div class="page-title"><h2>Minha Assinatura</h2><p>Plano, pagamentos e status da conta</p></div>
   </div>
@@ -1181,6 +1201,38 @@ tbody tr:hover td{background:var(--surface2)}
 </section>
 
 </main>
+<!-- PWA INSTALL BANNER (Android/Chrome) -->
+<div id="pwa-banner" style="display:none;position:fixed;bottom:80px;left:12px;right:12px;z-index:9998;background:var(--surface);border:1px solid var(--accent);border-radius:14px;padding:14px 16px;box-shadow:0 8px 32px rgba(0,0,0,.5);animation:slidePWA .3s ease">
+  <div style="display:flex;align-items:center;gap:12px">
+    <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#C8A96E,#8a6a1a);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">📱</div>
+    <div style="flex:1">
+      <div style="font-size:14px;font-weight:600;color:var(--text)">Instalar FinRossi</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px">Adicione à tela inicial para acesso rápido</div>
+    </div>
+    <button onclick="fecharPWABanner()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:22px;padding:4px;line-height:1">×</button>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:12px">
+    <button onclick="instalarPWA()" style="flex:1;background:var(--accent);color:#0f0f0f;border:none;border-radius:8px;padding:11px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer">📲 Instalar agora</button>
+    <button onclick="fecharPWABanner()" style="flex:1;background:var(--surface2);color:var(--muted);border:1px solid var(--border2);border-radius:8px;padding:11px;font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer">Agora não</button>
+  </div>
+</div>
+
+<!-- iOS INSTALL HINT (Safari) -->
+<div id="ios-banner" style="display:none;position:fixed;bottom:80px;left:12px;right:12px;z-index:9998;background:var(--surface);border:1px solid var(--accent);border-radius:14px;padding:14px 16px;box-shadow:0 8px 32px rgba(0,0,0,.5);animation:slidePWA .3s ease">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+    <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#C8A96E,#8a6a1a);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">📱</div>
+    <div style="flex:1">
+      <div style="font-size:14px;font-weight:600;color:var(--text)">Instalar FinRossi</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px">Adicione à tela inicial em 2 passos</div>
+    </div>
+    <button onclick="fecharIOSBanner()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:22px;padding:4px;line-height:1">×</button>
+  </div>
+  <div style="font-size:12px;color:#ccc;line-height:2;background:var(--surface2);border-radius:8px;padding:10px 14px">
+    1. Toque em <strong style="color:var(--text)">Compartilhar</strong> <span style="font-size:15px">⎋</span> na barra do Safari<br>
+    2. Toque em <strong style="color:var(--text)">"Adicionar à Tela de Início"</strong> <span style="font-size:13px">＋</span>
+  </div>
+</div>
+
 <!-- ── MODAL CONFIGURAÇÕES ─────────────────────────────────────────────────── -->
 <div id="modal-config" style="display:none;position:fixed;inset:0;background:rgba(8,8,8,0.85);backdrop-filter:blur(6px);align-items:center;justify-content:center;z-index:200;padding:20px">
   <div style="width:100%;max-width:440px;background:var(--surface);border:1px solid var(--border2);border-radius:18px;overflow:hidden">
@@ -1331,78 +1383,109 @@ tbody tr:hover td{background:var(--surface2)}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
     Lançar
   </button>
-  <button class="mobile-nav-item" id="mnav-investimentos" onclick="goTo('investimentos')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-    Invest.
+  <button class="mobile-nav-item" id="mnav-historico" onclick="goTo('historico')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    Histórico
   </button>
   <button class="mobile-nav-item" id="mnav-metas" onclick="goTo('metas')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
     Metas
   </button>
-  <button class="mobile-nav-item" id="mnav-historico" onclick="goTo('historico')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-    Histórico
-  </button>
-  <button class="mobile-nav-item" id="mnav-objetivos" onclick="goTo('objetivos')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
-    Objetivos
+  <button class="mobile-nav-item" id="mnav-mais" onclick="openMobileMore()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>
+    Mais
   </button>
 </nav>
 
-<!-- MOBILE MORE DRAWER (perfil + renda passiva) -->
+<!-- MOBILE MORE DRAWER -->
 <div class="mobile-profile-drawer" id="mobile-more-drawer" onclick="closeMobileMore(event)">
   <div class="mobile-profile-sheet">
-    <h4>Perfil ativo</h4>
-    <div class="mobile-profile-opt" id="mp-pessoal" onclick="setProfile('pessoal');closeMobileMoreForce()">
-      <div style="width:9px;height:9px;border-radius:50%;background:var(--green);flex-shrink:0"></div>
-      <div><div class="po-name">Pessoal</div><div class="po-sub">Finanças pessoais</div></div>
+
+    <!-- Perfil (só para sócio/admin) -->
+    <div id="mob-perfis-section">
+      <h4>Minha área</h4>
+      <div class="mobile-profile-opt active" id="mp-pessoal" onclick="setProfile('pessoal');closeMobileMoreForce()">
+        <div style="width:9px;height:9px;border-radius:50%;background:var(--green);flex-shrink:0"></div>
+        <div><div class="po-name">👤 Pessoal</div><div class="po-sub">Minhas finanças</div></div>
+      </div>
+      <div class="mobile-profile-opt" id="mp-finrossi" onclick="abrirFinRossi();closeMobileMoreForce()">
+        <div style="width:9px;height:9px;border-radius:50%;background:var(--accent);flex-shrink:0"></div>
+        <div><div class="po-name">💼 FinRossi</div><div class="po-sub">Negócio e clientes</div></div>
+      </div>
     </div>
-    <div id="mnav-renda-opt" style="margin-top:10px;border-top:1px solid var(--border);padding-top:10px">
-      <div style="font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;padding:0 4px">Tema</div>
-      <div style="display:flex;gap:8px;padding:0 4px;margin-bottom:10px">
-        <button onclick="setTema('escuro')" style="flex:1;height:36px;border-radius:8px;border:2px solid transparent;background:#0f0f0f;cursor:pointer;font-size:14px" id="mob-tema-escuro">🌙</button>
-        <button onclick="setTema('claro')" style="flex:1;height:36px;border-radius:8px;border:2px solid transparent;background:#f0f2f5;cursor:pointer;font-size:14px" id="mob-tema-claro">☀️</button>
-        <button onclick="setTema('azul')" style="flex:1;height:36px;border-radius:8px;border:2px solid transparent;background:#0d1117;cursor:pointer;font-size:14px" id="mob-tema-azul">🌊</button>
+
+    <!-- Menu -->
+    <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px">
+      <h4>Menu</h4>
+      <div class="mobile-profile-opt" onclick="goTo('investimentos');closeMobileMoreForce()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <div><div class="po-name">Investimentos</div></div>
+      </div>
+      <div class="mobile-profile-opt" onclick="goTo('objetivos');closeMobileMoreForce()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+        <div><div class="po-name">Objetivos</div></div>
       </div>
       <div class="mobile-profile-opt" onclick="goTo('renda');closeMobileMoreForce()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-        <div><div class="po-name">Renda Passiva</div><div class="po-sub">Calculadora de patrimônio</div></div>
+        <div><div class="po-name">Renda Passiva</div></div>
       </div>
-      </div>
-      <div class="mobile-profile-opt" onclick="goTo('notas');closeMobileMoreForce()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        <div><div class="po-name">Notas</div><div class="po-sub">Bloco de anotações</div></div>
-      </div>
-      <div class="mobile-profile-opt" onclick="goTo('manual');closeMobileMoreForce()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
-        <div><div class="po-name">Manual</div><div class="po-sub">Como usar o FinRossi</div></div>
+    </div>
+
+    <!-- Controles -->
+    <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px">
+      <h4>Controles</h4>
+      <div class="mobile-profile-opt" onclick="goTo('cartoes');closeMobileMoreForce()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        <div><div class="po-name">Cartões</div><div class="po-sub">Faturas e gastos</div></div>
       </div>
       <div class="mobile-profile-opt" onclick="goTo('assinaturas');closeMobileMoreForce()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
-        <div><div class="po-name">Assinaturas</div><div class="po-sub">Netflix, Spotify, Academia...</div></div>
+        <div><div class="po-name">Assinaturas</div><div class="po-sub">Netflix, Spotify...</div></div>
       </div>
       <div class="mobile-profile-opt" onclick="goTo('recorrentes');closeMobileMoreForce()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
-        <div><div class="po-name">Recorrentes</div><div class="po-sub">Luz, água, aluguel...</div></div>
+        <div><div class="po-name">Recorrentes</div><div class="po-sub">Aluguel, luz, água...</div></div>
       </div>
       <div class="mobile-profile-opt" onclick="goTo('calendario');closeMobileMoreForce()">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         <div><div class="po-name">Calendário</div><div class="po-sub">Próximos vencimentos</div></div>
       </div>
-      <div class="mobile-profile-opt" onclick="goTo('assinaturas');closeMobileMoreForce()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
-        <div><div class="po-name">Assinaturas</div><div class="po-sub">Netflix, Spotify, Academia...</div></div>
+      <div class="mobile-profile-opt" onclick="goTo('notas');closeMobileMoreForce()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <div><div class="po-name">Notas</div><div class="po-sub">Anotações financeiras</div></div>
       </div>
-      <div class="mobile-profile-opt" onclick="goTo('recorrentes');closeMobileMoreForce()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
-        <div><div class="po-name">Recorrentes</div><div class="po-sub">Luz, água, aluguel auto</div></div>
-      </div>
-      <div class="mobile-profile-opt" onclick="goTo('calendario');closeMobileMoreForce()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        <div><div class="po-name">Calendário</div><div class="po-sub">Vencimentos e datas</div></div>
+      <div class="mobile-profile-opt" onclick="goTo('manual');closeMobileMoreForce()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+        <div><div class="po-name">Manual</div><div class="po-sub">Como usar o FinRossi</div></div>
       </div>
     </div>
-    <button class="btn" style="width:100%;margin-top:12px;justify-content:center;height:44px" onclick="closeMobileMoreForce()">Fechar</button>
+
+    <!-- Minha Assinatura (só clientes) -->
+    <div id="mob-minha-assin-section" style="display:none;margin-top:12px;border-top:1px solid var(--border);padding-top:10px">
+      <h4>Minha conta</h4>
+      <div class="mobile-profile-opt" onclick="goTo('minha-assinatura');closeMobileMoreForce()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        <div><div class="po-name">Minha Assinatura</div><div class="po-sub">Plano e pagamentos</div></div>
+      </div>
+    </div>
+
+    <!-- Tema -->
+    <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px">
+      <h4>Tema</h4>
+      <div style="display:flex;gap:8px;padding:0 4px">
+        <button onclick="setTema('escuro')" style="flex:1;height:40px;border-radius:8px;border:2px solid transparent;background:#0f0f0f;cursor:pointer;font-size:16px" id="mob-tema-escuro">🌙</button>
+        <button onclick="setTema('claro')"  style="flex:1;height:40px;border-radius:8px;border:2px solid transparent;background:#f0f2f5;cursor:pointer;font-size:16px" id="mob-tema-claro">☀️</button>
+        <button onclick="setTema('azul')"   style="flex:1;height:40px;border-radius:8px;border:2px solid transparent;background:#0d1117;cursor:pointer;font-size:16px" id="mob-tema-azul">🌊</button>
+      </div>
+    </div>
+
+    <!-- Configurações e Sair -->
+    <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px;display:flex;gap:8px">
+      <button onclick="abrirConfiguracoes();closeMobileMoreForce()" class="btn" style="flex:1;justify-content:center">⚙ Configurações</button>
+      <button onclick="fazerLogout()" class="btn danger" style="flex:1;justify-content:center">Sair</button>
+    </div>
+
+    <button class="btn" style="width:100%;margin-top:10px;justify-content:center;height:44px" onclick="closeMobileMoreForce()">Fechar</button>
   </div>
 </div>
 
@@ -1516,7 +1599,7 @@ tbody tr:hover td{background:var(--surface2)}
     <h3>Cadastrar usuário</h3>
     <div class="form-row">
       <div class="field"><label>Nome</label><input id="nc-nome" type="text" placeholder="Nome completo"></div>
-      <div class="field"><label>Email</label><input id="nc-email" type="email" placeholder="email@exemplo.com"></div>
+      <div class="field"><label>Email</label><input id="nc-email" type="email" placeholder="email@exemplo.com" onblur="const v=this.value;this.style.borderColor=v&&!validarEmail(v)?'var(--red)':'var(--border2)'"></div>
     </div>
     <div class="form-row">
       <div class="field"><label>Senha</label><input id="nc-senha" type="password" placeholder="Senha de acesso"></div>
@@ -1868,6 +1951,12 @@ function setupPerfilUI(){
       <div style="margin-top:8px;font-size:11px;padding:4px 8px;background:var(--accent-s);border:1px solid var(--accent);border-radius:6px;color:var(--accent);display:inline-block">${role==='dev'?'Acesso: painel técnico':'Acesso: gestão de clientes'}</div>
     </div>`;
   }
+
+  // Mobile drawer — mostra/oculta seções por role
+  const mobPerfis = document.getElementById('mob-perfis-section');
+  const mobAssin  = document.getElementById('mob-minha-assin-section');
+  if(mobPerfis) mobPerfis.style.display = (socio||admin||dev) ? '' : 'none';
+  if(mobAssin)  mobAssin.style.display  = role==='cliente' ? '' : 'none';
 
   // Preview só para sócio
   const navPreview=document.getElementById('nav-preview');
@@ -3674,6 +3763,7 @@ async function cadastrarNovoCliente(){
   const msg=document.getElementById('msg-novo-cliente');
 
   if(!nome||!email||!senha){showMsg('msg-novo-cliente','Preencha todos os campos','err');return}
+  if(!validarEmail(email)){showMsg('msg-novo-cliente','Email inválido — verifique o formato','err');return}
 
   const token=getAdminToken();
   if(!token){showMsg('msg-novo-cliente','Token admin necessário','err');return}
@@ -3786,7 +3876,7 @@ async function renderClientes(){
           <td style="padding:10px;text-align:center"><span style="font-size:11px;padding:2px 8px;border-radius:20px;background:${STATUS_CORES[c.status]||'var(--muted)'}18;color:${STATUS_CORES[c.status]||'var(--muted)'}">${c.status||'—'}</span></td>
           <td style="padding:10px;text-align:center;font-size:12px;color:var(--muted)">${interno?'🏢 Interno':c.origem==='teste'?'🎁 Teste':c.origem==='trial'?'⏱ Trial':'💳 Pagante'}</td>
           <td style="padding:10px;text-align:center;font-size:12px;color:var(--muted)">${c.dataCadastro?c.dataCadastro.slice(0,10):'—'}</td>
-          <td style="padding:10px;text-align:center">${interno?'<span style="font-size:11px;color:var(--muted)">Equipe</span>':`<button class="btn danger xs" onclick="desativarCliente('${c.uid}')" ${c.status==='inativo'?'disabled':''}>${c.status==='inativo'?'Inativo':'Desativar'}</button>`}</td>
+          <td style="padding:10px;text-align:center">${interno?'<span style="font-size:11px;color:var(--muted)">Equipe</span>':c.status==='inativo'?`<button class="btn xs" onclick="reativarCliente('${c.uid}')" style="color:var(--green);border-color:var(--green)">↺ Reativar</button>`:`<button class="btn danger xs" onclick="desativarCliente('${c.uid}')">Desativar</button>`}</td>
         </tr>`;}).join('')}</tbody>
     </table></div>`;
 
@@ -3798,15 +3888,21 @@ async function renderClientes(){
 async function desativarCliente(uid){
   if(!confirm('Desativar este cliente?')) return;
   const token=getAdminToken();
+  if(!token) return;
   try{
-    const res=await fetch(`${BACKEND_URL}/admin/clientes/${uid}/desativar`,{
-      method:'POST',
-      headers:{'x-admin-token':token}
-    });
-    const data=await res.json();
-    if(data.ok){renderClientes();}
-    else alert('Erro: '+data.erro);
-  }catch(e){alert('Erro de conexão')}
+    await fetch(`${BACKEND_URL}/admin/clientes/${uid}/desativar`,{method:'POST',headers:{'x-admin-token':token}});
+    renderClientes();
+  }catch(e){alert('Erro ao desativar');}
+}
+
+async function reativarCliente(uid){
+  if(!confirm('Reativar este cliente?')) return;
+  const token=getAdminToken();
+  if(!token) return;
+  try{
+    await fetch(`${BACKEND_URL}/admin/clientes/${uid}/reativar`,{method:'POST',headers:{'x-admin-token':token}});
+    renderClientes();
+  }catch(e){alert('Erro ao reativar');}
 }
 
 // ─── PREVIEW DE PLANOS ────────────────────────────────────────────────────────
@@ -4838,6 +4934,11 @@ document.getElementById('modal-config').addEventListener('click', e=>{
 });
 
 // ─── LOGIN / LOGOUT ──────────────────────────────────────────────────────────
+// ─── VALIDAÇÃO DE EMAIL ───────────────────────────────────────────────────────
+function validarEmail(email){
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
+}
+
 async function fazerLogin(){
   const email=document.getElementById('login-email').value.trim();
   const senha=document.getElementById('login-senha').value;
@@ -4846,6 +4947,11 @@ async function fazerLogin(){
 
   if(!email||!senha){
     erroEl.textContent='Preencha email e senha.';
+    erroEl.style.display='block';
+    return;
+  }
+  if(!validarEmail(email)){
+    erroEl.textContent='Email inválido — verifique o formato.';
     erroEl.style.display='block';
     return;
   }
@@ -5086,10 +5192,55 @@ function initDatePickers(){
   });
 }
 
+// ─── PWA INSTALL ─────────────────────────────────────────────────────────────
+let _pwaPrompt = null;
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  _pwaPrompt = e;
+  // Mostra banner após 3s do login
+  setTimeout(mostrarPWABanner, 3000);
+});
+
+function mostrarPWABanner(){
+  // Não mostra se já instalado ou já fechou hoje
+  if(window.matchMedia('(display-mode: standalone)').matches) return;
+  if(localStorage.getItem('fin_pwa_dismissed') === new Date().toDateString()) return;
+  const banner = document.getElementById('pwa-banner');
+  if(banner && _pwaPrompt) banner.style.display='block';
+  // iOS Safari
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone;
+  if(isIOS && !localStorage.getItem('fin_ios_dismissed')){
+    const iosBanner = document.getElementById('ios-banner');
+    if(iosBanner) setTimeout(()=>iosBanner.style.display='block', 3000);
+  }
+}
+
+async function instalarPWA(){
+  if(!_pwaPrompt) return;
+  _pwaPrompt.prompt();
+  const result = await _pwaPrompt.userChoice;
+  console.log('[PWA] resultado:', result.outcome);
+  _pwaPrompt = null;
+  fecharPWABanner();
+}
+
+function fecharPWABanner(){
+  const banner = document.getElementById('pwa-banner');
+  if(banner) banner.style.display='none';
+  localStorage.setItem('fin_pwa_dismissed', new Date().toDateString());
+}
+
+function fecharIOSBanner(){
+  const banner = document.getElementById('ios-banner');
+  if(banner) banner.style.display='none';
+  localStorage.setItem('fin_ios_dismissed','1');
+}
+
 // ─── PWA SERVICE WORKER ──────────────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/financeiro/sw.js')
+    navigator.serviceWorker.register('/sw.js')
       .then(r => console.log('[SW] registrado:', r.scope))
       .catch(e => console.log('[SW] erro:', e));
   });
