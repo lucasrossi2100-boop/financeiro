@@ -181,12 +181,12 @@
 
     window._firebase = { db, ref, set, onValue, auth, signInWithEmailAndPassword, signOut, onAuthStateChanged, firebaseOk: true };
 
-    // Timeout de segurança: se auth demorar +8s, mostra login
-    let authResolvido = false;
+
+    // Timeout: se auth demorar +8s na inicialização, mostra login
+    let authInicial = false;
     const authTimeout = setTimeout(() => {
-      if(!authResolvido){
-        authResolvido = true;
-        console.warn('[FinRossi] Auth timeout — mostrando login');
+      if(!authInicial){
+        authInicial = true;
         mostrarLogin();
         window._fbReady = true;
         document.dispatchEvent(new Event('fbReady'));
@@ -194,9 +194,12 @@
     }, 8000);
 
     onAuthStateChanged(auth, async (user) => {
-      if(authResolvido) return;
-      authResolvido = true;
-      clearTimeout(authTimeout);
+      // Cancela timeout apenas na primeira resposta
+      if(!authInicial){
+        authInicial = true;
+        clearTimeout(authTimeout);
+      }
+
       window._firebaseUser = user;
 
       if (user) {
@@ -222,11 +225,17 @@
         setTimeout(()=>mostrarPWABanner(), 4000);
         setTimeout(()=>{ loadCategorias(); populateCatSelects(); }, 200);
       } else {
+        // Não logado — mostra login e reseta botão
         mostrarLogin();
+        const btn = document.getElementById('btn-login');
+        if(btn){ btn.textContent='Entrar'; btn.disabled=false; }
       }
 
-      window._fbReady = true;
-      document.dispatchEvent(new Event('fbReady'));
+      if(!window._fbReady){
+        window._fbReady = true;
+        document.dispatchEvent(new Event('fbReady'));
+      }
+    });
     });
 
   } catch(e) {
@@ -612,20 +621,33 @@ tbody tr:hover td{background:var(--surface2)}
 
       <div style="margin-bottom:20px">
         <label style="font-size:12px;color:#888;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Senha</label>
-        <input id="login-senha" type="password" placeholder="••••••••" style="width:100%;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:#f5f0e8;border-radius:8px;padding:12px 14px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='rgba(201,168,76,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'" onkeydown="if(event.key==='Enter')fazerLogin()">
+        <div style="position:relative">
+          <input id="login-senha" type="password" placeholder="••••••••" style="width:100%;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:#f5f0e8;border-radius:8px;padding:12px 42px 12px 14px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='rgba(201,168,76,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'" onkeydown="if(event.key==='Enter')fazerLogin()">
+          <button type="button" onclick="toggleSenha('login-senha','olho-login')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#555;padding:4px;font-size:16px;line-height:1" id="olho-login">👁</button>
+        </div>
       </div>
 
       <div id="login-erro" style="display:none;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.3);border-radius:8px;padding:10px 14px;font-size:13px;color:#f87171;margin-bottom:16px"></div>
 
-      <button onclick="fazerLogin()" id="btn-login" style="width:100%;background:#c9a84c;color:#000;border:none;border-radius:8px;padding:14px;font-size:15px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s" onmouseover="this.style.background='#e8c96d'" onmouseout="this.style.background='#c9a84c'">
-        Entrar
+      <!-- Barra de progresso login -->
+      <div id="login-progress-wrap" style="display:none;margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span id="login-progress-txt" style="font-size:12px;color:#888">Verificando credenciais...</span>
+          <span id="login-progress-pct" style="font-size:12px;color:#C8A96E;font-weight:500">0%</span>
+        </div>
+        <div style="width:100%;height:3px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden">
+          <div id="login-progress-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#8a6a1a,#C8A96E);border-radius:2px;transition:width .4s ease"></div>
+        </div>
+      </div>
+
+      <button onclick="fazerLogin()" id="btn-login" style="width:100%;background:#c9a84c;color:#000;border:none;border-radius:8px;padding:14px;font-size:15px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px" onmouseover="this.style.background='#e8c96d'" onmouseout="this.style.background='#c9a84c'">
+        <span id="btn-login-txt">Entrar</span>
       </button>
 
       <div style="text-align:center;margin-top:16px">
         <a href="landing.html" style="font-size:13px;color:#666;text-decoration:none">Não tem conta? <span style="color:#c9a84c">Conheça os planos</span></a>
       </div>
     </div>
-
     <div style="text-align:center;margin-top:20px;font-size:12px;color:#444">
       FinRossi © 2025 · Controle financeiro pessoal
     </div>
@@ -1803,7 +1825,12 @@ tbody tr:hover td{background:var(--surface2)}
       <div class="field"><label>Email</label><input id="nc-email" type="email" placeholder="email@exemplo.com" onblur="const v=this.value;this.style.borderColor=v&&!validarEmail(v)?'var(--red)':'var(--border2)'"></div>
     </div>
     <div class="form-row">
-      <div class="field"><label>Senha</label><input id="nc-senha" type="password" placeholder="Senha de acesso"></div>
+      <div class="field"><label>Senha</label>
+        <div style="position:relative">
+          <input id="nc-senha" type="password" placeholder="Senha de acesso" style="padding-right:38px">
+          <button type="button" onclick="toggleSenha('nc-senha','olho-nc')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;font-size:15px;line-height:1" id="olho-nc">👁</button>
+        </div>
+      </div>
       <div class="field"><label>Role</label>
         <select id="nc-role" onchange="toggleCamposRole()">
           <option value="cliente">👤 Cliente</option>
@@ -1905,11 +1932,14 @@ tbody tr:hover td{background:var(--surface2)}
 
       <div style="margin-bottom:20px">
         <label style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Senha</label>
-        <input id="inp-senha-finrossi" type="password" placeholder="••••••••"
-          style="width:100%;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:#f5f0e8;border-radius:9px;padding:13px 14px;font-size:16px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;letter-spacing:2px"
-          onfocus="this.style.borderColor='rgba(200,169,110,0.5)'"
-          onblur="this.style.borderColor='rgba(255,255,255,0.1)'"
-          onkeydown="if(event.key==='Enter')confirmarSenhaFinRossi()">
+        <div style="position:relative">
+          <input id="inp-senha-finrossi" type="password" placeholder="••••••••"
+            style="width:100%;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:#f5f0e8;border-radius:9px;padding:13px 42px 13px 14px;font-size:16px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;letter-spacing:2px"
+            onfocus="this.style.borderColor='rgba(200,169,110,0.5)'"
+            onblur="this.style.borderColor='rgba(255,255,255,0.1)'"
+            onkeydown="if(event.key==='Enter')confirmarSenhaFinRossi()">
+          <button type="button" onclick="toggleSenha('inp-senha-finrossi','olho-fr')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#555;padding:4px;font-size:16px;line-height:1" id="olho-fr">👁</button>
+        </div>
       </div>
 
       <div id="msg-senha-finrossi" style="min-height:18px;font-size:13px;color:#f87171;margin-bottom:12px;display:none;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.2);border-radius:8px;padding:9px 12px"></div>
@@ -5177,6 +5207,15 @@ document.getElementById('modal-config').addEventListener('click', e=>{
 
 // ─── LOGIN / LOGOUT ──────────────────────────────────────────────────────────
 // ─── VALIDAÇÃO DE EMAIL ───────────────────────────────────────────────────────
+function toggleSenha(inputId, btnId){
+  const inp = document.getElementById(inputId);
+  const btn = document.getElementById(btnId);
+  if(!inp) return;
+  const mostrar = inp.type === 'password';
+  inp.type = mostrar ? 'text' : 'password';
+  if(btn) btn.textContent = mostrar ? '🙈' : '👁';
+}
+
 function validarEmail(email){
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
 }
@@ -5186,45 +5225,53 @@ async function fazerLogin(){
   const senha=document.getElementById('login-senha').value;
   const erroEl=document.getElementById('login-erro');
   const btn=document.getElementById('btn-login');
+  const btnTxt=document.getElementById('btn-login-txt');
+  const progressWrap=document.getElementById('login-progress-wrap');
+  const progressBar=document.getElementById('login-progress-bar');
+  const progressTxt=document.getElementById('login-progress-txt');
+  const progressPct=document.getElementById('login-progress-pct');
 
-  if(!email||!senha){
-    erroEl.textContent='Preencha email e senha.';
-    erroEl.style.display='block';
-    return;
-  }
-  if(!validarEmail(email)){
-    erroEl.textContent='Email inválido — verifique o formato.';
-    erroEl.style.display='block';
-    return;
-  }
+  if(!email||!senha){erroEl.textContent='Preencha email e senha.';erroEl.style.display='block';return;}
+  if(!validarEmail(email)){erroEl.textContent='Email inválido — verifique o formato.';erroEl.style.display='block';return;}
 
-  btn.textContent='Entrando...';
-  btn.disabled=true;
   erroEl.style.display='none';
+  btn.disabled=true; btn.style.opacity='.7'; btn.style.cursor='not-allowed';
+  if(btnTxt) btnTxt.textContent='Entrando...';
+  if(progressWrap) progressWrap.style.display='block';
+
+  const setProgress=(pct,txt)=>{
+    if(progressBar) progressBar.style.width=pct+'%';
+    if(progressTxt) progressTxt.textContent=txt;
+    if(progressPct) progressPct.textContent=pct+'%';
+  };
+
+  setProgress(15,'Verificando credenciais...');
 
   try{
     const f=window._firebase;
     if(!f||!f.firebaseOk){
-      // Modo local — entra direto
       document.getElementById('tela-login').style.display='none';
       document.getElementById('tela-app').style.display='flex';
       return;
     }
-    await f.signInWithEmailAndPassword(f.auth, email, senha);
-    // onAuthStateChanged vai cuidar do resto
+    setTimeout(()=>setProgress(40,'Autenticando...'),300);
+    setTimeout(()=>setProgress(65,'Carregando perfil...'),800);
+    await f.signInWithEmailAndPassword(f.auth,email,senha);
+    setProgress(85,'Preparando o app...');
+    setTimeout(()=>setProgress(100,'Pronto! ✓'),300);
   }catch(e){
     let msg='Email ou senha incorretos.';
     if(e.code==='auth/user-not-found') msg='Usuário não encontrado.';
-    if(e.code==='auth/wrong-password') msg='Senha incorreta.';
+    if(e.code==='auth/wrong-password'||e.code==='auth/invalid-credential') msg='Senha incorreta.';
     if(e.code==='auth/invalid-email') msg='Email inválido.';
     if(e.code==='auth/too-many-requests') msg='Muitas tentativas. Aguarde alguns minutos.';
-    erroEl.textContent=msg;
-    erroEl.style.display='block';
-    btn.textContent='Entrar';
-    btn.disabled=false;
+    erroEl.textContent=msg; erroEl.style.display='block';
+    if(progressWrap) progressWrap.style.display='none';
+    if(progressBar) progressBar.style.width='0%';
+    btn.disabled=false; btn.style.opacity='1'; btn.style.cursor='pointer';
+    if(btnTxt) btnTxt.textContent='Entrar';
   }
 }
-
 async function fazerLogout(){
   try{
     const f=window._firebase;
