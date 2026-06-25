@@ -1248,6 +1248,12 @@ tbody tr:hover td{background:var(--surface2)}
   </div>
 </div>
 
+<!-- BOTÃO FLUTUANTE INSTALAR (aparece após fechar o banner) -->
+<div id="pwa-fab" style="display:none;position:fixed;bottom:90px;right:20px;z-index:9997;flex-direction:column;align-items:flex-end;gap:6px" onclick="abrirPWAManual()">
+  <div style="background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:6px 10px;font-size:11px;color:var(--muted);white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.3)">Instalar app</div>
+  <div style="width:44px;height:44px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 16px rgba(200,169,110,.35);cursor:pointer">📲</div>
+</div>
+
 <!-- ── MODAL CONFIGURAÇÕES ─────────────────────────────────────────────────── -->
 <div id="modal-config" style="display:none;position:fixed;inset:0;background:rgba(8,8,8,0.85);backdrop-filter:blur(6px);align-items:center;justify-content:center;z-index:200;padding:20px">
   <div style="width:100%;max-width:440px;background:var(--surface);border:1px solid var(--border2);border-radius:18px;overflow:hidden">
@@ -5258,21 +5264,45 @@ let _pwaPrompt = null;
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   _pwaPrompt = e;
-  // Mostra banner após 3s do login
-  setTimeout(mostrarPWABanner, 3000);
+  setTimeout(mostrarPWABanner, 4000);
 });
 
-function mostrarPWABanner(){
-  // Não mostra se já instalado ou já fechou hoje
-  if(window.matchMedia('(display-mode: standalone)').matches) return;
-  if(localStorage.getItem('fin_pwa_dismissed') === new Date().toDateString()) return;
-  const banner = document.getElementById('pwa-banner');
-  if(banner && _pwaPrompt) banner.style.display='block';
-  // iOS Safari
+// Verifica se instalou — checa localStorage E Firebase
+async function _pwaJaInstalou(){
+  // 1. Se está rodando como standalone — instalado neste dispositivo
+  if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) return true;
+  // 2. Se salvou localmente que instalou
+  if(localStorage.getItem('fin_pwa_instalado') === '1') return true;
+  // 3. Verifica no Firebase (instalou em outro dispositivo)
+  if(window._db && window._ref && window._onValue && window._firebaseUser){
+    try{
+      const snap = await new Promise(res=>{
+        window._onValue(window._ref(window._db,`usuarios/${window._firebaseUser.uid}/pwaInstalado`),res,{onlyOnce:true});
+      });
+      if(snap.val() === true){
+        localStorage.setItem('fin_pwa_instalado','1');
+        return true;
+      }
+    }catch(e){}
+  }
+  return false;
+}
+
+function _pwaDeveMostrarHoje(){
+  const hoje = new Date().toDateString();
+  const ultimo = localStorage.getItem('fin_pwa_ultimo_aviso');
+  return !ultimo || ultimo !== hoje;
+}
+
+async function mostrarPWABanner(){
+  if(await _pwaJaInstalou()) return;
+  if(!_pwaDeveMostrarHoje()) return;
+
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone;
-  if(isIOS && !localStorage.getItem('fin_ios_dismissed')){
-    const iosBanner = document.getElementById('ios-banner');
-    if(iosBanner) setTimeout(()=>iosBanner.style.display='block', 3000);
+  if(_pwaPrompt){
+    document.getElementById('pwa-banner').style.display='block';
+  } else if(isIOS){
+    document.getElementById('ios-banner').style.display='block';
   }
 }
 
@@ -5280,21 +5310,45 @@ async function instalarPWA(){
   if(!_pwaPrompt) return;
   _pwaPrompt.prompt();
   const result = await _pwaPrompt.userChoice;
-  console.log('[PWA] resultado:', result.outcome);
   _pwaPrompt = null;
-  fecharPWABanner();
+  fecharPWABanner(true);
+  if(result.outcome === 'accepted'){
+    // Salva que instalou — localStorage e Firebase
+    localStorage.setItem('fin_pwa_instalado','1');
+    if(window._db && window._set && window._ref && window._firebaseUser){
+      try{ window._set(window._ref(window._db,`usuarios/${window._firebaseUser.uid}/pwaInstalado`), true); }catch(e){}
+    }
+    const fab = document.getElementById('pwa-fab');
+    if(fab) fab.style.display='none';
+  }
 }
 
-function fecharPWABanner(){
-  const banner = document.getElementById('pwa-banner');
-  if(banner) banner.style.display='none';
-  localStorage.setItem('fin_pwa_dismissed', new Date().toDateString());
+function fecharPWABanner(instalou=false){
+  document.getElementById('pwa-banner').style.display='none';
+  if(!instalou){
+    // Recusou — registra hoje, mostra de novo amanhã
+    localStorage.setItem('fin_pwa_ultimo_aviso', new Date().toDateString());
+    // Mostra FAB para instalar quando quiser
+    if(_pwaPrompt){
+      const fab = document.getElementById('pwa-fab');
+      if(fab) fab.style.display='flex';
+    }
+  }
 }
 
 function fecharIOSBanner(){
-  const banner = document.getElementById('ios-banner');
-  if(banner) banner.style.display='none';
-  localStorage.setItem('fin_ios_dismissed','1');
+  document.getElementById('ios-banner').style.display='none';
+  localStorage.setItem('fin_pwa_ultimo_aviso', new Date().toDateString());
+}
+
+async function abrirPWAManual(){
+  if(await _pwaJaInstalou()) return;
+  if(_pwaPrompt){
+    document.getElementById('pwa-banner').style.display='block';
+  } else {
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    if(isIOS) document.getElementById('ios-banner').style.display='block';
+  }
 }
 
 // ─── PWA SERVICE WORKER ──────────────────────────────────────────────────────
