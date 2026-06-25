@@ -30,11 +30,66 @@
     document.getElementById('tela-login').style.display = 'flex';
     document.getElementById('tela-app').style.display = 'none';
   };
-  const mostrarApp = () => {
+
+  const mostrarApp = (nome) => {
     document.getElementById('loading').style.display = 'none';
     document.getElementById('tela-login').style.display = 'none';
-    document.getElementById('tela-app').style.display = 'flex';
+    // Verifica se é o primeiro acesso do dia
+    const hoje = new Date().toDateString();
+    const ultimoAcesso = localStorage.getItem('fin_ultimo_acesso');
+    const primeiroAcessoHoje = ultimoAcesso !== hoje;
+    localStorage.setItem('fin_ultimo_acesso', hoje);
+
+    if(primeiroAcessoHoje && nome){
+      // Mostra boas-vindas por 2.2s antes de abrir o app
+      mostrarBemVindo(nome, () => {
+        document.getElementById('tela-app').style.display = 'flex';
+      });
+    } else {
+      document.getElementById('tela-app').style.display = 'flex';
+    }
   };
+
+  function mostrarBemVindo(nome, callback){
+    const tela = document.getElementById('tela-bemvindo');
+    const nomeEl = document.getElementById('bv-nome');
+    const saudacaoEl = document.getElementById('bv-saudacao');
+    const fraseEl = document.getElementById('bv-frase');
+    const progress = document.getElementById('bv-progress');
+
+    // Saudação por horário
+    const hora = new Date().getHours();
+    const saudacao = hora < 12 ? 'Bom dia,' : hora < 18 ? 'Boa tarde,' : 'Boa noite,';
+    const frases = [
+      'Suas finanças estão te esperando ✨',
+      'Vamos organizar o seu dia 💛',
+      'Controle total nas suas mãos 📊',
+      'Cada real conta. Vamos lá! 🚀',
+    ];
+    const frase = frases[Math.floor(Math.random() * frases.length)];
+
+    if(saudacaoEl) saudacaoEl.textContent = saudacao;
+    if(nomeEl) nomeEl.textContent = nome.split(' ')[0]; // só primeiro nome
+    if(fraseEl) fraseEl.textContent = frase;
+
+    tela.style.display = 'flex';
+
+    // Barra de progresso
+    setTimeout(() => { if(progress) progress.style.width = '100%'; }, 100);
+
+    // Transição saindo
+    setTimeout(() => {
+      tela.style.transition = 'opacity .5s ease, transform .5s ease';
+      tela.style.opacity = '0';
+      tela.style.transform = 'scale(1.04)';
+      setTimeout(() => {
+        tela.style.display = 'none';
+        tela.style.opacity = '1';
+        tela.style.transform = '';
+        if(callback) callback();
+      }, 500);
+    }, 2000);
+  }
 
   try {
     const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
@@ -88,7 +143,8 @@
           }catch(e){ window._userRole = 'cliente'; }
         }
         _userRole = window._userRole;
-        mostrarApp();
+        const nomeExibicao = user.displayName || user.email?.split('@')[0] || '';
+        mostrarApp(nomeExibicao);
         const nomeEl = document.getElementById('user-nome');
         if(nomeEl) nomeEl.textContent = user.displayName || user.email;
         setTimeout(()=>setupPerfilUI(), 100);
@@ -229,6 +285,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .dp-footer button{background:none;border:none;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;padding:3px 8px;border-radius:4px;transition:all .15s}
 .dp-clear{color:var(--muted)}.dp-clear:hover{color:var(--red);background:var(--red-s)}
 .dp-today-btn{color:var(--accent)}.dp-today-btn:hover{background:var(--accent-s)}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
 @keyframes slidePWA{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
 @media(max-width:640px){#pwa-banner,#ios-banner{right:12px!important;left:12px!important;bottom:80px!important;max-width:100%!important}}
 .section-hidden{display:none!important}
@@ -413,6 +470,18 @@ tbody tr:hover td{background:var(--surface2)}
 <div id="loading" style="position:fixed;inset:0;background:#0a0a0a;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;z-index:999">
   <div style="font-family:'DM Serif Display',serif;font-size:28px;color:#e8c96d">FinRossi</div>
   <div style="width:32px;height:32px;border:3px solid #222;border-top-color:#4ade80;border-radius:50%;animation:spin .8s linear infinite"></div>
+</div>
+
+<!-- TELA DE BOAS-VINDAS -->
+<div id="tela-bemvindo" style="display:none;position:fixed;inset:0;background:#0a0a0a;align-items:center;justify-content:center;flex-direction:column;z-index:998;gap:0">
+  <div style="text-align:center;animation:fadeInUp .6s ease forwards">
+    <div id="bv-saudacao" style="font-size:15px;color:#888;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">Bem-vindo de volta</div>
+    <div id="bv-nome" style="font-family:'DM Serif Display',serif;font-size:40px;color:#e8c96d;margin-bottom:6px">Lucas</div>
+    <div id="bv-frase" style="font-size:14px;color:#555;margin-bottom:32px">Suas finanças estão te esperando</div>
+    <div style="width:48px;height:2px;background:rgba(200,169,110,.3);border-radius:2px;margin:0 auto;overflow:hidden">
+      <div id="bv-progress" style="height:100%;width:0%;background:#C8A96E;border-radius:2px;transition:width 1.8s ease"></div>
+    </div>
+  </div>
 </div>
 
 <!-- TELA DE LOGIN -->
