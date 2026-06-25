@@ -1,11 +1,12 @@
 {
-  "name": "Financeiro Pessoal",
-  "short_name": "Financeiro",
-  "description": "Controle financeiro pessoal — receitas, despesas, investimentos e metas",
-  "start_url": "/financeiro/",
+  "name": "FinRossi",
+  "short_name": "FinRossi",
+  "description": "Controle financeiro pessoal simples e inteligente",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#0f0f0f",
-  "theme_color": "#0f0f0f",
+  "theme_color": "#C8A96E",
   "orientation": "portrait-primary",
   "icons": [
     {
