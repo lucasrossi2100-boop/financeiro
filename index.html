@@ -56,39 +56,108 @@
     const saudacaoEl = document.getElementById('bv-saudacao');
     const fraseEl = document.getElementById('bv-frase');
     const progress = document.getElementById('bv-progress');
+    const logoEl = document.getElementById('bv-logo');
+    const linhaEl = document.getElementById('bv-linha');
+    const loadingTxt = document.getElementById('bv-loading-txt');
+    const feats = document.querySelectorAll('.bv-feat');
 
-    // Saudação por horário
     const hora = new Date().getHours();
-    const saudacao = hora < 12 ? 'Bom dia,' : hora < 18 ? 'Boa tarde,' : 'Boa noite,';
+    const saudacao = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
     const frases = [
       'Suas finanças estão te esperando ✨',
       'Vamos organizar o seu dia 💛',
       'Controle total nas suas mãos 📊',
       'Cada real conta. Vamos lá! 🚀',
+      'Bem-vindo ao seu painel financeiro 🏆',
     ];
-    const frase = frases[Math.floor(Math.random() * frases.length)];
 
-    if(saudacaoEl) saudacaoEl.textContent = saudacao;
-    if(nomeEl) nomeEl.textContent = nome.split(' ')[0]; // só primeiro nome
-    if(fraseEl) fraseEl.textContent = frase;
+    if(saudacaoEl) saudacaoEl.textContent = saudacao + ',';
+    if(nomeEl) nomeEl.textContent = nome.split(' ')[0];
+    if(fraseEl) fraseEl.textContent = frases[Math.floor(Math.random()*frases.length)];
 
     tela.style.display = 'flex';
 
-    // Barra de progresso
-    setTimeout(() => { if(progress) progress.style.width = '100%'; }, 100);
+    // ── Partículas flutuantes ──
+    const canvas = document.getElementById('bv-canvas');
+    if(canvas){
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const ctx = canvas.getContext('2d');
+      const particles = Array.from({length:40},()=>({
+        x: Math.random()*canvas.width,
+        y: Math.random()*canvas.height,
+        r: Math.random()*1.5+.3,
+        vx: (Math.random()-.5)*.3,
+        vy: (Math.random()-.5)*.3,
+        a: Math.random()*.4+.1,
+      }));
+      let animId;
+      const drawParticles = () => {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        particles.forEach(p=>{
+          ctx.beginPath();
+          ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+          ctx.fillStyle=`rgba(200,169,110,${p.a})`;
+          ctx.fill();
+          p.x+=p.vx; p.y+=p.vy;
+          if(p.x<0) p.x=canvas.width;
+          if(p.x>canvas.width) p.x=0;
+          if(p.y<0) p.y=canvas.height;
+          if(p.y>canvas.height) p.y=0;
+        });
+        animId = requestAnimationFrame(drawParticles);
+      };
+      drawParticles();
 
-    // Transição saindo
-    setTimeout(() => {
-      tela.style.transition = 'opacity .5s ease, transform .5s ease';
-      tela.style.opacity = '0';
-      tela.style.transform = 'scale(1.04)';
-      setTimeout(() => {
-        tela.style.display = 'none';
-        tela.style.opacity = '1';
-        tela.style.transform = '';
+      // Para as partículas ao sair
+      setTimeout(()=>cancelAnimationFrame(animId), 3200);
+    }
+
+    // ── Sequência de animações ──
+    // 0ms — logo aparece
+    setTimeout(()=>{ if(logoEl){logoEl.style.opacity='1';logoEl.style.transform='translateY(0)';} }, 100);
+
+    // 300ms — saudação
+    setTimeout(()=>{ if(saudacaoEl){saudacaoEl.style.opacity='1';} }, 300);
+
+    // 600ms — nome com efeito tipo digitando
+    setTimeout(()=>{
+      if(nomeEl){
+        nomeEl.style.opacity='1';
+        nomeEl.style.transform='translateY(0)';
+      }
+    }, 600);
+
+    // 900ms — linha
+    setTimeout(()=>{ if(linhaEl) linhaEl.style.width='160px'; }, 900);
+
+    // 1100ms — frase
+    setTimeout(()=>{ if(fraseEl) fraseEl.style.opacity='1'; }, 1100);
+
+    // 1300ms — features em cascata
+    feats.forEach((f,i)=>{
+      setTimeout(()=>{
+        f.style.opacity='1';
+        f.style.transform='translateY(0)';
+      }, 1300 + i*100);
+    });
+
+    // 1600ms — barra de progresso + loading txt
+    setTimeout(()=>{
+      if(progress) progress.style.width='100%';
+      if(loadingTxt) loadingTxt.style.opacity='1';
+    }, 1600);
+
+    // 3000ms — transição de saída
+    setTimeout(()=>{
+      tela.style.transition='opacity .6s ease';
+      tela.style.opacity='0';
+      setTimeout(()=>{
+        tela.style.display='none';
+        tela.style.opacity='1';
         if(callback) callback();
-      }, 500);
-    }, 2000);
+      }, 600);
+    }, 3000);
   }
 
   try {
@@ -473,14 +542,52 @@ tbody tr:hover td{background:var(--surface2)}
 </div>
 
 <!-- TELA DE BOAS-VINDAS -->
-<div id="tela-bemvindo" style="display:none;position:fixed;inset:0;background:#0a0a0a;align-items:center;justify-content:center;flex-direction:column;z-index:998;gap:0">
-  <div style="text-align:center;animation:fadeInUp .6s ease forwards">
-    <div id="bv-saudacao" style="font-size:15px;color:#888;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">Bem-vindo de volta</div>
-    <div id="bv-nome" style="font-family:'DM Serif Display',serif;font-size:40px;color:#e8c96d;margin-bottom:6px">Lucas</div>
-    <div id="bv-frase" style="font-size:14px;color:#555;margin-bottom:32px">Suas finanças estão te esperando</div>
-    <div style="width:48px;height:2px;background:rgba(200,169,110,.3);border-radius:2px;margin:0 auto;overflow:hidden">
-      <div id="bv-progress" style="height:100%;width:0%;background:#C8A96E;border-radius:2px;transition:width 1.8s ease"></div>
+<div id="tela-bemvindo" style="display:none;position:fixed;inset:0;background:#080808;align-items:center;justify-content:center;flex-direction:column;z-index:998;overflow:hidden">
+  <!-- Partículas de fundo -->
+  <canvas id="bv-canvas" style="position:absolute;inset:0;width:100%;height:100%;opacity:.5"></canvas>
+
+  <!-- Conteúdo central -->
+  <div style="position:relative;text-align:center;z-index:2">
+    <!-- Logo pulsando -->
+    <div id="bv-logo" style="font-family:'DM Serif Display',serif;font-size:20px;color:rgba(200,169,110,.4);letter-spacing:8px;text-transform:uppercase;margin-bottom:40px;opacity:0;transform:translateY(-10px);transition:all .6s ease">FinRossi</div>
+
+    <!-- Saudação -->
+    <div id="bv-saudacao" style="font-size:13px;color:#555;letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;opacity:0;transition:all .5s ease"></div>
+
+    <!-- Nome principal -->
+    <div id="bv-nome" style="font-family:'DM Serif Display',serif;font-size:52px;color:#e8c96d;line-height:1;margin-bottom:16px;opacity:0;transform:translateY(20px);transition:all .7s cubic-bezier(.34,1.56,.64,1)"></div>
+
+    <!-- Linha decorativa -->
+    <div id="bv-linha" style="width:0px;height:1px;background:linear-gradient(90deg,transparent,#C8A96E,transparent);margin:0 auto 20px;transition:width 1s ease"></div>
+
+    <!-- Frase -->
+    <div id="bv-frase" style="font-size:14px;color:#444;margin-bottom:48px;opacity:0;transition:all .5s ease;min-height:20px"></div>
+
+    <!-- Ícones de features aparecendo -->
+    <div id="bv-features" style="display:flex;gap:28px;justify-content:center;margin-bottom:40px">
+      <div class="bv-feat" style="opacity:0;transform:translateY(10px);transition:all .4s ease;text-align:center">
+        <div style="font-size:22px;margin-bottom:4px">📊</div>
+        <div style="font-size:10px;color:#444;letter-spacing:.5px">Dashboard</div>
+      </div>
+      <div class="bv-feat" style="opacity:0;transform:translateY(10px);transition:all .4s ease;text-align:center">
+        <div style="font-size:22px;margin-bottom:4px">💰</div>
+        <div style="font-size:10px;color:#444;letter-spacing:.5px">Lançamentos</div>
+      </div>
+      <div class="bv-feat" style="opacity:0;transform:translateY(10px);transition:all .4s ease;text-align:center">
+        <div style="font-size:22px;margin-bottom:4px">🎯</div>
+        <div style="font-size:10px;color:#444;letter-spacing:.5px">Metas</div>
+      </div>
+      <div class="bv-feat" style="opacity:0;transform:translateY(10px);transition:all .4s ease;text-align:center">
+        <div style="font-size:22px;margin-bottom:4px">📈</div>
+        <div style="font-size:10px;color:#444;letter-spacing:.5px">Investimentos</div>
+      </div>
     </div>
+
+    <!-- Barra de progresso -->
+    <div style="width:180px;height:2px;background:rgba(255,255,255,.06);border-radius:2px;margin:0 auto;overflow:hidden">
+      <div id="bv-progress" style="height:100%;width:0%;background:linear-gradient(90deg,#8a6a1a,#C8A96E,#e8c96d);border-radius:2px;transition:width 2.2s cubic-bezier(.4,0,.2,1)"></div>
+    </div>
+    <div id="bv-loading-txt" style="font-size:11px;color:#333;margin-top:10px;letter-spacing:1px;opacity:0;transition:opacity .4s">Carregando...</div>
   </div>
 </div>
 
