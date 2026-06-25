@@ -12,19 +12,27 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="FinRossi">
-<meta name="theme-color" content="#0f0f0f">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="FinRossi">
-<link rel="apple-touch-icon" href="icon-192.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="description" content="Controle financeiro pessoal simples e inteligente">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
 <!-- Firebase SDK -->
 <script type="module">
 (async () => {
+  const mostrarLogin = () => {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('tela-login').style.display = 'flex';
+    document.getElementById('tela-app').style.display = 'none';
+  };
+  const mostrarApp = () => {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('tela-login').style.display = 'none';
+    document.getElementById('tela-app').style.display = 'flex';
+  };
+
   try {
     const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
     const { getDatabase, ref, set, onValue } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js");
@@ -46,61 +54,64 @@
 
     window._firebase = { db, ref, set, onValue, auth, signInWithEmailAndPassword, signOut, onAuthStateChanged, firebaseOk: true };
 
-    // Monitora estado de autenticação
+    // Timeout de segurança: se auth demorar +8s, mostra login
+    let authResolvido = false;
+    const authTimeout = setTimeout(() => {
+      if(!authResolvido){
+        authResolvido = true;
+        console.warn('[FinRossi] Auth timeout — mostrando login');
+        mostrarLogin();
+        window._fbReady = true;
+        document.dispatchEvent(new Event('fbReady'));
+      }
+    }, 8000);
+
     onAuthStateChanged(auth, async (user) => {
+      if(authResolvido) return;
+      authResolvido = true;
+      clearTimeout(authTimeout);
       window._firebaseUser = user;
+
       if (user) {
-        document.getElementById('tela-login').style.display = 'none';
-        document.getElementById('tela-app').style.display = 'flex';
-        const nomeEl = document.getElementById('user-nome');
-        if (nomeEl) nomeEl.textContent = user.displayName || user.email;
-        // Busca role do Firebase antes de configurar UI
         if(user.email === 'lucasrossi2100@gmail.com'){
           window._userRole = 'socio';
         } else {
           try{
-            const snap = await new Promise(res=>onValue(ref(db,`usuarios/${user.uid}/role`),res,{onlyOnce:true}));
-            window._userRole = snap.val()||'cliente';
-          }catch(e){ window._userRole='cliente'; }
+            const snap = await new Promise((res, rej) => {
+              const unsub = onValue(ref(db,`usuarios/${user.uid}/role`), s => { unsub(); res(s); }, {onlyOnce:true});
+              setTimeout(()=>rej(new Error('timeout')), 3000);
+            });
+            window._userRole = snap.val() || 'cliente';
+          }catch(e){ window._userRole = 'cliente'; }
         }
         _userRole = window._userRole;
+        mostrarApp();
+        const nomeEl = document.getElementById('user-nome');
+        if(nomeEl) nomeEl.textContent = user.displayName || user.email;
         setTimeout(()=>setupPerfilUI(), 100);
         setTimeout(()=>initSidebar(), 150);
         setTimeout(()=>initAvatar(), 300);
         setTimeout(()=>mostrarPWABanner(), 4000);
         setTimeout(()=>{ loadCategorias(); populateCatSelects(); }, 200);
       } else {
-        document.getElementById('tela-login').style.display = 'flex';
-        document.getElementById('tela-app').style.display = 'none';
-        _userRole = null;
+        mostrarLogin();
       }
-      document.getElementById('loading').style.display = 'none';
+
+      window._fbReady = true;
+      document.dispatchEvent(new Event('fbReady'));
     });
 
   } catch(e) {
-    console.warn('Firebase não disponível:', e.message);
+    console.warn('[FinRossi] Firebase erro:', e.message);
     window._firebase = { firebaseOk: false };
-    // Sem Firebase — mostra app direto (modo local)
-    document.getElementById('tela-login').style.display = 'none';
-    document.getElementById('tela-app').style.display = 'flex';
+    // Firebase falhou — mostra login (nunca abre o app sem autenticação)
     document.getElementById('loading').style.display = 'none';
-  }
-  window._fbReady = true;
-  document.dispatchEvent(new Event('fbReady'));
-})();
-</script>
-<script>
-// Fallback se Firebase demorar mais de 5s
-setTimeout(() => {
-  if (!window._fbReady) {
+    document.getElementById('tela-login').style.display = 'flex';
+    document.getElementById('tela-app').style.display = 'none';
     window._fbReady = true;
-    window._firebase = { firebaseOk: false };
-    document.getElementById('tela-login').style.display = 'none';
-    document.getElementById('tela-app').style.display = 'flex';
-    document.getElementById('loading').style.display = 'none';
     document.dispatchEvent(new Event('fbReady'));
   }
-}, 5000);
+})();
 </script>
 <style>
 /* ── TEMA ESCURO (padrão) ── */
@@ -1796,11 +1807,20 @@ function destroyChart(id){if(charts[id]){charts[id].destroy();delete charts[id]}
 
 // ─── STORAGE ─────────────────────────────────────────────────────────────────
 function lsLoad(){
+  // Carrega perfis fixos
   ['pessoal','finrossi'].forEach(p=>{
     ['lancs','invs','metas','objs','notas','assinaturas','recorrentes','cartoes'].forEach(t=>{
       try{const v=localStorage.getItem(`fin3_${p}_${t}`);if(v)DATA[p][t]=JSON.parse(v)}catch{}
     });
   });
+  // Carrega perfil de cliente (UID) se existir
+  const uid = window._firebaseUser?.uid;
+  if(uid && uid !== 'pessoal' && uid !== 'finrossi'){
+    if(!DATA[uid]) DATA[uid]={lancs:[],invs:[],metas:[],objs:[],notas:[],assinaturas:[],recorrentes:[],cartoes:[]};
+    ['lancs','invs','metas','objs','notas','assinaturas','recorrentes','cartoes'].forEach(t=>{
+      try{const v=localStorage.getItem(`fin3_${uid}_${t}`);if(v)DATA[uid][t]=JSON.parse(v)}catch{}
+    });
+  }
 }
 function lsSave(profile,type){
   if(!DATA[profile]) DATA[profile]={lancs:[],invs:[],metas:[],objs:[],notas:[],assinaturas:[],recorrentes:[],cartoes:[]};
@@ -1808,18 +1828,46 @@ function lsSave(profile,type){
 }
 
 async function fbSave(profile,type){
-  if(!fbOk||!_db||!_ref||!_set)return;
+  if(!fbOk||!_db||!_ref||!_set) return;
   try{
-    // Admin salva no perfil nomeado, cliente salva no próprio uid
-    const path=isAdmin()?`financeiro/${profile}/${type}`:`financeiro/${profile}/${type}`;
-    const data=DATA[profile][type];
-    await _set(_ref(_db,path),data||null);
+    const role = window._userRole || _userRole;
+    const savePath = (role==='cliente' && window._firebaseUser?.uid)
+      ? `financeiro/${window._firebaseUser.uid}/${type}`
+      : `financeiro/${profile}/${type}`;
+    const data = DATA[profile][type];
+    await _set(_ref(_db, savePath), data||null);
   }catch(e){console.warn('fbSave err',e)}
 }
 
 async function saveCollection(type){
-  lsSave(cp,type);
-  fbSave(cp,type); // não await — salva em background sem travar UI
+  // Garante que DATA[cp] existe
+  if(!DATA[cp]) DATA[cp]={lancs:[],invs:[],metas:[],objs:[],notas:[],assinaturas:[],recorrentes:[],cartoes:[]};
+  
+  // Salva localStorage primeiro (imediato)
+  lsSave(cp, type);
+  
+  // Salva Firebase em background
+  if(fbOk && _db && _ref && _set){
+    try{
+      const role = window._userRole || _userRole;
+      // Cliente usa UID como path
+      const savePath = (role==='cliente' && window._firebaseUser?.uid)
+        ? `financeiro/${window._firebaseUser.uid}/${type}`
+        : `financeiro/${cp}/${type}`;
+      await _set(_ref(_db, savePath), DATA[cp][type] || null);
+      // Atualiza badge
+      const sb = document.getElementById('sync-badge');
+      if(sb){ sb.className='sync-badge ok'; sb.innerHTML='<span class="sync-dot"></span><span class="nav-text">Sincronizado</span>'; }
+    }catch(e){
+      console.warn('fbSave erro:', e);
+      const sb = document.getElementById('sync-badge');
+      if(sb){ sb.className='sync-badge local'; sb.innerHTML='<span class="sync-dot"></span><span class="nav-text">Salvo localmente</span>'; }
+    }
+  } else {
+    // Sem Firebase — salvo só local, badge avisa
+    const sb = document.getElementById('sync-badge');
+    if(sb && sb.className !== 'sync-badge ok'){ sb.innerHTML='<span class="sync-dot"></span><span class="nav-text">Salvo localmente</span>'; }
+  }
 }
 
 // ─── FIREBASE INIT ────────────────────────────────────────────────────────────
@@ -1863,7 +1911,11 @@ function initFB(){
             const val=snap.val();
             if(val){
               ['lancs','invs','metas','objs','notas','assinaturas','recorrentes','cartoes'].forEach(t=>{
-                if(val[t]!==undefined) DATA[uid][t]=Array.isArray(val[t])?val[t]:Object.values(val[t]||{});
+                if(val[t]!==undefined){
+                  DATA[uid][t]=Array.isArray(val[t])?val[t]:Object.values(val[t]||{});
+                  // Salva no localStorage com a chave do UID para persistir offline
+                  try{localStorage.setItem(`fin3_${uid}_${t}`,JSON.stringify(DATA[uid][t]));}catch{}
+                }
               });
             }
             refreshAll();
