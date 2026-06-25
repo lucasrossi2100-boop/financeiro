@@ -25,161 +25,41 @@
 <!-- Firebase SDK -->
 <script type="module">
 (async () => {
-  const mostrarLogin = () => {
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('tela-login').style.display = 'flex';
-    document.getElementById('tela-app').style.display = 'none';
-  };
+  const show = (id, d='block') => { const el=document.getElementById(id); if(el) el.style.display=d; };
+  const hide = (id) => { const el=document.getElementById(id); if(el) el.style.display='none'; };
 
-  const mostrarApp = (nome) => {
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('tela-login').style.display = 'none';
-
+  const irParaLogin = () => { hide('loading'); show('tela-login','flex'); hide('tela-app'); };
+  const irParaApp   = (nome) => {
+    hide('loading'); hide('tela-login');
     const hoje = new Date().toDateString();
-    const ultimoAcesso = localStorage.getItem('fin_ultimo_acesso');
-    const primeiroAcessoHoje = ultimoAcesso !== hoje;
+    const primeiro = localStorage.getItem('fin_ultimo_acesso') !== hoje;
     localStorage.setItem('fin_ultimo_acesso', hoje);
-
-    const abrirApp = () => {
-      document.getElementById('tela-app').style.display = 'flex';
-    };
-
-    if(primeiroAcessoHoje && nome){
-      try{
-        mostrarBemVindo(nome, abrirApp);
-      }catch(e){
-        console.warn('Boas-vindas erro:', e);
-        abrirApp();
-      }
+    if(primeiro && nome){
+      // Delega para função global (definida no script principal)
+      window._abrirComBoasVindas(nome, () => show('tela-app','flex'));
     } else {
-      abrirApp();
+      show('tela-app','flex');
     }
   };
 
-  function mostrarBemVindo(nome, callback){
-    const tela = document.getElementById('tela-bemvindo');
-    const nomeEl = document.getElementById('bv-nome');
-    const saudacaoEl = document.getElementById('bv-saudacao');
-    const fraseEl = document.getElementById('bv-frase');
-    const progress = document.getElementById('bv-progress');
-    const logoEl = document.getElementById('bv-logo');
-    const linhaEl = document.getElementById('bv-linha');
-    const loadingTxt = document.getElementById('bv-loading-txt');
-    const feats = document.querySelectorAll('.bv-feat');
-
-    const hora = new Date().getHours();
-    const saudacao = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
-    const frases = [
-      'Suas finanças estão te esperando ✨',
-      'Vamos organizar o seu dia 💛',
-      'Controle total nas suas mãos 📊',
-      'Cada real conta. Vamos lá! 🚀',
-      'Bem-vindo ao seu painel financeiro 🏆',
-    ];
-
-    if(saudacaoEl) saudacaoEl.textContent = saudacao + ',';
-    if(nomeEl) nomeEl.textContent = nome.split(' ')[0];
-    if(fraseEl) fraseEl.textContent = frases[Math.floor(Math.random()*frases.length)];
-
-    tela.style.display = 'flex';
-
-    // ── Partículas flutuantes ──
-    const canvas = document.getElementById('bv-canvas');
-    if(canvas){
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      const ctx = canvas.getContext('2d');
-      const particles = Array.from({length:40},()=>({
-        x: Math.random()*canvas.width,
-        y: Math.random()*canvas.height,
-        r: Math.random()*1.5+.3,
-        vx: (Math.random()-.5)*.3,
-        vy: (Math.random()-.5)*.3,
-        a: Math.random()*.4+.1,
-      }));
-      let animId;
-      const drawParticles = () => {
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        particles.forEach(p=>{
-          ctx.beginPath();
-          ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-          ctx.fillStyle=`rgba(200,169,110,${p.a})`;
-          ctx.fill();
-          p.x+=p.vx; p.y+=p.vy;
-          if(p.x<0) p.x=canvas.width;
-          if(p.x>canvas.width) p.x=0;
-          if(p.y<0) p.y=canvas.height;
-          if(p.y>canvas.height) p.y=0;
-        });
-        animId = requestAnimationFrame(drawParticles);
-      };
-      drawParticles();
-
-      // Para as partículas ao sair
-      setTimeout(()=>cancelAnimationFrame(animId), 3200);
+  // Timeout de segurança — se Firebase travar, vai para login
+  let iniciou = false;
+  setTimeout(() => {
+    if(!iniciou){
+      iniciou = true;
+      console.warn('[FinRossi] timeout — indo para login');
+      irParaLogin();
+      window._fbReady = true;
+      document.dispatchEvent(new Event('fbReady'));
     }
-
-    // ── Sequência de animações ──
-    // 0ms — logo aparece
-    setTimeout(()=>{ if(logoEl){logoEl.style.opacity='1';logoEl.style.transform='translateY(0)';} }, 100);
-
-    // 300ms — saudação
-    setTimeout(()=>{ if(saudacaoEl){saudacaoEl.style.opacity='1';} }, 300);
-
-    // 600ms — nome com efeito tipo digitando
-    setTimeout(()=>{
-      if(nomeEl){
-        nomeEl.style.opacity='1';
-        nomeEl.style.transform='translateY(0)';
-      }
-    }, 600);
-
-    // 900ms — linha
-    setTimeout(()=>{ if(linhaEl) linhaEl.style.width='160px'; }, 900);
-
-    // 1100ms — frase
-    setTimeout(()=>{ if(fraseEl) fraseEl.style.opacity='1'; }, 1100);
-
-    // 1300ms — features em cascata
-    feats.forEach((f,i)=>{
-      setTimeout(()=>{
-        f.style.opacity='1';
-        f.style.transform='translateY(0)';
-      }, 1300 + i*100);
-    });
-
-    // 1600ms — barra de progresso + loading txt
-    setTimeout(()=>{
-      if(progress) progress.style.width='100%';
-      if(loadingTxt) loadingTxt.style.opacity='1';
-    }, 1600);
-
-    // 3000ms — transição de saída
-    const saida = setTimeout(()=>{
-      tela.style.transition='opacity .5s ease';
-      tela.style.opacity='0';
-      setTimeout(()=>{
-        tela.style.display='none';
-        tela.style.opacity='1';
-        if(callback) callback();
-      }, 500);
-    }, 2500);
-
-    // Segurança: se algo travar, entra no app em 5s
-    setTimeout(()=>{
-      if(tela.style.display !== 'none'){
-        tela.style.display='none';
-        if(callback) callback();
-      }
-    }, 5000);
-  }
+  }, 6000);
 
   try {
     const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
     const { getDatabase, ref, set, onValue } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js");
     const { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
 
-    const firebaseConfig = {
+    const app = initializeApp({
       apiKey: "AIzaSyC6WIL7R0ZkL4Yr3TuBqyZ_VVji3HmhSuE",
       authDomain: "lucasrossi-8dd18.firebaseapp.com",
       databaseURL: "https://lucasrossi-8dd18-default-rtdb.firebaseio.com",
@@ -187,62 +67,46 @@
       storageBucket: "lucasrossi-8dd18.firebasestorage.app",
       messagingSenderId: "673298550054",
       appId: "1:673298550054:web:373dbcfc8dc615555605e7"
-    };
+    });
 
-    const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const auth = getAuth(app);
-
     window._firebase = { db, ref, set, onValue, auth, signInWithEmailAndPassword, signOut, onAuthStateChanged, firebaseOk: true };
 
-
-    // Timeout: se auth demorar +8s na inicialização, mostra login
-    let authInicial = false;
-    const authTimeout = setTimeout(() => {
-      if(!authInicial){
-        authInicial = true;
-        mostrarLogin();
-        window._fbReady = true;
-        document.dispatchEvent(new Event('fbReady'));
-      }
-    }, 5000);
-
     onAuthStateChanged(auth, async (user) => {
-      // Cancela timeout apenas na primeira resposta
-      if(!authInicial){
-        authInicial = true;
-        clearTimeout(authTimeout);
-      }
-
+      if(!iniciou){ iniciou = true; }
       window._firebaseUser = user;
 
-      if (user) {
+      if(user){
         if(user.email === 'lucasrossi2100@gmail.com'){
           window._userRole = 'socio';
         } else {
           try{
-            const snap = await new Promise((res, rej) => {
-              const unsub = onValue(ref(db,`usuarios/${user.uid}/role`), s => { unsub(); res(s); }, {onlyOnce:true});
-              setTimeout(()=>rej(new Error('timeout')), 3000);
+            const snap = await new Promise((res,rej) => {
+              const u = onValue(ref(db,`usuarios/${user.uid}/role`), s=>{ u(); res(s); }, {onlyOnce:true});
+              setTimeout(()=>rej(), 3000);
             });
             window._userRole = snap.val() || 'cliente';
           }catch(e){ window._userRole = 'cliente'; }
         }
         _userRole = window._userRole;
-        const nomeExibicao = user.displayName || user.email?.split('@')[0] || '';
-        mostrarApp(nomeExibicao);
-        const nomeEl = document.getElementById('user-nome');
-        if(nomeEl) nomeEl.textContent = user.displayName || user.email;
+        const nome = user.displayName || user.email?.split('@')[0] || '';
+        irParaApp(nome);
+        const nEl = document.getElementById('user-nome');
+        if(nEl) nEl.textContent = user.displayName || user.email;
         setTimeout(()=>setupPerfilUI(), 100);
         setTimeout(()=>initSidebar(), 150);
         setTimeout(()=>initAvatar(), 300);
         setTimeout(()=>mostrarPWABanner(), 4000);
         setTimeout(()=>{ loadCategorias(); populateCatSelects(); }, 200);
       } else {
-        // Não logado — mostra login e reseta botão
-        mostrarLogin();
+        irParaLogin();
         const btn = document.getElementById('btn-login');
-        if(btn){ btn.textContent='Entrar'; btn.disabled=false; }
+        if(btn){ btn.disabled=false; btn.style.opacity='1'; btn.style.cursor='pointer'; }
+        const btnTxt = document.getElementById('btn-login-txt');
+        if(btnTxt) btnTxt.textContent='Entrar';
+        const pw = document.getElementById('login-progress-wrap');
+        if(pw) pw.style.display='none';
       }
 
       if(!window._fbReady){
@@ -250,15 +114,11 @@
         document.dispatchEvent(new Event('fbReady'));
       }
     });
-    });
 
   } catch(e) {
     console.warn('[FinRossi] Firebase erro:', e.message);
     window._firebase = { firebaseOk: false };
-    // Firebase falhou — mostra login (nunca abre o app sem autenticação)
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('tela-login').style.display = 'flex';
-    document.getElementById('tela-app').style.display = 'none';
+    irParaLogin();
     window._fbReady = true;
     document.dispatchEvent(new Event('fbReady'));
   }
@@ -5495,7 +5355,61 @@ function initDatePickers(){
   });
 }
 
-// ─── PWA INSTALL ─────────────────────────────────────────────────────────────
+// ─── TELA DE BOAS-VINDAS ────────────────────────────────────────────────────
+window._abrirComBoasVindas = function(nome, callback){
+  const tela = document.getElementById('tela-bemvindo');
+  if(!tela){ if(callback) callback(); return; }
+
+  const set = (id, txt) => { const el=document.getElementById(id); if(el) el.textContent=txt; };
+  const fade = (id, v) => { const el=document.getElementById(id); if(el){ el.style.opacity=v; el.style.transform=v==='1'?'translateY(0)':'translateY(20px)'; } };
+
+  const hora = new Date().getHours();
+  const saudacao = hora<12?'Bom dia':hora<18?'Boa tarde':'Boa noite';
+  const frases = ['Suas finanças estão te esperando ✨','Vamos organizar o seu dia 💛','Controle total nas suas mãos 📊','Cada real conta. Vamos lá! 🚀'];
+
+  set('bv-saudacao', saudacao+',');
+  set('bv-nome', nome.split(' ')[0]);
+  set('bv-frase', frases[Math.floor(Math.random()*frases.length)]);
+  tela.style.display = 'flex';
+  tela.style.opacity = '1';
+
+  // Partículas
+  const canvas = document.getElementById('bv-canvas');
+  let animId;
+  if(canvas){
+    canvas.width=window.innerWidth; canvas.height=window.innerHeight;
+    const ctx=canvas.getContext('2d');
+    const pts=Array.from({length:35},()=>({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*1.4+.3,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,a:Math.random()*.35+.1}));
+    const draw=()=>{ctx.clearRect(0,0,canvas.width,canvas.height);pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(200,169,110,${p.a})`;ctx.fill();p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=canvas.width;if(p.x>canvas.width)p.x=0;if(p.y<0)p.y=canvas.height;if(p.y>canvas.height)p.y=0;});animId=requestAnimationFrame(draw);};
+    draw();
+  }
+
+  // Sequência
+  const logoEl=document.getElementById('bv-logo');
+  const linhaEl=document.getElementById('bv-linha');
+  const loadTxt=document.getElementById('bv-loading-txt');
+  const progressBar=document.getElementById('bv-progress');
+  const feats=document.querySelectorAll('.bv-feat');
+
+  setTimeout(()=>{ if(logoEl){logoEl.style.opacity='1';logoEl.style.transform='translateY(0)';} },100);
+  setTimeout(()=>fade('bv-saudacao','1'),300);
+  setTimeout(()=>{ const el=document.getElementById('bv-nome');if(el){el.style.opacity='1';el.style.transform='translateY(0)';} },600);
+  setTimeout(()=>{ if(linhaEl)linhaEl.style.width='160px'; },900);
+  setTimeout(()=>fade('bv-frase','1'),1100);
+  feats.forEach((f,i)=>setTimeout(()=>{f.style.opacity='1';f.style.transform='translateY(0)';},1300+i*100));
+  setTimeout(()=>{ if(progressBar)progressBar.style.width='100%'; if(loadTxt)loadTxt.style.opacity='1'; },1600);
+
+  // Saída
+  const sair = () => {
+    if(animId) cancelAnimationFrame(animId);
+    tela.style.transition='opacity .5s ease';
+    tela.style.opacity='0';
+    setTimeout(()=>{ tela.style.display='none'; tela.style.opacity='1'; tela.style.transition=''; if(callback)callback(); },500);
+  };
+  setTimeout(sair, 2800);
+  // Segurança total
+  setTimeout(()=>{ if(tela.style.display!=='none'){ tela.style.display='none'; if(callback)callback(); } },5000);
+};
 let _pwaPrompt = null;
 
 window.addEventListener('beforeinstallprompt', e => {
