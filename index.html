@@ -34,19 +34,25 @@
   const mostrarApp = (nome) => {
     document.getElementById('loading').style.display = 'none';
     document.getElementById('tela-login').style.display = 'none';
-    // Verifica se é o primeiro acesso do dia
+
     const hoje = new Date().toDateString();
     const ultimoAcesso = localStorage.getItem('fin_ultimo_acesso');
     const primeiroAcessoHoje = ultimoAcesso !== hoje;
     localStorage.setItem('fin_ultimo_acesso', hoje);
 
-    if(primeiroAcessoHoje && nome){
-      // Mostra boas-vindas por 2.2s antes de abrir o app
-      mostrarBemVindo(nome, () => {
-        document.getElementById('tela-app').style.display = 'flex';
-      });
-    } else {
+    const abrirApp = () => {
       document.getElementById('tela-app').style.display = 'flex';
+    };
+
+    if(primeiroAcessoHoje && nome){
+      try{
+        mostrarBemVindo(nome, abrirApp);
+      }catch(e){
+        console.warn('Boas-vindas erro:', e);
+        abrirApp();
+      }
+    } else {
+      abrirApp();
     }
   };
 
@@ -149,15 +155,23 @@
     }, 1600);
 
     // 3000ms — transição de saída
-    setTimeout(()=>{
-      tela.style.transition='opacity .6s ease';
+    const saida = setTimeout(()=>{
+      tela.style.transition='opacity .5s ease';
       tela.style.opacity='0';
       setTimeout(()=>{
         tela.style.display='none';
         tela.style.opacity='1';
         if(callback) callback();
-      }, 600);
-    }, 3000);
+      }, 500);
+    }, 2500);
+
+    // Segurança: se algo travar, entra no app em 5s
+    setTimeout(()=>{
+      if(tela.style.display !== 'none'){
+        tela.style.display='none';
+        if(callback) callback();
+      }
+    }, 5000);
   }
 
   try {
@@ -191,7 +205,7 @@
         window._fbReady = true;
         document.dispatchEvent(new Event('fbReady'));
       }
-    }, 8000);
+    }, 5000);
 
     onAuthStateChanged(auth, async (user) => {
       // Cancela timeout apenas na primeira resposta
