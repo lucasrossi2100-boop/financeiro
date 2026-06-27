@@ -368,7 +368,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 .btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 
 /* ── SIDEBAR ELEMENTS ──────────────────────────────────── */
-.sb-logo{padding:0 16px 20px;border-bottom:1px solid var(--border);margin-bottom:8px}
+.sb-logo{padding:12px 16px 16px;border-bottom:1px solid var(--border);margin-bottom:8px;display:flex;align-items:center;min-height:60px}
 .sb-logo h1{font-family:'DM Serif Display',serif;font-size:20px;color:var(--accent);font-weight:400;letter-spacing:-.3px}
 .sb-logo span{font-size:11px;color:var(--muted);display:block;margin-top:2px}
 .sb-group-label{font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:1.2px;padding:10px 18px 4px;margin-top:4px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
@@ -391,8 +391,9 @@ button{-webkit-appearance:none;appearance:none;background:transparent;border:non
 }
 .nav-item:hover{background:var(--surface2);color:var(--text)}
 .nav-item.active{background:var(--accent-s);color:var(--accent);font-weight:500}
-.nav-item svg{flex-shrink:0;opacity:.7}
+.nav-item svg{flex-shrink:0;opacity:.7;width:18px!important;height:18px!important;min-width:18px;min-height:18px}
 .nav-item.active svg{opacity:1}
+.nav-item>svg,.nav-item svg{width:18px!important;height:18px!important}
 .nav-text{white-space:nowrap;overflow:hidden}
 .sb-label{font-size:13px}
 
@@ -822,7 +823,13 @@ tr:hover td{background:var(--surface2)}
 <div class="sidebar-wrap">
   <button class="sidebar-toggle" id="sb-toggle" onclick="toggleSidebar()" title="Minimizar">‹</button>
 <aside class="sidebar" id="sidebar">
-  <div class="sb-logo" style="display:flex;align-items:center;gap:8px;padding:0 12px 16px"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAADW0lEQVR4nO1VTWgcZRh+3+/7ZmZnZndnZ9M0ySbxp9RYIy1BI6UgQgq96KGmPUQ9iLSlVUEsHjz2YMCD4EXopS09FA9CQRRyaA+piLjQikpqbcXSbLJZa7O7md3Z3WR3fl8P20LRzqw/6EHyHL+/53mf5/veD2AT/3tgj2kERPz9OkQgCCkk+heVAQAw1kMfxFSAAASQ1qSx0RQRCc654EJwLklclust79uFIlGIiBRbiIhRF4S0/9mR4wcfc30w0lrSSCeNtGaYSqYvEPp3P5YOHT977cYKYxiGkRwsvkDO0AuYh7LLVIdpG6g3At3uCE7hMzsHPj35qpnRie7mFOVEHBSJq4ogAEREhkQoJKGr8rvHpl7bv0sC98iJuXOffS8484Pw71QgOCoSqjLTFK7K3MyossDlUnX2owtWpVIvl3NmpMl3T4ia4AyDkA4+N/Lm9OMioW/NDWQHB5hmTB85fXvV3rMr57Xsjfb6YnENAAgiM4jmRwCAhCKyZoonM0o663P19Xc+vvjl9X17Hp09Otlu2Iul+vw3vyBATMiRBN1wZEXZOtR/y8J9L51qtdrltdYrLzz5/hu7m7V6YaU+e+7qWsNhiDFPLsZBBKCEphr9/b5lLy5XAGBwS/LEoafttZrT7nzyxfKVnyzB0Q/i3kGPkCUlAUIKPUdwzhneqbbe/uCS2+lYdvvlqYfGRtN+QCz6jvYmCIk6zWbDskIKg5A4w4uXS2fmbqoy8zzvrRe3y4KFRDEUkQSIyBiT0RdOo2PXuiMAwBmenrv11Q9lXeGTY+Z7hycUicc0pcgMPD8AgM/nr9eqtWtLTQAkCrtuM4Yfnv/5+d05REwnE5mUvGq1EeHPNteuUl3Xx8fHRx/epqb6uuOmoe18YkiW+B+3PDKS/QsVcM593z8wfWDv3qn5S/OB7zWbrXLVmtwW7NgxvLRYvnx1pe34rusrsmAInPPRnLlUsh7YWSMt0nTNcd1KpTozMxP47roD9Rvn5VZ1iw5TTw0j0nB/cmW1YSQTG22nWnfgXofvTdBVUSwW8/l8oVCYmJjI579OpkzNWb1w+9dMSjF0yQ/oyoI31Kct2J3BrFq4sw4POv2/QHQfRwQAImKM3efsfSoJAOHeZxD/rW1iE/8IvwE4lF9XB3u/LwAAAABJRU5ErkJggg==" width="32" height="32" alt="FR" style="border-radius:6px;flex-shrink:0"><div><div style="font-family:'DM Serif Display',serif;font-size:17px;color:var(--accent);letter-spacing:-.3px;line-height:1.1">Fin<span style="font-weight:300;color:var(--text)">Rossi</span></div><span id="sb-logo-sub" style="font-size:10px;color:var(--muted)">Painel pessoal</span></div></div>
+  <div class="sb-logo">
+  <!-- Logo completa (sidebar aberta) -->
+  <img id="sb-logo-full" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADUAAAAkCAYAAAApbHJOAAADv0lEQVR4nO3WbWgbdRwH8O/vf3dJ0zTJ6tqutfjwonPSIpbqCxFnK3WK+mKIXF84nLXiOqgi7IUvVvGSvSgo+qLqHJ0PGyK+uDCYoLY4sbNuDKFOEC8dQqquT2v6mGvS3OVy9/dFDFNoexlS9cV9XuTC5Z9f/g9ffhfA4/F4PB6Px7MBKnegqspCbW0zAUAH/nztABBf4NTVZW/D3P5bnPOyN+ffILoNUBSFxWIx59yJngMNN9fc7wuGClXhMAKVIVRGIoaeWRsholHOORERd6vHuSrgvFbchI6YTYQtv8N5MU1u4/7KdVFRADEADpwXRFFoZ4xBFEWAAcRt1IQCr0x+99azRPQxV1XBLYpEf/9cVVVBrtUIHVEbiBLOgxXfx9lG48tRdmwUpV2cm8vQyZM/WABo5cdTEUdcD1mGfWZ5cXlX82PR2zkHqFhx011dnfjoqM8vNZk5c9qW/G/W3PGMvtXvJr9946lCPm/s2ffqF6oqC11dcddFup5UKVYP3XbnwK0PNrYd630usLNup5QzrIHq3X1nfx5RZrO63gQUI3J9XRvUUlVhMb8sSz5/r12wjhRy6y/Ofj94ORKp2Ksb9qAg+Rp3BIS9U9NLI/4Kfxu3LCmTyeRs20wDgKw1lxVB5j4kSgAQ3hHpDAQrOyVRvJJbz18Aty4mhl/r8/HCfn1Vf7s4Z1mgLU4Jssyz6ZWVhalkz9L8vJjR06KZy3SLEtNW5lPvL8/Mvr54LdXKnXzT6mLqWCar35Rd0+9NL67uBgC0JMpKlutJlQTDoXwBbKLh7sPPA8BPn/c/vKu68t2JX65+va/3wyjnCgNiDucKI4o5wPWuSER8fJxLU1OXxOnfp/2RSNW51PxSn2EYFufMGP1q7EpdQ33EJ7IhBn4wnVnv9Pt9J0zT2m8XnILNbQ0A4mXO1X1R0eIlb5qMMRbko4qo1YIFF3Ah+du1Mb9I9w0PdbcRxS6rqiy0th4QOY9aROQAEDRNY5xza3JystIwWGjm6szpB/rPnjnV/3jWBoVAbK6qKnj41+mZl4IVwbss0xyXJGnMyOv35M3CZ6KAOcOykwCglRk/V4qiMAAYPt596ZsPDl0EgFGlXQSA4fd69nw5+HT204EnNXXoUKTUfsutuV3K7n6njz7RmF6z115+Z6TUrQgAP37kkVvq6kPV4fpA8tGDn2RL9zerU+pgXFFYFEBLS4I0LUVAh9OSSBBkFHNWugKQ1bhzI8+pf+T/9k/ihnEO2iheiqKw7Y6Tx+PxeDwej8ezmT8AX0alOhFO+uUAAAAASUVORK5CYII=" style="display:block;height:36px;width:auto;max-width:170px" alt="FinRossi">
+  <!-- Só símbolo (sidebar colapsada) -->
+  <img id="sb-logo-symbol" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAAsCAYAAACHfIO0AAABnklEQVR4nO3Tv0scQRQH8O+7m5vd2dm9vfW8QyMItiL5QUJIacDWTrtALAIWdrZB1mtEEDsRyZ8ggYRABCvLVBYJCQSRGKLenT8w5wmH7u3eSxEVG2EXbIT9NMMMvMf3wRsglUqlkqCkBaur49lSaZAAYPj6dfjm5W7ETub7fqZSqXTWVyZGy91dI9KyQ6VtUtpiQ2vkpApE3GazACoAOOK5/geFIWHayBcKgOMApgKEjJ+MASKA15Zfvyh3e0Vl26xdl6RUrG1bRExe7GQEMACErWDbUdau8FQoDdnpffI4V9380eh7NtnKxE7GfgYA8kX3vaHNvaL26r09PYfRfnXfds1HABA72RXXzbe146AVREvWRft34+z8Z/nhmy/fP89MJ25magvCkMhmxIIcePUHAL59ejvdlTcWY495jdGJwihqBxce84bgDV+cB9HHau2klrjZ8eGRbp3+zR7s1pjoZbi5VaPnY/O/Go3mVPw9m/1/HtSPvzZPmyeuyu0AoKeT70JmJiL6kDTYrZg58T8HM+hyTZIXp1Kp1D3xD/Ofhg7ejaivAAAAAElFTkSuQmCC" style="display:none;height:40px;width:auto" alt="FR">
+  <span id="sb-logo-sub" style="display:none">Painel pessoal</span>
+</div><span id="sb-logo-sub" style="font-size:10px;color:var(--muted)">Painel pessoal</span></div></div>
   <div id="sync-badge" class="sync-badge local"><span class="sync-dot"></span><span class="nav-text">Modo local</span></div>
 
   <div class="sb-section">
@@ -5675,6 +5682,14 @@ function toggleSidebar(){
   localStorage.setItem('fin_sb_collapsed',collapsed?'1':'0');
 }
 function initSidebar(){
+  const collapsed=localStorage.getItem('fin_sidebar_collapsed')==='1';
+  const sb=document.getElementById('sidebar');
+  const btn=document.getElementById('sb-toggle');
+  const full=document.getElementById('sb-logo-full');
+  const symbol=document.getElementById('sb-logo-symbol');
+  if(collapsed){ sb.classList.add('collapsed'); if(btn)btn.textContent='›'; }
+  if(full) full.style.display=collapsed?'none':'block';
+  if(symbol) symbol.style.display=collapsed?'block':'none';
   if(localStorage.getItem('fin_sb_collapsed')==='1'){
     document.getElementById('sidebar')?.classList.add('collapsed');
     const btn=document.getElementById('sb-toggle');
