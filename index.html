@@ -420,7 +420,8 @@ tbody tr:hover td{background:var(--surface2)}
 
 <!-- LOADING -->
 <div id="loading" style="position:fixed;inset:0;background:#0a0a0a;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;z-index:999">
-  <div style="font-family:'DM Serif Display',serif;font-size:28px;color:#e8c96d">FinRossi</div>
+  <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAlC+aJAAAIrElEQVR4nO2YfYxVxRXAz5mve++77+0uu8tbqiygiyBboQ3aqqxSWqPVamOwfiyl2oIECqnV2LI02tZi/SDSr7QRXSkKCVELaWrSNLXFtgErYgERUQF1QRfY7337Pu/3zPSPh5QqTbvv0qjJ++XmZu67Z+ae886cM2cGoEqVKlWqVKlSpcrHFozZnyDiKcfA8g3f96PWoJTWWsf87ocMpeR0DVW5BxBBa/jU5Pq28xrCUCIApYRSwhiljFJKGWeUc8oF5ZxQRpjIFoNX3xzYtv1AqeQiIsBp8ASLo30qwe/+Wuu4Oi6VFpwKzgRnwuDCMAzT5AYXpilMk5sWt2wwLDAsIMah7sxPHn72kcf/hHh8nA/BgDKmoIxA3okoJVJrhSgRJSERpVFEGKEckQNyQKY1jTT6EUE5KW2t+em8Cz89YdGdT2glVTxHxDJAKc0pSSY4IURwJgzBBRemIUyTGwY3TC4MZlrMtCk3FFKlAUF5Thhlc1+fd/7wcO47KzdRgjKGE+IGExJCKKOMU2FQLqgwqDCpsIiwUFhgJEGkNLUi4KYhEkkhwwBURFBn3+29ff75s85vkUpTUrkasdIoQWyqNyklCIjlhIplCBxvE4DjebapMXX7wjk3Xj0jN5JHJYMgqLXZxj+8sfB7mylBqSr0Qtx1YLQ889it18xuyWTyKgqJjroH3EtvXu96QcXRfNry8X/5DEHBKSL+asO2KPADz/Fdp1Qo2ixqqLPgg0ve/0ysIGYUpzTXUAREJJSUoZQiJYRQJERqSKUSe/Z1D2WKEjUAZEZKhVw+cJ0oCGUY+KFGiJVHY60DdUnxwK0zkglmCJ6wDdu2rWQiYduGbRuWrZlhNNa/vvfIF276OSJSglKq1pZGqgKv5Mow1CoazPiZnAsAulIz4k4hqbQG1Eg0MkWoIiJCEQIrBZoI8fb+nsvn/WJgKM8oBqGsTVlLr5+eHSmEvu84no6i17uGSm5IECteCWJNIQCwTJawDMM0rIRlJmzLtk3bJkxYtpUrBnMXPdo7kBOcBqEcW28/sfLKiQ18aLgQ+L7j+GixZ55/FwAQoeJ5FMsARDQMblmGsCzDMlO1KTOZUoQjY3knvGHJ468d7DEN5vnR5AkNG+678qyxRv9gXoZhyfFNjlv39G17pR+x8hx6GgwwTcOwTG6aNXU1PSPhwqXr8kWfUpIvuD39Oc6I50cXnHfG+nuvqjPVwFBBy8jzg4TAQ8cKDz39htY6Ziav2AAE0IhgWKZpmdS0aupqXnqrZ/e+I/8ampIwUpfPOnvtD65A6Q9nilpGnhcwAvvezt2z/tXBrE8QVbxqLl4MIJoJy0gkiDCZMIQhCMGyToRgFKlLZjb/ZtXVI5m8U3JUGLpewIn+68uDKzp3AwBBiKk9xMxCiMgNUxgmEwYAahkppcuXlAoRDh4efnFPN8jQc33P9YIgLJSCaRNTU5pry/1jah/XAADkQlDOlNJKShlFJ15oDQg4OOIsffAvA0NFLaXnR2Eo/VDWWPSHt0xPJYTWOr4JFRpQ/i4SpFwopZWMosBXUXiyjNKaEuzuK3aseQlBR5FUSgNAvhSc2SjuuLFVayCxLYi7kGmtlZRh4PuuE3r++95KpSnF5/f2r/ndwVSCh6FUUgHC0Ih7aWvt3NmTpNKUxKuI43QGrWUUBL7nlxynUPSd0gdFlNSU4BPPdj23uy9pUS+IwkAqpYazzoIrJrROGiOVJjFsqNAAfVx/7buu77husVTI5l3nFFWNBlBaI8JDT+8/3FfiDINQaq0RCUG14qvTbIsrVXkwxJ1CKvAj3w18L/K9KPDhVIWx1oCIeSd84Mn9YaQNQQRntsU14NTxybtvnoFYeTkdy4AoUn0Dhd7+wsBQ8fCx3G//9g7AqfdISmlK8K2jhUd+3+VHUAp0ydeBxN5MOGfmGVfPmliO+Ap0qKQPIaRcTiNi0mKMUikjP5SuL0+SOT6yPukYrtzLNln5bXmviYha63wpYJTID/fQ7j/N45MPH0/H2vXvg49OGlFr3dLS0tjYyDkPw7C/r6+9vf3hNQ+7rleWUUoRhNZzmhImA8BXD/Y6bnh8eiBqpTVA+bH8b1OCGkBJvXT+xVv/cei1N/tGVSCNrhYihEgpOx/tvOAzF/T29jqOs6KjY1Zb29pfry0UiifExjam/rxuYSbrENR+EM391pOHjmYA4ETVH510EqTeq6U/O338ga6B10a5PaikmEumkqtXr77//vsBIJ1O79y507aTy5d3CCEmT265556Vbx3Y53v+Zd9Y1zuY7/rjbV+cdfbWXeS+b8/JFfwfrdk2kCndtbjt3LMa1zy1652e3F2LLyGgf9z595dePjQwlIdR7m0qyUK5XG7ZsmU7duzYuHHj+PHjOzo60un0ihUrpJQIuG7d4zKKvGL++wtmrlx8UXY4292T2XDvl15+vdfzgl92XLbw2um3XtP6wu7u4Zz34G2XTB2ffHHvEceLFl8349xJY2CUcVKJBzjn27dv37RpUzab9X2/v79fKXXs2LHly5fP+dzszsfWCUFGBodH8t5Nn5/0s6d2HXxnmCnvvrUvIMCu9ddv33u0c/Pui6bWHjlqrd6w85tzW2edO2bHK6Krq6dYcAFG54JKPDBu3CcO7D+wefPmLVu2EELS6SbBeXpsuq6urqlpXG1dnVaa6WDV+l233Pvc/MuaEfTbhwdWLZ7Z+d2Lt+85YlDd35/N5UpXXnjmGXXsxT3dExuNmefUh75HUFWgzygoJ8T29va2tjZKKaW0oaFh0aJFTU1NS5Ys4Zy3tLQsWLBQMJx76YSGGgMArps9YWpzTX3KuPOGaUu+fI7JSXPavuOGacuunTImKWZOqe9o/+RXZk/gjFx14ZnNaRv+D6m2cj5CqpwMpZS8d56MiIyx8r38SBkDAPpepU9J+cwXKMEPtgliuX1CskqVKlWqVKlSpUqVjw//BIvtCMgPgRONAAAAAElFTkSuQmCC" width="64" height="64" alt="FinRossi" style="border-radius:12px">
+  <div style="font-family:'DM Serif Display',serif;font-size:18px;color:#e8c96d;margin-top:10px;letter-spacing:1px">Fin<span style="font-weight:300;color:#f0ede8">Rossi</span></div>
   <div style="width:32px;height:32px;border:3px solid #222;border-top-color:#4ade80;border-radius:50%;animation:spin .8s linear infinite"></div>
 </div>
 
@@ -432,7 +433,7 @@ tbody tr:hover td{background:var(--surface2)}
   <!-- Conteúdo central -->
   <div style="position:relative;text-align:center;z-index:2">
     <!-- Logo pulsando -->
-    <div id="bv-logo" style="font-family:'DM Serif Display',serif;font-size:20px;color:rgba(200,169,110,.4);letter-spacing:8px;text-transform:uppercase;margin-bottom:40px;opacity:0;transform:translateY(-10px);transition:all .6s ease">FinRossi</div>
+    <div id="bv-logo" style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:40px;opacity:0;transform:translateY(-10px);transition:all .6s ease"><img src="data:image/png;base64,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" width="48" height="48" alt="FinRossi" style="border-radius:10px"><span style="font-family:'DM Serif Display',serif;font-size:20px;color:rgba(200,169,110,.7)">Fin<span style="font-weight:300;color:rgba(240,237,232,.5)">Rossi</span></span></div>
 
     <!-- Saudação -->
     <div id="bv-saudacao" style="font-size:13px;color:#555;letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;opacity:0;transition:all .5s ease"></div>
@@ -479,7 +480,7 @@ tbody tr:hover td{background:var(--surface2)}
   <div style="width:100%;max-width:380px">
     <!-- Logo -->
     <div style="text-align:center;margin-bottom:40px">
-      <div style="font-family:'DM Serif Display',serif;font-size:36px;color:#e8c96d;letter-spacing:-1px">FinRossi</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:4px"><img src="data:image/png;base64,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" width="72" height="72" alt="FinRossi" style="border-radius:14px"><span style="font-family:'DM Serif Display',serif;font-size:34px;color:#e8c96d;letter-spacing:-1px">Fin<span style="font-weight:300;color:#f0ede8">Rossi</span></span></div>
       <div style="font-size:13px;color:#666;margin-top:6px">Controle financeiro pessoal simples e inteligente</div>
     </div>
 
@@ -518,12 +519,51 @@ tbody tr:hover td{background:var(--surface2)}
         <span id="btn-login-txt">Entrar</span>
       </button>
 
-      <div style="text-align:center;margin-top:16px">
+      <div style="text-align:center;margin-top:14px">
+        <button onclick="abrirResetSenha()" style="background:none;border:none;color:#666;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:underline;text-underline-offset:3px" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#666'">Esqueci minha senha</button>
+      </div>
+
+      <div style="text-align:center;margin-top:10px">
         <a href="landing.html" style="font-size:13px;color:#666;text-decoration:none">Não tem conta? <span style="color:#c9a84c">Conheça os planos</span></a>
       </div>
     </div>
     <div style="text-align:center;margin-top:20px;font-size:12px;color:#444">
       FinRossi © 2025 · Controle financeiro pessoal
+    </div>
+  </div>
+
+  <!-- MODAL RESET DE SENHA -->
+  <div id="modal-reset-senha" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(6px);align-items:center;justify-content:center;z-index:300;padding:20px">
+    <div style="width:100%;max-width:380px;background:#111;border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:32px 28px">
+      <!-- Ícone -->
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="width:52px;height:52px;border-radius:50%;background:rgba(200,169,110,0.1);border:1px solid rgba(200,169,110,0.2);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto">🔑</div>
+      </div>
+      <div style="font-size:18px;font-weight:600;color:#f0ede8;text-align:center;margin-bottom:6px">Redefinir senha</div>
+      <div style="font-size:13px;color:#666;text-align:center;margin-bottom:22px;line-height:1.6">
+        Digite seu email cadastrado e enviaremos um link para criar uma nova senha.
+      </div>
+
+      <!-- Campo email -->
+      <div style="margin-bottom:16px">
+        <label style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Email</label>
+        <input id="reset-email" type="email" placeholder="seu@email.com"
+          style="width:100%;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:#f5f0e8;border-radius:8px;padding:12px 14px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;box-sizing:border-box"
+          onfocus="this.style.borderColor='rgba(201,168,76,0.5)'"
+          onblur="this.style.borderColor='rgba(255,255,255,0.1)'"
+          onkeydown="if(event.key==='Enter')enviarResetSenha()">
+      </div>
+
+      <!-- Mensagem feedback -->
+      <div id="reset-msg" style="min-height:36px;font-size:13px;text-align:center;margin-bottom:14px;line-height:1.6;display:none;padding:10px 14px;border-radius:8px"></div>
+
+      <!-- Botões -->
+      <button onclick="enviarResetSenha()" id="btn-reset" style="width:100%;background:#c9a84c;color:#000;border:none;border-radius:8px;padding:13px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;margin-bottom:10px;transition:all .2s">
+        Enviar link de redefinição
+      </button>
+      <button onclick="fecharResetSenha()" style="width:100%;background:none;border:1px solid rgba(255,255,255,0.1);color:#888;border-radius:8px;padding:11px;font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer">
+        Voltar ao login
+      </button>
     </div>
   </div>
 </div>
@@ -534,7 +574,7 @@ tbody tr:hover td{background:var(--surface2)}
 <div class="sidebar-wrap">
   <button class="sidebar-toggle" id="sb-toggle" onclick="toggleSidebar()" title="Minimizar">‹</button>
 <aside class="sidebar" id="sidebar">
-  <div class="sb-logo"><h1>FinRossi</h1><span id="sb-logo-sub">Painel pessoal</span></div>
+  <div class="sb-logo" style="display:flex;align-items:center;gap:10px"><img src="data:image/png;base64,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" width="42" height="42" alt="FinRossi" style="flex-shrink:0;border-radius:8px"><div><h1 style="margin:0">Fin<span style="font-weight:300;color:var(--text)">Rossi</span></h1><span id="sb-logo-sub">Painel pessoal</span></div></div></div>
   <div id="sync-badge" class="sync-badge local"><span class="sync-dot"></span><span class="nav-text">Modo local</span></div>
 
   <div class="sb-section">
@@ -5642,7 +5682,88 @@ function initDatePickers(){
   });
 }
 
-// ─── TELA DE BOAS-VINDAS ────────────────────────────────────────────────────
+// ─── RESET DE SENHA ──────────────────────────────────────────────────────────
+function abrirResetSenha(){
+  const modal = document.getElementById('modal-reset-senha');
+  const emailLogin = document.getElementById('login-email')?.value || '';
+  if(emailLogin) document.getElementById('reset-email').value = emailLogin;
+  document.getElementById('reset-msg').style.display = 'none';
+  document.getElementById('reset-msg').textContent = '';
+  document.getElementById('btn-reset').textContent = 'Enviar link de redefinição';
+  document.getElementById('btn-reset').disabled = false;
+  modal.style.display = 'flex';
+  setTimeout(()=>document.getElementById('reset-email').focus(), 100);
+}
+
+function fecharResetSenha(){
+  document.getElementById('modal-reset-senha').style.display = 'none';
+}
+
+async function enviarResetSenha(){
+  const emailEl = document.getElementById('reset-email');
+  const msgEl   = document.getElementById('reset-msg');
+  const btnEl   = document.getElementById('btn-reset');
+  const email   = emailEl.value.trim();
+
+  if(!email){ 
+    msgEl.textContent = 'Digite seu email.';
+    msgEl.style.display = 'block';
+    msgEl.style.background = 'rgba(248,113,113,0.1)';
+    msgEl.style.color = '#f87171';
+    return; 
+  }
+  if(!validarEmail(email)){
+    msgEl.textContent = 'Email inválido — verifique o formato.';
+    msgEl.style.display = 'block';
+    msgEl.style.background = 'rgba(248,113,113,0.1)';
+    msgEl.style.color = '#f87171';
+    return;
+  }
+
+  btnEl.textContent = 'Enviando...';
+  btnEl.disabled = true;
+  msgEl.style.display = 'none';
+
+  try{
+    const f = window._firebase;
+    if(!f || !f.firebaseOk) throw new Error('Firebase não disponível');
+
+    const { sendPasswordResetEmail } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
+    
+    await sendPasswordResetEmail(f.auth, email, {
+      url: 'https://finrossi.com.br', // redireciona para o app após redefinir
+      handleCodeInApp: false,
+    });
+
+    // Sucesso
+    msgEl.innerHTML = '✅ Email enviado!<br><span style="font-size:12px;opacity:.8">Verifique sua caixa de entrada e spam. O link expira em 1 hora.</span>';
+    msgEl.style.display = 'block';
+    msgEl.style.background = 'rgba(74,222,128,0.08)';
+    msgEl.style.border = '1px solid rgba(74,222,128,0.2)';
+    msgEl.style.color = '#4ade80';
+    btnEl.textContent = 'Email enviado ✓';
+    btnEl.style.background = '#1a3a2a';
+    btnEl.style.color = '#4ade80';
+
+    // Fecha o modal após 4s
+    setTimeout(()=>fecharResetSenha(), 4000);
+
+  }catch(e){
+    let msg = 'Erro ao enviar. Tente novamente.';
+    if(e.code === 'auth/user-not-found') msg = 'Email não encontrado. Verifique ou crie uma conta.';
+    if(e.code === 'auth/invalid-email')  msg = 'Email inválido.';
+    if(e.code === 'auth/too-many-requests') msg = 'Muitas tentativas. Aguarde alguns minutos.';
+    msgEl.textContent = msg;
+    msgEl.style.display = 'block';
+    msgEl.style.background = 'rgba(248,113,113,0.1)';
+    msgEl.style.border = '1px solid rgba(248,113,113,0.2)';
+    msgEl.style.color = '#f87171';
+    btnEl.textContent = 'Enviar link de redefinição';
+    btnEl.disabled = false;
+  }
+}
+
+
 window._abrirComBoasVindas = function(nome, callback){
   const tela = document.getElementById('tela-bemvindo');
   if(!tela){ if(callback) callback(); return; }
