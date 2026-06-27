@@ -8,6 +8,13 @@
 <!-- PWA -->
 <!-- PWA -->
 <link rel="manifest" href="manifest.json">
+<!-- Aplica tema ANTES do render para evitar flash de cor errada -->
+<script>
+(function(){
+  var t = localStorage.getItem('finrossi_tema') || 'escuro';
+  document.documentElement.setAttribute('data-theme', t === 'escuro' ? '' : t);
+})();
+</script>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
@@ -644,6 +651,10 @@ tr:hover td{background:var(--surface2)}
   .main{padding:10px 10px 72px}
   .metrics{grid-template-columns:1fr}
 }
+
+.sb-section{padding:0 0 8px}
+.sb-group-label{font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:1.2px;padding:10px 18px 4px;cursor:pointer;display:flex;align-items:center;justify-content:space-between}
+.sb-group-items{overflow:hidden;transition:max-height .2s ease}
 </style>
 </head>
 <body>
@@ -803,7 +814,7 @@ tr:hover td{background:var(--surface2)}
 <div class="sidebar-wrap">
   <button class="sidebar-toggle" id="sb-toggle" onclick="toggleSidebar()" title="Minimizar">‹</button>
 <aside class="sidebar" id="sidebar">
-  <div class="sb-logo"><h1>FinRossi</h1><span id="sb-logo-sub">Painel pessoal</span></div></div>
+  <div class="sb-logo"><h1>FinRossi</h1><span id="sb-logo-sub">Painel pessoal</span></div>
   <div id="sync-badge" class="sync-badge local"><span class="sync-dot"></span><span class="nav-text">Modo local</span></div>
 
   <div class="sb-section">
@@ -2445,9 +2456,10 @@ function initFB(){
 }
 // ─── INICIALIZAÇÃO — aguarda Firebase estar pronto ────────────────────────────
 document.addEventListener('fbReady', () => {
-  lsLoad();      // carrega dados do localStorage primeiro (resposta imediata)
-  refreshAll();  // renderiza com dados locais
-  initFB();      // conecta Firebase e sincroniza em background
+  initTema();   // aplica tema salvo antes de renderizar
+  lsLoad();
+  refreshAll();
+  initFB();
 });
 
 // ─── PROFILE & NAV ───────────────────────────────────────────────────────────
