@@ -402,7 +402,6 @@ button{-webkit-appearance:none;appearance:none;background:transparent;border:non
 .sidebar.collapsed .nav-item span,
 .sidebar.collapsed .nav-text,
 .sidebar.collapsed .sb-logo h1,
-.sidebar.collapsed .sb-logo span,
 .sidebar.collapsed #sb-perfis-admin,
 .sidebar.collapsed #sb-perfil-cliente,
 .sidebar.collapsed .profile-btn .pn,
@@ -413,6 +412,7 @@ button{-webkit-appearance:none;appearance:none;background:transparent;border:non
 .sidebar.collapsed .nav-item{padding:9px;justify-content:center;margin:1px 6px}
 .sidebar.collapsed .sb-logo{padding:12px 6px 16px;justify-content:center}
 .sidebar.collapsed #sb-logo-text{display:none!important}
+#sb-logo-symbol{display:block!important}
 .sidebar.collapsed .sb-group-label{padding:4px}
 
 /* ── PROFILE BUTTONS ───────────────────────────────────── */
@@ -5684,16 +5684,7 @@ function initSidebar(){
   const collapsed=localStorage.getItem('fin_sidebar_collapsed')==='1';
   const sb=document.getElementById('sidebar');
   const btn=document.getElementById('sb-toggle');
-  const full=document.getElementById('sb-logo-full');
-  const symbol=document.getElementById('sb-logo-symbol');
   if(collapsed){ sb.classList.add('collapsed'); if(btn)btn.textContent='›'; }
-  if(full) full.style.display=collapsed?'none':'block';
-  if(symbol) symbol.style.display=collapsed?'block':'none';
-  if(localStorage.getItem('fin_sb_collapsed')==='1'){
-    document.getElementById('sidebar')?.classList.add('collapsed');
-    const btn=document.getElementById('sb-toggle');
-    if(btn){btn.textContent='›';btn.title='Expandir sidebar';}
-  }
   initNavGroups();
   aplicarNavConfig();
 }
