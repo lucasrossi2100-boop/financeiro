@@ -1,4 +1,4 @@
-const CACHE_NAME = 'finrossi-v2';
+const CACHE_NAME = 'finrossi-v3';
 const ASSETS = [
   '/',
   '/index.html',
