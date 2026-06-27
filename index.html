@@ -6041,12 +6041,33 @@ async function abrirPWAManual(){
   }
 }
 
-// ─── PWA SERVICE WORKER ──────────────────────────────────────────────────────
+// ─── PWA SERVICE WORKER + AUTO-UPDATE ────────────────────────────────────────
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(r => console.log('[SW] registrado:', r.scope))
-      .catch(e => console.log('[SW] erro:', e));
+  window.addEventListener('load', async () => {
+    try {
+      const reg = await navigator.serviceWorker.register('/sw.js');
+
+      // Detecta nova versão disponível
+      reg.addEventListener('updatefound', () => {
+        const newSW = reg.installing;
+        newSW.addEventListener('statechange', () => {
+          if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+            // Nova versão pronta — recarrega automaticamente
+            console.log('[SW] Nova versão detectada — atualizando...');
+            newSW.postMessage('SKIP_WAITING');
+          }
+        });
+      });
+
+      // Quando o SW assumir controle, recarrega a página
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        console.log('[SW] Atualização aplicada — recarregando');
+        window.location.reload();
+      });
+
+    } catch(e) {
+      console.log('[SW] Erro:', e);
+    }
   });
 }
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'finrossi-v3';
+const CACHE_NAME = 'finrossi-v5';
 const ASSETS = [
   '/',
   '/index.html',
@@ -8,39 +8,67 @@ const ASSETS = [
   'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'
 ];
 
+// Instala e faz cache
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS).catch(() => {}))
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(ASSETS).catch(() => {}))
+      .then(() => self.skipWaiting()) // ativa imediatamente sem esperar
   );
-  self.skipWaiting();
 });
 
+// Limpa caches antigos e assume controle imediato
 self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-    )
+    caches.keys()
+      .then(keys => Promise.all(
+        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
+      ))
+      .then(() => self.clients.claim()) // assume controle de todas as abas abertas
   );
-  self.clients.claim();
 });
 
+// Busca rede primeiro, cache como fallback
 self.addEventListener('fetch', e => {
-  // Nunca faz cache de Firebase, auth, APIs
   const url = e.request.url;
-  if (url.includes('firebase') || url.includes('gstatic') || 
-      url.includes('googleapis.com/identitytoolkit') ||
-      url.includes('railway.app') || url.includes('api.')) {
+
+  // Nunca faz cache de Firebase, auth, APIs externas
+  if (url.includes('firebase') || url.includes('gstatic') ||
+      url.includes('googleapis.com') || url.includes('railway.app') ||
+      url.includes('resend.com')) {
     return;
   }
+
+  // Para o index.html — sempre busca da rede primeiro
+  if (url.endsWith('/') || url.includes('index.html')) {
+    e.respondWith(
+      fetch(e.request)
+        .then(response => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+          return response;
+        })
+        .catch(() => caches.match(e.request))
+    );
+    return;
+  }
+
+  // Demais assets: cache primeiro, atualiza em background
   e.respondWith(
     caches.match(e.request).then(cached => {
-      return fetch(e.request).then(response => {
+      const fetchPromise = fetch(e.request).then(response => {
         if (response && response.status === 200 && response.type === 'basic') {
           const clone = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
         }
         return response;
-      }).catch(() => cached || new Response('Offline', {status: 503}));
+      });
+      return cached || fetchPromise;
     })
   );
+});
+
+// Recebe mensagem do app para pular espera
+self.addEventListener('message', e => {
+  if (e.data === 'SKIP_WAITING') self.skipWaiting();
 });
