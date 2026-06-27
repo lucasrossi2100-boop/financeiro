@@ -208,7 +208,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .nav-item.active{background:var(--accent-s);color:var(--accent);font-weight:500}
 .nav-item svg{width:15px;height:15px;flex-shrink:0}
 
-.main{flex:1;width:0;min-width:0;padding:36px 40px;overflow-x:hidden}
+.main{flex:1;width:0;min-width:0;padding:36px 40px;overflow-x:hidden;max-width:100%}
 .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:12px}
 .page-title h2{font-family:'DM Serif Display',serif;font-size:28px;letter-spacing:-.5px}
 .page-title p{font-size:12px;color:var(--muted);margin-top:4px}
@@ -2214,6 +2214,13 @@ function initFB(){
     }
   }
 }
+// ─── INICIALIZAÇÃO — aguarda Firebase estar pronto ────────────────────────────
+document.addEventListener('fbReady', () => {
+  lsLoad();      // carrega dados do localStorage primeiro (resposta imediata)
+  refreshAll();  // renderiza com dados locais
+  initFB();      // conecta Firebase e sincroniza em background
+});
+
 // ─── PROFILE & NAV ───────────────────────────────────────────────────────────
 // Senha do perfil admin (Rossi & Moraes)
 const ADMIN_HASH = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8'; // "password" — TROQUE ABAIXO
