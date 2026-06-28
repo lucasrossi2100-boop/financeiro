@@ -3210,9 +3210,83 @@ function refreshDash(){
   destroyChart('cat');
   const ctxCat=document.getElementById('c-cat');
   const cL=Object.keys(catMap),cV=Object.values(catMap);
+  const totalCat=cV.reduce((a,b)=>a+b,0);
+
+  // Paleta começando em dourado
+  const CAT_COLORS=['#C8A96E','#E8C97E','#A07840','#D4B896','#8A6030','#F0D8A0','#6A4820','#B89060'];
+
   if(ctxCat){
-    if(!cL.length){ctxCat.parentElement.innerHTML='<p class="empty" style="padding:60px 0;text-align:center;color:var(--muted)">Sem despesas este mês</p>';}
-    else{charts['cat']=new Chart(ctxCat,{type:'doughnut',data:{labels:cL,datasets:[{data:cV,backgroundColor:PALETTE.slice(0,cL.length),borderWidth:0,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'right',labels:{color:'#888',font:{size:11},padding:8,boxWidth:10}}}}});}
+    if(!cL.length){
+      ctxCat.parentElement.innerHTML='<p class="empty" style="padding:60px 0;text-align:center;color:var(--muted)">Sem despesas este mês</p>';
+    } else {
+      charts['cat']=new Chart(ctxCat,{
+        type:'doughnut',
+        data:{
+          labels:cL,
+          datasets:[{
+            data:cV,
+            backgroundColor:CAT_COLORS.slice(0,cL.length),
+            borderWidth:2,
+            borderColor:'#1a1a1a',
+            hoverOffset:6
+          }]
+        },
+        options:{
+          responsive:true,
+          maintainAspectRatio:false,
+          cutout:'70%',
+          plugins:{
+            legend:{
+              position:'right',
+              labels:{
+                color:'#aaa',
+                font:{size:11},
+                padding:10,
+                boxWidth:8,
+                boxHeight:8,
+                borderRadius:4,
+                generateLabels:(chart)=>{
+                  const data=chart.data;
+                  return data.labels.map((label,i)=>{
+                    const val=data.datasets[0].data[i];
+                    const pct=totalCat>0?Math.round(val/totalCat*100):0;
+                    return {
+                      text:`${label}   ${pct}%`,
+                      fillStyle:data.datasets[0].backgroundColor[i],
+                      strokeStyle:'transparent',
+                      lineWidth:0,
+                      index:i
+                    };
+                  });
+                }
+              }
+            },
+            tooltip:{
+              callbacks:{
+                label:(ctx)=>`${ctx.label}: ${fmtR(ctx.raw)} (${totalCat>0?Math.round(ctx.raw/totalCat*100):0}%)`
+              }
+            }
+          }
+        },
+        plugins:[{
+          id:'centerText',
+          afterDraw(chart){
+            const {ctx,chartArea:{left,top,right,bottom}}=chart;
+            const cx=(left+right)/2, cy=(top+bottom)/2;
+            ctx.save();
+            ctx.textAlign='center';
+            ctx.textBaseline='middle';
+            ctx.font='bold 16px DM Sans,Arial';
+            ctx.fillStyle='#f0ede8';
+            ctx.fillText(fmtR(totalCat).replace('R$\u00a0','R$ '), cx, cy-8);
+            ctx.font='11px DM Sans,Arial';
+            ctx.fillStyle='#666';
+            ctx.fillText('Total', cx, cy+10);
+            ctx.restore();
+          }
+        }]
+      });
+    }
   }
 
   // ── Gráfico barras receitas vs despesas ──
