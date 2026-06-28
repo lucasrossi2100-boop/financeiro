@@ -3271,26 +3271,36 @@ function refreshDash(){
             legend:{
               position:'right',
               labels:{
-                color:'#aaa',
+                color:'#ffffff',
                 font:{size:11},
                 padding:10,
                 boxWidth:8,
                 boxHeight:8,
-                borderRadius:4,
                 generateLabels:(chart)=>{
                   const data=chart.data;
                   return data.labels.map((label,i)=>{
                     const val=data.datasets[0].data[i];
                     const pct=totalCat>0?Math.round(val/totalCat*100):0;
+                    const hidden=chart.getDatasetMeta(0).data[i]?.hidden;
                     return {
                       text:`${label}   ${pct}%`,
-                      fillStyle:data.datasets[0].backgroundColor[i],
+                      fillStyle:hidden?'#444':data.datasets[0].backgroundColor[i],
                       strokeStyle:'transparent',
+                      fontColor:hidden?'#555':'#ffffff',
                       lineWidth:0,
-                      index:i
+                      hidden:hidden,
+                      index:i,
+                      datasetIndex:0
                     };
                   });
                 }
+              },
+              onClick:(e,legendItem,legend)=>{
+                const idx=legendItem.index;
+                const meta=legend.chart.getDatasetMeta(0);
+                const item=meta.data[idx];
+                item.hidden=!item.hidden;
+                legend.chart.update();
               }
             },
             tooltip:{
