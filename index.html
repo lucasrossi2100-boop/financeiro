@@ -526,6 +526,7 @@ tr:hover td{background:var(--surface2)}
   background:var(--surface);border-top:1px solid var(--border);
   padding:0 8px;height:60px;
   z-index:100;
+  align-items:center;justify-content:space-around;
 }
 .mobile-nav-item{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -1801,7 +1802,7 @@ tr:hover td{background:var(--surface2)}
 </div>
 
 <!-- MOBILE BOTTOM NAV -->
-<nav class="mobile-nav" id="mobile-nav" style="display:none">
+<nav class="mobile-nav" id="mobile-nav">
   <button class="mobile-nav-item active" id="mnav-dashboard" onclick="goTo('dashboard')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
     Início
@@ -5192,7 +5193,7 @@ function exportarManualPDF(){
   setTimeout(()=>janela.print(),800);
 }
 
-function isMobile(){ return window.innerWidth <= 640; }
+function isMobile(){ return window.innerWidth <= 767; }
 
 function setupMobile(){
   const mob = isMobile();
