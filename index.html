@@ -1710,8 +1710,8 @@ tr:hover td{background:var(--surface2)}
           <input type="file" id="cfg-foto-input" accept="image/*" style="display:none" onchange="carregarFoto(event)">
         </div>
         <div>
-          <div style="font-size:14px;font-weight:500" id="cfg-nome-display">—</div>
-          <div style="font-size:12px;color:var(--muted)" id="cfg-email-display">—</div>
+          <div style="font-size:14px;font-weight:500" id="cfg-nome-display2">—</div>
+          <div style="font-size:12px;color:var(--muted)" id="cfg-email-display2">—</div>
           <div style="font-size:11px;color:var(--muted2);margin-top:3px">Clique em 📷 para alterar a foto</div>
         </div>
       </div>
@@ -5500,9 +5500,9 @@ function initTema(){
 
 // ─── CONFIGURAÇÕES ───────────────────────────────────────────────────────────
 function abrirConfiguracoes(){
+  try{
   const user = window._firebaseUser;
   const nome = user?.displayName || localStorage.getItem('fin_nome_display') || (user?.email?.split('@')[0]) || 'Usuário';
-  const email = user?.email || '';
   const inicial = nome.charAt(0).toUpperCase();
 
   // Avatar
@@ -5521,6 +5521,10 @@ function abrirConfiguracoes(){
   document.getElementById('cfg-nome-display').textContent = nome;
   document.getElementById('cfg-email-display').textContent = email;
   document.getElementById('cfg-email-readonly').textContent = email;
+  const nd2 = document.getElementById('cfg-nome-display2');
+  const ed2 = document.getElementById('cfg-email-display2');
+  if(nd2) nd2.textContent = nome;
+  if(ed2) ed2.textContent = email;
   document.getElementById('cfg-input-nome').value = nome;
   document.getElementById('cfg-msg-nome').textContent = '';
 
@@ -5547,6 +5551,7 @@ function abrirConfiguracoes(){
   atualizarTemaAtivo();
   cfgTab('conta');
   document.getElementById('modal-config').style.display = 'flex';
+  }catch(err){console.error('[Config] Erro:',err);document.getElementById('modal-config').style.display='flex';}
 }
 
 function fecharConfiguracoes(){
