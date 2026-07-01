@@ -3372,6 +3372,7 @@ function refreshDash(){
   populateDashMetaSel();renderDashMeta();
   renderTodosMeses();
 }
+  const lancs=pd().lancs;
   const doMes=lancs.filter(l=>l.data.startsWith(mes));
 function renderTodosMeses(){
   const lancs=pd().lancs;
@@ -3811,7 +3812,7 @@ function renderSim(){
 }
 
 // ─── OBJETIVOS ────────────────────────────────────────────────────────────────
-let objDashOpen = false;
+var objDashOpen = false;
 function toggleObjDash(){
   objDashOpen = !objDashOpen;
   const wrap = document.getElementById('obj-dash-wrap');
@@ -4623,7 +4624,7 @@ const MANUAL_SECTIONS=[
 const BACKEND_URL = 'https://finrossi-backend-production.up.railway.app';
 const ADMIN_TOKEN = ''; // Deixe em branco — será pedido se necessário
 
-let _adminToken = localStorage.getItem('fin_admin_token')||'';
+var _adminToken = localStorage.getItem('fin_admin_token')||'';
 
 function getAdminToken(){
   if(_adminToken) return _adminToken;
@@ -5501,57 +5502,58 @@ function initTema(){
 // ─── CONFIGURAÇÕES ───────────────────────────────────────────────────────────
 function abrirConfiguracoes(){
   try{
-  const user = window._firebaseUser;
-  const nome = user?.displayName || localStorage.getItem('fin_nome_display') || (user?.email?.split('@')[0]) || 'Usuário';
-  const inicial = nome.charAt(0).toUpperCase();
+    const user = window._firebaseUser;
+    const email = user?.email || '';
+    const nome = user?.displayName || localStorage.getItem('fin_nome_display') || (user?.email?.split('@')[0]) || 'Usuário';
+    const inicial = nome.charAt(0).toUpperCase();
 
-  // Avatar
-  const fotoSalva = localStorage.getItem('fin_foto_'+cp);
-  const preview = document.getElementById('cfg-foto-preview');
-  if(preview){
-    if(fotoSalva){
-      preview.innerHTML=`<img src="${fotoSalva}" style="width:100%;height:100%;object-fit:cover">`;
-      document.getElementById('sb-avatar').innerHTML=`<img src="${fotoSalva}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
-    } else {
-      preview.textContent = inicial;
+    // Avatar
+    const fotoSalva = localStorage.getItem('fin_foto_'+cp);
+    const preview = document.getElementById('cfg-foto-preview');
+    if(preview){
+      if(fotoSalva){
+        preview.innerHTML=`<img src="${fotoSalva}" style="width:100%;height:100%;object-fit:cover">`;
+        document.getElementById('sb-avatar').innerHTML=`<img src="${fotoSalva}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+      } else {
+        preview.textContent = inicial;
+      }
     }
+
+    const el = (id)=>document.getElementById(id);
+    if(el('cfg-avatar')) el('cfg-avatar').textContent = inicial;
+    if(el('cfg-nome-display')) el('cfg-nome-display').textContent = nome;
+    if(el('cfg-nome-display2')) el('cfg-nome-display2').textContent = nome;
+    if(el('cfg-email-display')) el('cfg-email-display').textContent = email;
+    if(el('cfg-email-display2')) el('cfg-email-display2').textContent = email;
+    if(el('cfg-email-readonly')) el('cfg-email-readonly').textContent = email;
+    if(el('cfg-input-nome')) el('cfg-input-nome').value = nome;
+    if(el('cfg-msg-nome')) el('cfg-msg-nome').textContent = '';
+
+    renderDashConfigCards();
+    renderNavConfigCards();
+
+    const badge = el('cfg-nav-perfil-badge');
+    if(badge) badge.textContent = cp==='finrossi' ? '💼 FinRossi' : '👤 Pessoal';
+
+    const dCount = el('cfg-cats-desp-count');
+    const rCount = el('cfg-cats-rec-count');
+    if(dCount){
+      const extras=(pd().categorias?.despesa||[]).length;
+      dCount.textContent=`${CATS_DEFAULT.despesa.length} padrão${extras?` + ${extras} suas`:''}`;
+    }
+    if(rCount){
+      const extras=(pd().categorias?.receita||[]).length;
+      rCount.textContent=`${CATS_DEFAULT.receita.length} padrão${extras?` + ${extras} suas`:''}`;
+    }
+
+    atualizarTemaAtivo();
+    cfgTab('conta');
+    el('modal-config').style.display='flex';
+  }catch(err){
+    console.error('[Config] Erro:',err);
+    const m=document.getElementById('modal-config');
+    if(m) m.style.display='flex';
   }
-
-  document.getElementById('cfg-avatar').textContent = inicial;
-  document.getElementById('cfg-nome-display').textContent = nome;
-  document.getElementById('cfg-email-display').textContent = email;
-  document.getElementById('cfg-email-readonly').textContent = email;
-  const nd2 = document.getElementById('cfg-nome-display2');
-  const ed2 = document.getElementById('cfg-email-display2');
-  if(nd2) nd2.textContent = nome;
-  if(ed2) ed2.textContent = email;
-  document.getElementById('cfg-input-nome').value = nome;
-  document.getElementById('cfg-msg-nome').textContent = '';
-
-  // Dashboard cards
-  renderDashConfigCards();
-  renderNavConfigCards();
-
-  // Badge do perfil no nav config
-  const badge = document.getElementById('cfg-nav-perfil-badge');
-  if(badge) badge.textContent = cp==='finrossi' ? '💼 FinRossi' : '👤 Pessoal';
-
-  // Contagem de categorias
-  const dCount = document.getElementById('cfg-cats-desp-count');
-  const rCount = document.getElementById('cfg-cats-rec-count');
-  if(dCount){
-    const extras = (pd().categorias?.despesa||[]).length;
-    dCount.textContent = `${CATS_DEFAULT.despesa.length} padrão${extras?` + ${extras} suas`:''}`;
-  }
-  if(rCount){
-    const extras = (pd().categorias?.receita||[]).length;
-    rCount.textContent = `${CATS_DEFAULT.receita.length} padrão${extras?` + ${extras} suas`:''}`;
-  }
-
-  atualizarTemaAtivo();
-  cfgTab('conta');
-  document.getElementById('modal-config').style.display = 'flex';
-  }catch(err){console.error('[Config] Erro:',err);document.getElementById('modal-config').style.display='flex';}
 }
 
 function fecharConfiguracoes(){
@@ -5908,7 +5910,7 @@ function initSidebar(){
 }
 
 // ─── NAV PERSONALIZATION ─────────────────────────────────────────────────────
-const NAV_ITEMS_DEF=[
+var NAV_ITEMS_DEF=[
   {id:'investimentos',label:'Investimentos',group:'menu',removable:true},
   {id:'historico',    label:'Histórico',    group:'menu',removable:true},
   {id:'metas',        label:'Metas',        group:'menu',removable:true},
@@ -6428,8 +6430,8 @@ window._abrirComBoasVindas = function(nome, callback){
   // Segurança total
   setTimeout(()=>{ if(tela.style.display!=='none'){ tela.style.display='none'; if(callback)callback(); } },5000);
 };
-let _pwaPrompt = null;
-let _deferredPromptLogin = null;
+var _pwaPrompt = null;
+var _deferredPromptLogin = null;
 
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
