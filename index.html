@@ -793,7 +793,21 @@ tr:hover td{background:var(--surface2)}
         <a href="landing.html" style="font-size:13px;color:#666;text-decoration:none">Não tem conta? <span style="color:#c9a84c">Conheça os planos</span></a>
       </div>
     </div>
-    <div style="text-align:center;margin-top:20px;font-size:12px;color:#444">
+    <!-- Card instalar app na tela de login -->
+    <div id="login-pwa-card" style="margin-top:16px;background:#111;border:1px solid rgba(200,169,110,.2);border-radius:14px;padding:14px 16px;display:none">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#C8A96E,#8a6a1a);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">📲</div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600;color:#f0ede8">Instalar FinRossi</div>
+          <div style="font-size:11px;color:#666;margin-top:2px">Acesso rápido na tela inicial</div>
+        </div>
+        <button onclick="document.getElementById('login-pwa-card').style.display='none'" style="background:none;border:none;color:#555;cursor:pointer;font-size:18px;padding:4px">×</button>
+      </div>
+      <button id="login-pwa-btn" onclick="instalarPWALogin()" style="width:100%;margin-top:12px;background:var(--accent,#C8A96E);color:#0f0f0f;border:none;border-radius:8px;padding:11px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer">
+        Instalar agora
+      </button>
+    </div>
+    <div style="text-align:center;margin-top:16px;font-size:12px;color:#444">
       FinRossi © 2025 · Controle financeiro pessoal
     </div>
   </div>
@@ -6410,12 +6424,34 @@ window._abrirComBoasVindas = function(nome, callback){
   setTimeout(()=>{ if(tela.style.display!=='none'){ tela.style.display='none'; if(callback)callback(); } },5000);
 };
 let _pwaPrompt = null;
+let _deferredPromptLogin = null;
 
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   _pwaPrompt = e;
+  _deferredPromptLogin = e;
   setTimeout(mostrarPWABanner, 4000);
+  // Mostra card na tela de login após 2s
+  setTimeout(() => {
+    const card = document.getElementById('login-pwa-card');
+    const jaInstalou = localStorage.getItem('fin_pwa_instalado');
+    const fechou = localStorage.getItem('fin_pwa_login_fechou');
+    if (card && !jaInstalou && !fechou) card.style.display = 'block';
+  }, 2000);
 });
+
+async function instalarPWALogin() {
+  if (!_deferredPromptLogin) return;
+  _deferredPromptLogin.prompt();
+  const { outcome } = await _deferredPromptLogin.userChoice;
+  if (outcome === 'accepted') {
+    localStorage.setItem('fin_pwa_instalado', '1');
+    document.getElementById('login-pwa-card').style.display = 'none';
+  } else {
+    localStorage.setItem('fin_pwa_login_fechou', '1');
+  }
+  _deferredPromptLogin = null;
+}
 
 // Verifica se instalou — checa localStorage E Firebase
 async function _pwaJaInstalou(){
