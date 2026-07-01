@@ -1,52 +1,63 @@
-// FinRossi SW v7 — força limpeza completa de cache
-const CACHE_NAME = 'finrossi-v7';
+// FinRossi SW v8
+const CACHE_NAME = 'finrossi-v8';
 const ASSETS = ['/', '/index.html'];
 
+// URLs que NUNCA devem ser interceptadas pelo SW
+const BYPASS = [
+  'firebase', 'firebaseio', 'firebaseapp', 'googleapis',
+  'gstatic', 'railway.app', 'resend.com', 'cdnjs.cloudflare.com',
+  'fonts.googleapis', 'fonts.gstatic'
+];
+
 self.addEventListener('install', e => {
-  // Limpa TODOS os caches antigos na instalação
   e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.map(k => caches.delete(k)))
-    ).then(() =>
-      caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS).catch(() => {}))
-    ).then(() => self.skipWaiting())
+    caches.keys()
+      .then(keys => Promise.all(keys.map(k => caches.delete(k))))
+      .then(() => caches.open(CACHE_NAME).then(c => c.addAll(ASSETS).catch(()=>{})))
+      .then(() => self.skipWaiting())
   );
 });
 
 self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-    ).then(() => self.clients.claim())
+    caches.keys()
+      .then(keys => Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))))
+      .then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', e => {
   const url = e.request.url;
-  if (url.includes('firebase') || url.includes('gstatic') ||
-      url.includes('googleapis') || url.includes('railway.app')) return;
 
-  // Sempre busca da rede para index.html
-  if (url.endsWith('/') || url.includes('index.html') || url === self.registration.scope) {
+  // Ignora completamente tudo que não é do próprio site
+  if (BYPASS.some(b => url.includes(b))) return;
+  if (!url.startsWith(self.location.origin)) return;
+
+  // index.html — sempre da rede
+  if (url.endsWith('/') || url.includes('index.html')) {
     e.respondWith(
-      fetch(e.request).then(r => {
-        const clone = r.clone();
-        caches.open(CACHE_NAME).then(c => c.put(e.request, clone));
-        return r;
-      }).catch(() => caches.match(e.request))
+      fetch(e.request)
+        .then(r => {
+          if (r && r.status === 200) {
+            caches.open(CACHE_NAME).then(c => c.put(e.request, r.clone()));
+          }
+          return r;
+        })
+        .catch(() => caches.match('/index.html'))
     );
     return;
   }
 
-  // Demais assets: rede primeiro
+  // Demais assets locais
   e.respondWith(
-    fetch(e.request).then(r => {
-      if (r && r.status === 200 && r.type === 'basic') {
-        const clone = r.clone();
-        caches.open(CACHE_NAME).then(c => c.put(e.request, clone));
-      }
-      return r;
-    }).catch(() => caches.match(e.request))
+    fetch(e.request)
+      .then(r => {
+        if (r && r.status === 200 && r.type === 'basic') {
+          caches.open(CACHE_NAME).then(c => c.put(e.request, r.clone()));
+        }
+        return r;
+      })
+      .catch(() => caches.match(e.request))
   );
 });
 
