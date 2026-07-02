@@ -3017,9 +3017,11 @@ function refreshDash(){
 
   // Saudação
   const hora=new Date().getHours();
-  const saud=hora<12?'Bom dia 👋':hora<18?'Boa tarde 👋':'Boa noite 👋';
+  const saud=hora<12?'Bom dia':hora<18?'Boa tarde':'Boa noite';
+  const nomeUser = window._firebaseUser?.displayName || localStorage.getItem('fin_nome_display') || '';
+  const primeiroNome = nomeUser ? ', ' + nomeUser.split(' ')[0] : '';
   const saudEl=document.getElementById('dash-saudacao');
-  if(saudEl) saudEl.textContent=saud;
+  if(saudEl) saudEl.textContent=saud + primeiroNome + ' 👋';
 
   populateMesFiltro();
   const doMes=lancs.filter(l=>l.data.startsWith(mes));
