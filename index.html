@@ -421,12 +421,13 @@ button{-webkit-appearance:none;appearance:none;background:transparent;border:non
   padding:10px 14px;margin:2px 8px;
   border-radius:10px;cursor:pointer;
   border:1px solid transparent;
-  transition:all .15s;
+  transition:all .15s;width:calc(100% - 16px);
+  text-align:left;background:transparent;
 }
 .profile-btn:hover{background:var(--surface2)}
 .profile-btn.active{border-color:var(--accent);color:var(--text);background:var(--accent-s)}
-.profile-btn .pn{font-size:13px;font-weight:500}
-.profile-btn .ps{font-size:11px;color:var(--muted)}
+.profile-btn .pn{font-size:13px;font-weight:600;color:var(--text);display:block}
+.profile-btn .ps{font-size:11px;color:var(--muted);display:block;margin-top:1px}
 .sb-user-section{margin-top:auto;padding:16px 8px 8px;border-top:1px solid var(--border)}
 
 /* ── SYNC BADGE ────────────────────────────────────────── */
@@ -565,8 +566,8 @@ tr:hover td{background:var(--surface2)}
   transition:background .15s;
 }
 .mobile-profile-opt:hover{background:var(--surface2)}
-.po-name{font-size:14px;font-weight:500}
-.po-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.po-name{font-size:14px;font-weight:600;color:var(--text);display:block}
+.po-sub{font-size:11px;color:var(--muted);margin-top:2px;display:block}
 
 /* ── MISC ──────────────────────────────────────────────── */
 .obj-view-toggle{display:flex;gap:4px;background:var(--surface2);border-radius:8px;padding:3px;margin-bottom:12px}
@@ -864,10 +865,18 @@ tr:hover td{background:var(--surface2)}
     <div id="sb-perfis-admin">
       <span class="sb-label">Minha área</span>
       <button class="profile-btn active" id="pb-pessoal" onclick="setProfile('pessoal')">
-        <span class="pn">👤 Pessoal</span><span class="ps">Minhas finanças</span>
+        <span style="font-size:18px;flex-shrink:0">👤</span>
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:2px">
+          <span class="pn">Pessoal</span>
+          <span class="ps">Minhas finanças</span>
+        </div>
       </button>
       <button class="profile-btn" id="pb-finrossi" onclick="abrirFinRossi()">
-        <span class="pn">💼 FinRossi</span><span class="ps">Negócio e clientes</span>
+        <span style="font-size:18px;flex-shrink:0">💼</span>
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:2px">
+          <span class="pn">FinRossi</span>
+          <span class="ps">Negócio e clientes</span>
+        </div>
       </button>
     </div>
     <div id="sb-perfil-cliente" style="display:none">
@@ -1848,12 +1857,12 @@ tr:hover td{background:var(--surface2)}
     <div id="mob-perfis-section">
       <h4>Minha área</h4>
       <div class="mobile-profile-opt active" id="mp-pessoal" onclick="setProfile('pessoal');closeMobileMoreForce()">
-        <div style="width:9px;height:9px;border-radius:50%;background:var(--green);flex-shrink:0"></div>
-        <div><div class="po-name">👤 Pessoal</div><div class="po-sub">Minhas finanças</div></div>
+        <span style="font-size:22px;flex-shrink:0">👤</span>
+        <div><div class="po-name">Pessoal</div><div class="po-sub">Minhas finanças</div></div>
       </div>
       <div class="mobile-profile-opt" id="mp-finrossi" onclick="abrirFinRossi();closeMobileMoreForce()">
-        <div style="width:9px;height:9px;border-radius:50%;background:var(--accent);flex-shrink:0"></div>
-        <div><div class="po-name">💼 FinRossi</div><div class="po-sub">Negócio e clientes</div></div>
+        <span style="font-size:22px;flex-shrink:0">💼</span>
+        <div><div class="po-name">FinRossi</div><div class="po-sub">Negócio e clientes</div></div>
       </div>
     </div>
 
