@@ -104,7 +104,7 @@
         setTimeout(()=>setupPerfilUI(), 100);
         setTimeout(()=>initSidebar(), 150);
         setTimeout(()=>initAvatar(), 300);
-        setTimeout(()=>mostrarPWABanner(), 4000);
+        setTimeout(()=>iniciarSistemaNotificacoes(), 1000);
         setTimeout(()=>{ loadCategorias(); populateCatSelects(); }, 200);
       } else {
         irParaLogin();
@@ -1007,6 +1007,9 @@ tr:hover td{background:var(--surface2)}
   <!-- KPI CARDS COM SPARKLINE -->
   <div id="dash-kpi-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:18px" id="dash-kpi-cards"></div>
 
+  <!-- ALERTAS DE VENCIMENTO -->
+  <div id="dash-alertas-venc" style="margin-bottom:16px"></div>
+
   <!-- COMPARATIVO -->
   <div id="dash-comparativo" style="margin-bottom:16px"></div>
   <div id="dash-parcelas-section"></div>
@@ -1759,7 +1762,7 @@ tr:hover td{background:var(--surface2)}
     <!-- Tab: Aparência -->
     <div id="cfg-pane-aparencia" style="display:none;padding:20px 24px">
       <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:12px">Tema</label>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:0">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px">
         <button onclick="setTema('escuro');atualizarTemaAtivo()" id="cfg-tema-escuro" style="padding:14px 8px;border-radius:10px;border:2px solid var(--accent);background:#0f0f0f;cursor:pointer;transition:all .2s;text-align:center">
           <div style="font-size:20px;margin-bottom:4px">🌙</div>
           <div style="font-size:11px;color:#888">Escuro</div>
@@ -1772,6 +1775,32 @@ tr:hover td{background:var(--surface2)}
           <div style="font-size:20px;margin-bottom:4px">🌊</div>
           <div style="font-size:11px;color:#58a6ff">Azul</div>
         </button>
+      </div>
+
+      <!-- Notificações -->
+      <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:12px">Notificações</label>
+      <div style="background:var(--surface2);border-radius:12px;padding:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div>
+            <div style="font-size:13px;font-weight:500">Alertas de vencimento</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Notificação quando contas estiverem próximas</div>
+          </div>
+          <span id="cfg-notif-status" style="font-size:11px;padding:3px 10px;border-radius:20px;background:var(--surface3);color:var(--muted)">Verificando...</span>
+        </div>
+        <button onclick="solicitarPermissaoNotificacoes()" id="cfg-notif-btn" style="width:100%;padding:10px;background:var(--accent);color:#0f0f0f;border:none;border-radius:8px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer">
+          🔔 Ativar notificações
+        </button>
+        <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px">
+            <span>📱</span> Push notification no celular e notebook
+          </div>
+          <div style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px">
+            <span>📧</span> Email automático 3 dias antes do vencimento
+          </div>
+          <div style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px">
+            <span>🔔</span> Alerta visual no Dashboard
+          </div>
+        </div>
       </div>
     </div>
 
@@ -2742,7 +2771,7 @@ function goTo(name){
   if(fn[name]) fn[name]();
 }
 
-function refreshAll(){refreshDash();renderInvs();renderHistorico();renderMetas();renderObjs();populateDashMetaSel();populateCatSelects();}
+function refreshAll(){refreshDash();renderInvs();renderHistorico();renderMetas();renderObjs();populateDashMetaSel();populateCatSelects();renderAlertasVencimento();}
 
 // ─── CATEGORIAS PERSONALIZADAS ────────────────────────────────────────────────
 const CATS_DEFAULT = {
@@ -5559,6 +5588,36 @@ function abrirConfiguracoes(){
 
     atualizarTemaAtivo();
     cfgTab('conta');
+    // Atualiza status das notificações
+    const nStatus = document.getElementById('cfg-notif-status');
+    const nBtn = document.getElementById('cfg-notif-btn');
+    if(nStatus && nBtn){
+      if(!('Notification' in window)){
+        nStatus.textContent='Não suportado';
+        nStatus.style.background='rgba(248,113,113,.1)';
+        nStatus.style.color='var(--red)';
+        nBtn.style.display='none';
+      } else if(Notification.permission==='granted'){
+        nStatus.textContent='✅ Ativo';
+        nStatus.style.background='rgba(74,222,128,.1)';
+        nStatus.style.color='var(--green)';
+        nBtn.textContent='🔔 Notificações ativas';
+        nBtn.style.background='var(--surface3)';
+        nBtn.style.color='var(--green)';
+      } else if(Notification.permission==='denied'){
+        nStatus.textContent='🚫 Bloqueado';
+        nStatus.style.background='rgba(248,113,113,.1)';
+        nStatus.style.color='var(--red)';
+        nBtn.textContent='⚙️ Habilitar nas configurações do navegador';
+        nBtn.style.background='var(--surface3)';
+        nBtn.style.color='var(--muted)';
+      } else {
+        nStatus.textContent='Desativado';
+        nBtn.textContent='🔔 Ativar notificações';
+        nBtn.style.background='var(--accent)';
+        nBtn.style.color='#0f0f0f';
+      }
+    }
     el('modal-config').style.display='flex';
   }catch(err){
     console.error('[Config] Erro:',err);
@@ -6553,6 +6612,162 @@ async function abrirPWAManual(){
     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
     if(isIOS) document.getElementById('ios-banner').style.display='block';
   }
+}
+
+// ═══════════════════════════════════════════════════════════
+// SISTEMA DE NOTIFICAÇÕES — FinRossi
+// ═══════════════════════════════════════════════════════════
+
+// ── Calcula vencimentos próximos ──────────────────────────
+function getVencimentosProximos(diasAlerta=3){
+  const hoje = new Date();
+  const diaHoje = hoje.getDate();
+  const mesHoje = hoje.getMonth();
+  const anoHoje = hoje.getFullYear();
+  const {assinaturas, recorrentes} = pd();
+  const alertas = [];
+
+  // Assinaturas
+  (assinaturas||[]).filter(a=>a.status!=='pausada').forEach(a=>{
+    const diasFaltam = a.dia >= diaHoje ? a.dia - diaHoje : (new Date(anoHoje, mesHoje+1, a.dia) - hoje) / 86400000;
+    if(diasFaltam >= 0 && diasFaltam <= diasAlerta){
+      alertas.push({tipo:'assinatura', nome:a.nome, val:a.val, dia:a.dia, diasFaltam:Math.ceil(diasFaltam), cat:a.cat});
+    }
+  });
+
+  // Recorrentes
+  (recorrentes||[]).forEach(r=>{
+    const diasFaltam = r.dia >= diaHoje ? r.dia - diaHoje : (new Date(anoHoje, mesHoje+1, r.dia) - hoje) / 86400000;
+    if(diasFaltam >= 0 && diasFaltam <= diasAlerta){
+      alertas.push({tipo:'recorrente', nome:r.desc, val:r.val, dia:r.dia, diasFaltam:Math.ceil(diasFaltam), cat:r.cat});
+    }
+  });
+
+  // Cartões (fatura)
+  (pd().cartoes||[]).forEach(cartao=>{
+    if(!cartao.venc) return;
+    const diasFaltam = cartao.venc >= diaHoje ? cartao.venc - diaHoje : (new Date(anoHoje, mesHoje+1, cartao.venc) - hoje) / 86400000;
+    if(diasFaltam >= 0 && diasFaltam <= diasAlerta){
+      alertas.push({tipo:'cartao', nome:`Fatura ${cartao.nome}`, val:null, dia:cartao.venc, diasFaltam:Math.ceil(diasFaltam), cat:'Cartão'});
+    }
+  });
+
+  return alertas.sort((a,b)=>a.diasFaltam-b.diasFaltam);
+}
+
+// ── FASE 1: Alerta visual no Dashboard ───────────────────
+function renderAlertasVencimento(){
+  const el = document.getElementById('dash-alertas-venc');
+  if(!el) return;
+  const alertas = getVencimentosProximos(5);
+  if(!alertas.length){ el.innerHTML=''; return; }
+
+  const itens = alertas.map(a=>{
+    const urgente = a.diasFaltam <= 1;
+    const cor = urgente ? 'var(--red)' : a.diasFaltam <= 3 ? 'var(--amber)' : 'var(--blue)';
+    const label = a.diasFaltam === 0 ? 'Hoje!' : a.diasFaltam === 1 ? 'Amanhã' : `Em ${a.diasFaltam} dias`;
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:${urgente?'rgba(248,113,113,.06)':'rgba(251,191,36,.06)'};border-radius:9px;border-left:3px solid ${cor}">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:16px">${a.tipo==='cartao'?'💳':a.tipo==='assinatura'?'🔄':'📋'}</span>
+        <div>
+          <div style="font-size:13px;font-weight:500;color:var(--text)">${a.nome}</div>
+          <div style="font-size:11px;color:var(--muted)">${a.cat} · dia ${a.dia}</div>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:12px;font-weight:600;color:${cor}">${label}</div>
+        ${a.val?`<div style="font-size:11px;color:var(--muted)">${fmtR(a.val)}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML=`<div class="card" style="padding:16px 18px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <span style="font-size:14px">🔔</span>
+      <span style="font-size:13px;font-weight:600;color:var(--text)">Vencimentos próximos</span>
+      <span style="background:var(--red-s);color:var(--red);font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600">${alertas.length}</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">${itens}</div>
+  </div>`;
+}
+
+// ── FASE 2: Email automático (via backend Railway) ────────
+async function enviarAlertasEmail(){
+  const token = await getAdminToken();
+  if(!token) return;
+  try{
+    await fetch(BACKEND_URL+'/admin/email/alertas-vencimento',{
+      method:'POST', headers:{'x-admin-token':token,'Content-Type':'application/json'}
+    });
+    console.log('[Notif] Alertas de email disparados');
+  }catch(e){ console.warn('[Notif] Erro email:', e.message); }
+}
+
+// ── FASE 3: Push Notifications ────────────────────────────
+async function solicitarPermissaoNotificacoes(){
+  if(!('Notification' in window)){
+    alert('Seu navegador não suporta notificações. Instale o app para receber alertas.');
+    return;
+  }
+  if(Notification.permission === 'granted'){
+    mostrarNotificacaoTeste();
+    return;
+  }
+  if(Notification.permission === 'denied'){
+    alert('Notificações bloqueadas. Acesse as configurações do navegador para permitir.');
+    return;
+  }
+  const perm = await Notification.requestPermission();
+  if(perm === 'granted'){
+    localStorage.setItem('fin_notif_ok','1');
+    mostrarNotificacaoTeste();
+    agendarNotificacoes();
+  }
+}
+
+function mostrarNotificacaoTeste(){
+  new Notification('FinRossi 🔔', {
+    body: 'Notificações ativadas! Você será avisado sobre vencimentos.',
+    icon: '/icon-192.png',
+    badge: '/favicon-32.png'
+  });
+}
+
+function agendarNotificacoes(){
+  if(Notification.permission !== 'granted') return;
+  const alertas = getVencimentosProximos(3);
+  alertas.forEach(a=>{
+    const msg = a.diasFaltam === 0
+      ? `${a.nome} vence HOJE!`
+      : a.diasFaltam === 1
+      ? `${a.nome} vence amanhã (dia ${a.dia})`
+      : `${a.nome} vence em ${a.diasFaltam} dias (dia ${a.dia})`;
+    // Mostra imediatamente se há alertas urgentes
+    if(a.diasFaltam <= 1){
+      new Notification('FinRossi — Vencimento próximo 🔔', {
+        body: msg + (a.val ? ` · ${fmtR(a.val)}` : ''),
+        icon: '/icon-192.png',
+        badge: '/favicon-32.png',
+        tag: `venc-${a.nome}-${a.dia}`,
+        renotify: false
+      });
+    }
+  });
+}
+
+// Verifica e mostra notificações ao abrir o app
+function iniciarSistemaNotificacoes(){
+  // Fase 1: sempre mostra no dashboard
+  renderAlertasVencimento();
+  // Fase 3: push se permitido
+  if(Notification.permission === 'granted'){
+    agendarNotificacoes();
+  }
+  // Verifica a cada hora
+  setInterval(()=>{
+    renderAlertasVencimento();
+    if(Notification.permission === 'granted') agendarNotificacoes();
+  }, 3600000);
 }
 
 // ─── PWA SERVICE WORKER + AUTO-UPDATE ────────────────────────────────────────
