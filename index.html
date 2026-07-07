@@ -3120,10 +3120,11 @@ function refreshDash(){
 
   const mkSpark=(id,data,color)=>`<canvas id="spark-${id}" width="120" height="40" style="position:absolute;bottom:12px;right:12px" data-spark='${JSON.stringify(data)}' data-color='${color}'></canvas>`;
 
-  const mkVar=(v)=>{
+  const mkVar=(v,invertido)=>{
     if(v===null) return '';
-    const pos=parseFloat(v)>=0;
-    return `<div style="font-size:11px;color:${pos?'var(--green)':'var(--red)'};display:flex;align-items:center;gap:3px;margin-top:4px"><span>${pos?'↑':'↓'} ${Math.abs(v)}%</span><span style="color:var(--muted)">este mês</span></div>`;
+    const subiu=parseFloat(v)>=0;
+    const bom=invertido?!subiu:subiu; // despesas: gastar mais é ruim (vermelho), gastar menos é bom (verde)
+    return `<div style="font-size:11px;color:${bom?'var(--green)':'var(--red)'};display:flex;align-items:center;gap:3px;margin-top:4px"><span>${subiu?'↑':'↓'} ${Math.abs(v)}%</span><span style="color:var(--muted)">este mês</span></div>`;
   };
 
   const ICON_CHART_UP = `<svg width="26" height="26" viewBox="0 0 32 22" fill="none"><polyline points="2,18 8,12 14,14 22,6 30,2" stroke="#C8A96E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><polyline points="2,18 8,12 14,14 22,6 30,2 30,22 2,22" fill="rgba(200,169,110,0.15)" stroke="none"/></svg>`;
@@ -3148,7 +3149,7 @@ function refreshDash(){
         <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">${k.label}</div>
         <div>
           <div style="font-size:22px;font-weight:700;color:var(--text);letter-spacing:-.5px;line-height:1">${k.val}</div>
-          ${mkVar(k.var)}
+          ${mkVar(k.var, k.id==='des')}
         </div>
         <div style="position:absolute;bottom:16px;right:18px;opacity:.85">${k.icon}</div>
       </div>`).join('');
