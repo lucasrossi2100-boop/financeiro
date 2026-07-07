@@ -1090,12 +1090,10 @@ tr:hover td{background:var(--surface2)}
       <div class="chart-wrap" style="height:180px"><canvas id="c-rv"></canvas></div>
     </div>
 
-    <!-- Meta selecionada -->
+    <!-- Cartões -->
     <div class="card" style="padding:20px">
-      <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Meta selecionada</div>
-      <select id="dash-meta-sel" onchange="renderDashMeta()" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius-sm);padding:5px 10px;font-size:12px;font-family:'DM Sans',sans-serif;outline:none;width:100%;margin-bottom:12px"><option value="">— Selecione uma meta —</option></select>
-      <div class="chart-wrap" style="height:130px"><canvas id="c-meta"></canvas></div>
-      <div id="dash-meta-info" style="margin-top:8px;font-size:12px;color:var(--muted)"></div>
+      <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:16px">Cartões</div>
+      <div id="dash-cartao-widget"></div>
     </div>
   </div>
 </section>
@@ -3462,7 +3460,7 @@ function refreshDash(){
     }
   });
 
-  populateDashMetaSel();renderDashMeta();
+  populateDashMetaSel();renderDashMeta();renderDashCartaoWidget();
   renderTodosMeses();
 }
   const lancs=pd().lancs;
@@ -3533,14 +3531,19 @@ function filtrarMes(mes){
 }
 
 function populateDashMetaSel(){
-  const metas=pd().metas, sel=document.getElementById('dash-meta-sel'), cur=sel.value;
+  const metas=pd().metas, sel=document.getElementById('dash-meta-sel');
+  if(!sel) return;
+  const cur=sel.value;
   sel.innerHTML='<option value="">— Selecione uma meta —</option>'+metas.map(m=>`<option value="${m.id}" ${m.id===cur?'selected':''}>${m.icone||'🎯'} ${m.nome} — ${fmtR0(m.valor)}</option>`).join('');
 }
 
 function renderDashMeta(){
-  const id=document.getElementById('dash-meta-sel').value;
+  const selEl=document.getElementById('dash-meta-sel');
+  if(!selEl) return;
+  const id=selEl.value;
   destroyChart('meta');
   const el=document.getElementById('dash-meta-info');
+  if(!el) return;
   if(!id){el.innerHTML='<span style="color:var(--muted)">Selecione uma meta para visualizar</span>';return}
   const meta=pd().metas.find(m=>m.id===id);
   if(!meta){el.innerHTML='';return}
@@ -3557,6 +3560,44 @@ function renderDashMeta(){
     </div>
     <div style="background:var(--surface3);border-radius:4px;height:6px;overflow:hidden"><div style="width:${pct.toFixed(1)}%;height:100%;background:${cor};border-radius:4px"></div></div>
     <div style="text-align:center;margin-top:4px;font-size:13px;font-weight:500">${pct.toFixed(1)}% — ${meta.icone||'🎯'} ${meta.nome}</div>`;
+}
+
+function renderDashCartaoWidget(){
+  const el=document.getElementById('dash-cartao-widget');
+  if(!el) return;
+  const cartoes=getCartoes();
+  if(!cartoes.length){
+    el.innerHTML=`<div style="text-align:center;padding:20px 0">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Nenhum cartão cadastrado</div>
+      <button class="btn sm" onclick="goTo('cartoes')">+ Cadastrar cartão</button>
+    </div>`;
+    return;
+  }
+  const c=cartoes[0];
+  const mes=getMesFiltro();
+  const lancsMes=pd().lancs.filter(l=>l.tipo==='despesa'&&l.data.startsWith(mes));
+  const gastos=lancsMes.filter(l=>l.cartaoId===c.id).reduce((a,b)=>a+b.val,0);
+  const disponivel=Math.max(0,(c.limite||0)-gastos);
+  const pct=c.limite>0?Math.min(100,(gastos/c.limite)*100):0;
+  const cor=c.cor||'#C8A96E';
+  el.innerHTML=`
+    <div style="display:flex;align-items:center;gap:16px">
+      <div style="width:130px;height:82px;flex-shrink:0;border-radius:12px;background:linear-gradient(135deg,${cor}ee 0%,${cor}99 50%,#1a1a1a 100%);padding:12px;position:relative;overflow:hidden">
+        <div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.06)"></div>
+        <svg width="22" height="16" viewBox="0 0 34 26" fill="none" style="position:relative"><rect x="0" y="0" width="34" height="26" rx="4" fill="#D4AF5A" opacity=".9"/><rect x="11" y="0" width="12" height="26" fill="#C4992A" opacity=".5"/><rect x="0" y="8" width="34" height="10" fill="#C4992A" opacity=".5"/></svg>
+        <div style="font-size:9px;letter-spacing:1.5px;color:rgba(255,255,255,.85);margin-top:8px;font-weight:600">FinRossi</div>
+        <div style="font-size:9px;letter-spacing:1px;color:rgba(255,255,255,.6);font-family:monospace;margin-top:14px">•••• ${c.final||'0000'}</div>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Limite disponível</div>
+        <div style="font-size:20px;font-weight:700;color:var(--text);letter-spacing:-.3px;margin-bottom:10px">${fmtR(disponivel)}</div>
+        <div style="background:var(--surface3);border-radius:4px;height:5px;overflow:hidden">
+          <div style="width:${pct.toFixed(1)}%;height:100%;background:var(--accent);border-radius:4px;transition:width .6s ease"></div>
+        </div>
+        <div style="font-size:10px;color:var(--muted2);margin-top:5px">de ${fmtR(c.limite||0)}</div>
+      </div>
+    </div>
+    ${cartoes.length>1?`<div style="font-size:10px;color:var(--muted2);margin-top:12px;text-align:right;cursor:pointer" onclick="goTo('cartoes')">+${cartoes.length-1} outro(s) cartão(ões) →</div>`:''}`;
 }
 
 // ─── LANÇAMENTOS ─────────────────────────────────────────────────────────────
