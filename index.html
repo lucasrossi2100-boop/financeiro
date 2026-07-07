@@ -417,6 +417,8 @@ button{-webkit-appearance:none;appearance:none;background:transparent;border:non
 .sidebar.collapsed #sync-badge{justify-content:center;padding:6px 0;gap:0;margin:0}
 .sidebar.collapsed .sb-user-info{display:none}
 .sidebar.collapsed .sb-avatar-wrap{justify-content:center;padding:9px 0;gap:0}
+.sidebar.collapsed .profile-btn{padding:9px;justify-content:center;margin:1px 6px;width:calc(100% - 12px);gap:0}
+.sidebar.collapsed .profile-btn-info{display:none}
 
 /* ── PROFILE BUTTONS ───────────────────────────────────── */
 .profile-btn{
@@ -869,14 +871,14 @@ tr:hover td{background:var(--surface2)}
       <span class="sb-label">Minha área</span>
       <button class="profile-btn active" id="pb-pessoal" onclick="setProfile('pessoal')">
         <span style="font-size:18px;flex-shrink:0">👤</span>
-        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:2px">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:2px" class="profile-btn-info">
           <span class="pn">Pessoal</span>
           <span class="ps">Minhas finanças</span>
         </div>
       </button>
       <button class="profile-btn" id="pb-finrossi" onclick="abrirFinRossi()">
         <span style="font-size:18px;flex-shrink:0">💼</span>
-        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:2px">
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:2px" class="profile-btn-info">
           <span class="pn">FinRossi</span>
           <span class="ps">Negócio e clientes</span>
         </div>
