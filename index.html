@@ -13,6 +13,8 @@
 (function(){
   var t = localStorage.getItem('finrossi_tema') || 'escuro';
   document.documentElement.setAttribute('data-theme', t === 'escuro' ? '' : t);
+  var ab = localStorage.getItem('fin_all_black') || '0';
+  document.documentElement.setAttribute('data-allblack', ab);
 })();
 </script>
 <link rel="icon" type="image/x-icon" href="favicon.ico?v=2">
@@ -160,6 +162,14 @@
   /* Radius padrão */
   --radius:14px;
   --radius-sm:9px;
+}
+
+/* ALL BLACK — variante do tema Escuro com preto puro */
+[data-theme=""][data-allblack="1"]{
+  --bg:#000000;
+  --surface:#000000;
+  --surface2:#0a0a0a;
+  --surface3:#141414;
 }
 
 /* TEMA CLARO */
@@ -1777,11 +1787,19 @@ tr:hover td{background:var(--surface2)}
     <!-- Tab: Aparência -->
     <div id="cfg-pane-aparencia" style="display:none;padding:20px 24px">
       <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:12px">Tema</label>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px">
-        <button onclick="setTema('escuro');atualizarTemaAtivo()" id="cfg-tema-escuro" style="padding:14px 8px;border-radius:10px;border:2px solid var(--accent);background:#0f0f0f;cursor:pointer;transition:all .2s;text-align:center">
-          <div style="font-size:20px;margin-bottom:4px">🌙</div>
-          <div style="font-size:11px;color:#888">Escuro</div>
-        </button>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px;margin-top:18px">
+        <div style="position:relative">
+          <div style="position:absolute;top:-18px;right:0;display:flex;align-items:center;gap:5px">
+            <span style="font-size:9px;color:var(--muted)">All Black</span>
+            <div onclick="event.stopPropagation();toggleAllBlack()" id="allblack-toggle" style="width:22px;height:13px;border-radius:8px;background:var(--surface3);border:1px solid var(--border2);cursor:pointer;transition:all .2s;position:relative;flex-shrink:0">
+              <div style="position:absolute;top:1px;left:2px;width:9px;height:9px;border-radius:50%;background:#fff;transition:left .2s"></div>
+            </div>
+          </div>
+          <button onclick="setTema('escuro');atualizarTemaAtivo()" id="cfg-tema-escuro" style="width:100%;padding:14px 8px;border-radius:10px;border:2px solid var(--accent);background:#0f0f0f;cursor:pointer;transition:all .2s;text-align:center">
+            <div style="font-size:20px;margin-bottom:4px">🌙</div>
+            <div style="font-size:11px;color:#888">Escuro</div>
+          </button>
+        </div>
         <button onclick="setTema('claro');atualizarTemaAtivo()" id="cfg-tema-claro" style="padding:14px 8px;border-radius:10px;border:2px solid transparent;background:#e8eaed;cursor:pointer;transition:all .2s;text-align:center">
           <div style="font-size:20px;margin-bottom:4px">☀️</div>
           <div style="font-size:11px;color:#555">Claro</div>
@@ -5566,6 +5584,24 @@ function setTema(tema){
 function initTema(){
   const tema = localStorage.getItem('finrossi_tema') || 'escuro';
   setTema(tema);
+  aplicarAllBlack();
+}
+
+function toggleAllBlack(){
+  const on = localStorage.getItem('fin_all_black')==='1';
+  localStorage.setItem('fin_all_black', on?'0':'1');
+  aplicarAllBlack();
+}
+
+function aplicarAllBlack(){
+  const on = localStorage.getItem('fin_all_black')==='1';
+  document.documentElement.setAttribute('data-allblack', on?'1':'0');
+  const t = document.getElementById('allblack-toggle');
+  if(t){
+    t.style.background = on?'var(--accent)':'var(--surface3)';
+    t.style.borderColor = on?'var(--accent)':'var(--border2)';
+    t.children[0].style.left = on?'11px':'2px';
+  }
 }
 
 // ─── CONFIGURAÇÕES ───────────────────────────────────────────────────────────
