@@ -1047,7 +1047,7 @@ tr:hover td{background:var(--surface2)}
     <!-- Gastos por categoria (donut) -->
     <div class="card" id="dash-card-chart-cat" style="padding:20px">
       <div style="margin-bottom:16px">
-        <div style="font-size:12px;color:var(--muted);margin-bottom:2px">Gastos por categoria</div>
+        <div style="font-size:15px;font-weight:700;color:var(--text)">Gastos por categoria</div>
       </div>
       <div class="chart-wrap" style="height:180px"><canvas id="c-cat"></canvas></div>
     </div>
@@ -3327,8 +3327,8 @@ function refreshDash(){
   const cL=Object.keys(catMap),cV=Object.values(catMap);
   const totalCat=cV.reduce((a,b)=>a+b,0);
 
-  // Paleta começando em dourado
-  const CAT_COLORS=['#C8A96E','#E8C97E','#A07840','#D4B896','#8A6030','#F0D8A0','#6A4820','#B89060'];
+  // Paleta variada, tons terrosos/dourados como na referência
+  const CAT_COLORS=['#6B7A6E','#E8C560','#C8A96E','#B8935A','#8A7050','#D4B896','#6A5838','#9A8560'];
 
   if(ctxCat){
     if(!cL.length){
@@ -3355,10 +3355,12 @@ function refreshDash(){
               position:'right',
               labels:{
                 color:'#ffffff',
-                font:{size:11},
-                padding:10,
+                font:{size:12},
+                padding:14,
                 boxWidth:8,
                 boxHeight:8,
+                usePointStyle:true,
+                pointStyle:'circle',
                 generateLabels:(chart)=>{
                   const data=chart.data;
                   return data.labels.map((label,i)=>{
@@ -3366,11 +3368,12 @@ function refreshDash(){
                     const pct=totalCat>0?Math.round(val/totalCat*100):0;
                     const hidden=chart.getDatasetMeta(0).data[i]?.hidden;
                     return {
-                      text:`${label}   ${pct}%`,
+                      text:`${label}    ${pct}%`,
                       fillStyle:hidden?'#444':data.datasets[0].backgroundColor[i],
-                      strokeStyle:'transparent',
+                      strokeStyle:hidden?'#444':data.datasets[0].backgroundColor[i],
                       fontColor:hidden?'#555':'#ffffff',
                       lineWidth:0,
+                      pointStyle:'circle',
                       hidden:hidden,
                       index:i,
                       datasetIndex:0
@@ -3401,12 +3404,12 @@ function refreshDash(){
             ctx.save();
             ctx.textAlign='center';
             ctx.textBaseline='middle';
-            ctx.font='bold 16px DM Sans,Arial';
+            ctx.font='bold 19px DM Sans,Arial';
             ctx.fillStyle='#f0ede8';
             ctx.fillText(fmtR(totalCat).replace('R$\u00a0','R$ '), cx, cy-8);
             ctx.font='11px DM Sans,Arial';
-            ctx.fillStyle='#666';
-            ctx.fillText('Total', cx, cy+10);
+            ctx.fillStyle='#777';
+            ctx.fillText('Total', cx, cy+12);
             ctx.restore();
           }
         }]
