@@ -3368,7 +3368,7 @@ function refreshDash(){
   const totalCat=cV.reduce((a,b)=>a+b,0);
 
   // Paleta variada, tons terrosos/dourados como na referência
-  const GOLD_PALETTE=['#6B7A6E','#E8C560','#C8A96E','#B8935A','#D4B896','#9A8560','#6A5838'];
+  const GOLD_PALETTE=['#E8C560','#C8A96E','#D4B896','#B8935A','#9A8560','#6A5838','#6B7A6E'];
   const COR_OUTROS='#5F5E5A';
   let _goldIdx=0;
   const CAT_COLORS=cL.map(c=>c==='Outros'?COR_OUTROS:GOLD_PALETTE[_goldIdx++%GOLD_PALETTE.length]);
