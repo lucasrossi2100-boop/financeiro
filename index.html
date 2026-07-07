@@ -586,10 +586,14 @@ tr:hover td{background:var(--surface2)}
 @keyframes slidePWA{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
 
 /* ── CURSOR FX (neon) ──────────────────────────────────── */
-#cursor-fx-dot,#cursor-fx-ring{position:fixed;top:0;left:0;pointer-events:none;z-index:9999;border-radius:50%;transform:translate(-50%,-50%);opacity:0;transition:opacity .2s}
+#cursor-fx-dot,#cursor-fx-ring{position:fixed;top:0;left:0;pointer-events:none;z-index:9999;border-radius:50%;transform:translate(-50%,-50%);opacity:0;transition:opacity .2s,width .2s,height .2s,box-shadow .2s,border-width .2s}
 #cursor-fx-dot{width:6px;height:6px;background:var(--accent);box-shadow:0 0 6px var(--accent),0 0 14px var(--accent)}
 #cursor-fx-ring{width:26px;height:26px;border:1.5px solid var(--accent);box-shadow:0 0 8px rgba(200,169,110,.5)}
 #cursor-fx-dot.on,#cursor-fx-ring.on{opacity:1}
+#cursor-fx-ring.cfx-hover{width:40px;height:40px;border-width:2px;box-shadow:0 0 18px var(--accent),0 0 32px rgba(200,169,110,.6)}
+#cursor-fx-dot.cfx-hover{box-shadow:0 0 10px var(--accent),0 0 22px var(--accent)}
+.cursor-fx-ripple{position:fixed;top:0;left:0;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--accent);pointer-events:none;z-index:9999;transform:translate(-50%,-50%) scale(0);opacity:.7;animation:cfx-ripple .5s ease-out forwards}
+@keyframes cfx-ripple{to{transform:translate(-50%,-50%) scale(3);opacity:0}}
 
 /* ── SCROLLBAR GLOBAL ──────────────────────────────────── */
 ::-webkit-scrollbar{width:5px;height:5px}
@@ -1557,7 +1561,7 @@ tr:hover td{background:var(--surface2)}
       <option value="gratuito">Gratuito</option>
       <option value="starter">Starter</option>
       <option value="essencial">Essencial</option>
-      <option value="consultoria">Consultoria</option>
+      <option value="performance">Performance</option>
     </select>
     <input id="cli-busca" type="text" placeholder="Buscar por nome ou email..." oninput="renderClientes()" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius-sm);padding:7px 12px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;flex:1;max-width:260px">
   </div>
@@ -1582,7 +1586,7 @@ tr:hover td{background:var(--surface2)}
         <button onclick="setPreviewPlano('gratuito')" id="prev-btn-gratuito" class="btn" style="font-size:12px">🆓 Gratuito</button>
         <button onclick="setPreviewPlano('starter')" id="prev-btn-starter" class="btn" style="font-size:12px">⚡ Starter</button>
         <button onclick="setPreviewPlano('essencial')" id="prev-btn-essencial" class="btn" style="font-size:12px">✨ Essencial</button>
-        <button onclick="setPreviewPlano('consultoria')" id="prev-btn-consultoria" class="btn primary" style="font-size:12px">👑 Consultoria</button>
+        <button onclick="setPreviewPlano('performance')" id="prev-btn-performance" class="btn primary" style="font-size:12px">🚀 Performance</button>
       </div>
       <div id="preview-plano-badge" style="margin-left:auto;font-size:12px;padding:4px 12px;border-radius:20px;background:var(--accent-s);color:var(--accent);font-weight:500"></div>
     </div>
@@ -2119,9 +2123,9 @@ tr:hover td{background:var(--surface2)}
         <label>Plano</label>
         <select id="ec-plano">
           <option value="gratuito">🆓 Gratuito (30 dias)</option>
-          <option value="starter">⚡ Starter — R$19,90/mês</option>
-          <option value="essencial">✨ Essencial — R$39,90/mês</option>
-          <option value="consultoria">👑 Consultoria — R$89,90/mês</option>
+          <option value="starter">⚡ Starter — R$9,90/mês</option>
+          <option value="essencial">⭐ Essencial — R$24,90/mês</option>
+          <option value="performance">🚀 Performance — R$49,90/mês</option>
         </select>
       </div>
       <!-- Status -->
@@ -2256,9 +2260,9 @@ tr:hover td{background:var(--surface2)}
         <div class="field"><label>Plano</label>
           <select id="nc-plano">
             <option value="gratuito">Gratuito (trial)</option>
-            <option value="starter">Starter — R$19,90</option>
-            <option value="essencial">Essencial — R$39,90</option>
-            <option value="consultoria">Consultoria — R$89,90</option>
+            <option value="starter">Starter — R$9,90</option>
+            <option value="essencial">Essencial — R$24,90</option>
+            <option value="performance">Performance — R$49,90</option>
           </select>
         </div>
         <div class="field"><label>Origem</label>
@@ -4723,7 +4727,7 @@ async function cadastrarNovoCliente(){
   const email=document.getElementById('nc-email').value.trim();
   const senha=document.getElementById('nc-senha').value;
   const role=document.getElementById('nc-role')?.value||'cliente';
-  const plano=role==='cliente'?(document.getElementById('nc-plano')?.value||'gratuito'):'consultoria';
+  const plano=role==='cliente'?(document.getElementById('nc-plano')?.value||'gratuito'):'performance';
   const origem=role==='cliente'?(document.getElementById('nc-origem')?.value||'teste'):'interno';
   const msg=document.getElementById('msg-novo-cliente');
 
@@ -4799,7 +4803,7 @@ async function renderClientes(){
     const pagantes=clientesReais.filter(c=>c.origem==='pagante'&&c.status==='ativo');
     const emTrial=clientesReais.filter(c=>c.origem==='trial'&&c.status!=='inativo');
     const inativos=clientesReais.filter(c=>c.status==='inativo');
-    const mrr=pagantes.reduce((a,c)=>{ const p={starter:19.90,essencial:39.90,consultoria:89.90}; return a+(p[c.plano]||0); },0);
+    const mrr=pagantes.reduce((a,c)=>{ const p={starter:9.90,essencial:24.90,performance:49.90}; return a+(p[c.plano]||0); },0);
 
     document.getElementById('clientes-metrics').innerHTML=`
       <div class="mc"><div class="mc-label">Pagantes ativos</div><div class="mc-val green">${pagantes.length}</div><div class="mc-sub">geram receita</div></div>
@@ -4814,7 +4818,7 @@ async function renderClientes(){
       return;
     }
 
-    const PLANO_CORES={gratuito:'var(--muted)',starter:'var(--blue)',essencial:'var(--green)',consultoria:'var(--accent)'};
+    const PLANO_CORES={gratuito:'var(--muted)',starter:'var(--blue)',essencial:'var(--green)',performance:'var(--accent)'};
     const STATUS_CORES={ativo:'var(--green)',trial:'var(--amber)',inativo:'var(--red)',pendente:'var(--amber)'};
     const ROLE_BADGE={socio:['👑','var(--accent)','Sócio'],admin:['👔','var(--purple)','Admin'],dev:['💻','var(--blue)','Dev'],cliente:['👤','var(--muted)','Cliente']};
     const ROLES_INTERNOS_TBL=['socio','admin','dev'];
@@ -5049,19 +5053,19 @@ const PLANOS_CONFIG = {
     desc: 'Acesso por 30 dias com até 20 lançamentos. Sem investimentos, metas ou controles avançados.'
   },
   starter: {
-    label: 'Starter', preco: 'R$ 19,90/mês', cor: 'var(--blue)', dias: null,
+    label: 'Starter', preco: 'R$ 9,90/mês', cor: 'var(--blue)', dias: null,
     limites: { lancamentos: true, investimentos: true, metas: false, cartoes: false, assinaturas: false, recorrentes: false, calendario: false, notas: false, renda: false, 'minha-assinatura': true },
     edicao: 'visualizacao',
     desc: 'Lançamentos ilimitados, gráficos e investimentos simples. Sem metas, objetivos ou controles.'
   },
   essencial: {
-    label: 'Essencial', preco: 'R$ 39,90/mês', cor: 'var(--green)', dias: null,
+    label: 'Essencial', preco: 'R$ 24,90/mês', cor: 'var(--green)', dias: null,
     limites: { lancamentos: true, investimentos: true, metas: true, cartoes: true, assinaturas: true, recorrentes: true, calendario: true, notas: true, renda: true, 'minha-assinatura': true },
     edicao: 'observacao',
     desc: 'Acesso completo ao app. Pode adicionar observações. Sem edição direta pelo consultor.'
   },
-  consultoria: {
-    label: 'Consultoria', preco: 'R$ 89,90/mês', cor: 'var(--accent)', dias: null,
+  performance: {
+    label: 'Performance', preco: 'R$ 49,90/mês', cor: 'var(--accent)', dias: null,
     limites: { lancamentos: true, investimentos: true, metas: true, cartoes: true, assinaturas: true, recorrentes: true, calendario: true, notas: true, renda: true, 'minha-assinatura': true },
     edicao: 'completa',
     desc: 'Tudo do Essencial + acesso do consultor para edição, reunião mensal e relatório.'
@@ -5105,13 +5109,13 @@ const PERMS_TABLE = [
   {label:'Período gratuito (dias)',  g:'30d',  s:false, e:false, c:false},
 ];
 
-let _previewPlano = 'consultoria';
+let _previewPlano = 'performance';
 
 function setPreviewPlano(plano){
   _previewPlano = plano;
   renderPreview();
   // Atualiza botões
-  ['gratuito','starter','essencial','consultoria'].forEach(p=>{
+  ['gratuito','starter','essencial','performance'].forEach(p=>{
     const btn = document.getElementById('prev-btn-'+p);
     if(btn) btn.className = 'btn' + (p===plano?' primary':'');
   });
@@ -5185,7 +5189,7 @@ function renderPreview(){
       ${cell(row.g, plano==='gratuito')}
       ${cell(row.s, plano==='starter')}
       ${cell(row.e, plano==='essencial')}
-      ${cell(row.c, plano==='consultoria')}
+      ${cell(row.c, plano==='performance')}
     </tr>`).join('');
   }
 }
@@ -5822,9 +5826,9 @@ async function renderMinhaAssinatura(){
 
   const PLANO_INFO = {
     gratuito:    {label:'Gratuito',    cor:'var(--muted)',   icone:'🆓', preco:'R$ 0,00',    desc:'Acesso por 30 dias, até 20 lançamentos'},
-    starter:     {label:'Starter',     cor:'var(--blue)',    icone:'⚡', preco:'R$ 19,90/mês',desc:'Lançamentos ilimitados + investimentos'},
-    essencial:   {label:'Essencial',   cor:'var(--green)',   icone:'✨', preco:'R$ 39,90/mês',desc:'Acesso completo ao app'},
-    consultoria: {label:'Consultoria', cor:'var(--accent)',  icone:'👑', preco:'R$ 89,90/mês',desc:'Tudo + consultoria mensal e suporte'},
+    starter:     {label:'Starter',     cor:'var(--blue)',    icone:'⚡', preco:'R$ 9,90/mês',desc:'Lançamentos ilimitados + investimentos'},
+    essencial:   {label:'Essencial',   cor:'var(--green)',   icone:'⭐', preco:'R$ 24,90/mês',desc:'Acesso completo ao app'},
+    performance: {label:'Performance', cor:'var(--accent)',  icone:'🚀', preco:'R$ 49,90/mês',desc:'Tudo + suporte prioritário'},
   };
 
   const STATUS_INFO = {
@@ -5903,11 +5907,11 @@ async function renderMinhaAssinatura(){
           ${[
             ['Lançamentos', plano==='gratuito'?'Até 20':'Ilimitados', true],
             ['Investimentos', plano==='gratuito'?false:true, plano!=='gratuito'],
-            ['Metas e Objetivos', ['essencial','consultoria'].includes(plano), ['essencial','consultoria'].includes(plano)],
-            ['Cartões e Assinaturas', ['essencial','consultoria'].includes(plano), ['essencial','consultoria'].includes(plano)],
-            ['Calendário e Notas', ['essencial','consultoria'].includes(plano), ['essencial','consultoria'].includes(plano)],
-            ['Consultoria mensal', plano==='consultoria', plano==='consultoria'],
-            ['Suporte WhatsApp', plano==='consultoria', plano==='consultoria'],
+            ['Metas e Objetivos', ['essencial','performance'].includes(plano), ['essencial','performance'].includes(plano)],
+            ['Cartões e Assinaturas', ['essencial','performance'].includes(plano), ['essencial','performance'].includes(plano)],
+            ['Calendário e Notas', ['essencial','performance'].includes(plano), ['essencial','performance'].includes(plano)],
+            ['Suporte prioritário', plano==='performance', plano==='performance'],
+            ['Suporte WhatsApp', plano==='performance', plano==='performance'],
           ].map(([label, detalhe, ok])=>`
             <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px">
               <span style="color:${ok?'var(--text)':'var(--muted2)'}">${label}</span>
@@ -5918,12 +5922,12 @@ async function renderMinhaAssinatura(){
     </div>
 
     <!-- Upgrade / Suporte -->
-    ${plano!=='consultoria'?`
+    ${plano!=='performance'?`
     <div class="card card-full" style="margin-bottom:20px;border-color:rgba(200,169,110,0.2);background:rgba(200,169,110,0.04)">
       <h3><span class="dot" style="background:var(--accent)"></span>Quer mais recursos?</h3>
       <p style="font-size:13px;color:var(--muted);margin:8px 0 16px;line-height:1.7">
         Faça upgrade do seu plano para desbloquear metas, cartões, calendário financeiro, 
-        consultoria mensal e muito mais.
+        suporte prioritário e muito mais.
       </p>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
         ${plano==='gratuito'||plano==='starter'?`<a href="https://finrossi.com.br/landing.html#planos" target="_blank" class="btn primary" style="text-decoration:none">⚡ Ver planos disponíveis</a>`:''}
@@ -5938,7 +5942,7 @@ async function renderMinhaAssinatura(){
         <a href="mailto:finrossiapp@gmail.com?subject=Suporte FinRossi" class="btn" style="text-decoration:none;font-size:13px">✉ Enviar e-mail</a>
         <a href="https://finrossi.com.br/legal/termos.html" target="_blank" class="btn" style="text-decoration:none;font-size:13px">📄 Termos de Uso</a>
         <a href="https://finrossi.com.br/legal/privacidade.html" target="_blank" class="btn" style="text-decoration:none;font-size:13px">🔒 Privacidade</a>
-        ${plano==='consultoria'?`<a href="mailto:finrossiapp@gmail.com?subject=Agendamento reunião FinRossi" class="btn primary" style="text-decoration:none;font-size:13px">📅 Agendar reunião</a>`:''}
+        ${plano==='performance'?`<a href="mailto:finrossiapp@gmail.com?subject=Agendamento sessão FinRossi" class="btn primary" style="text-decoration:none;font-size:13px">📅 Agendar sessão</a>`:''}
       </div>
     </div>
   `;
@@ -5987,7 +5991,8 @@ function initNavGroups(){
 
 // ─── CURSOR FX (neon) ─────────────────────────────────────────────────────
 var _cursorFxOn=false, _cursorFxRAF=null;
-var _cfxMouseX=0, _cfxMouseY=0, _cfxRingX=0, _cfxRingY=0;
+var _cfxMouseX=0, _cfxMouseY=0, _cfxRingX=0, _cfxRingY=0, _cfxEase=0.15;
+var CFX_INTERATIVOS='a,button,.btn,input,select,textarea,[onclick],.nav-item,.profile-btn,.mc,.card';
 function _cfxEnsureEls(){
   if(!document.getElementById('cursor-fx-dot')){
     const dot=document.createElement('div'); dot.id='cursor-fx-dot';
@@ -6006,9 +6011,28 @@ function _cfxLeave(){
   const dot=document.getElementById('cursor-fx-dot'); if(dot) dot.classList.remove('on');
   const ring=document.getElementById('cursor-fx-ring'); if(ring) ring.classList.remove('on');
 }
+function _cfxOver(e){
+  if(!e.target.closest(CFX_INTERATIVOS)) return;
+  _cfxEase=0.35;
+  const dot=document.getElementById('cursor-fx-dot'); if(dot) dot.classList.add('cfx-hover');
+  const ring=document.getElementById('cursor-fx-ring'); if(ring) ring.classList.add('cfx-hover');
+}
+function _cfxOut(e){
+  if(!e.target.closest(CFX_INTERATIVOS)) return;
+  _cfxEase=0.15;
+  const dot=document.getElementById('cursor-fx-dot'); if(dot) dot.classList.remove('cfx-hover');
+  const ring=document.getElementById('cursor-fx-ring'); if(ring) ring.classList.remove('cfx-hover');
+}
+function _cfxClick(e){
+  const r=document.createElement('div');
+  r.className='cursor-fx-ripple';
+  r.style.left=e.clientX+'px'; r.style.top=e.clientY+'px';
+  document.body.appendChild(r);
+  setTimeout(()=>r.remove(),500);
+}
 function _cfxLoop(){
-  _cfxRingX+=(_cfxMouseX-_cfxRingX)*0.15;
-  _cfxRingY+=(_cfxMouseY-_cfxRingY)*0.15;
+  _cfxRingX+=(_cfxMouseX-_cfxRingX)*_cfxEase;
+  _cfxRingY+=(_cfxMouseY-_cfxRingY)*_cfxEase;
   const ring=document.getElementById('cursor-fx-ring');
   if(ring){ ring.style.left=_cfxRingX+'px'; ring.style.top=_cfxRingY+'px'; }
   _cursorFxRAF=requestAnimationFrame(_cfxLoop);
@@ -6020,12 +6044,18 @@ function startCursorFx(){
   _cursorFxOn=true;
   document.addEventListener('mousemove', _cfxMove);
   document.addEventListener('mouseleave', _cfxLeave);
+  document.addEventListener('mouseover', _cfxOver);
+  document.addEventListener('mouseout', _cfxOut);
+  document.addEventListener('click', _cfxClick);
   _cfxLoop();
 }
 function stopCursorFx(){
   _cursorFxOn=false;
   document.removeEventListener('mousemove', _cfxMove);
   document.removeEventListener('mouseleave', _cfxLeave);
+  document.removeEventListener('mouseover', _cfxOver);
+  document.removeEventListener('mouseout', _cfxOut);
+  document.removeEventListener('click', _cfxClick);
   if(_cursorFxRAF) cancelAnimationFrame(_cursorFxRAF);
   const dot=document.getElementById('cursor-fx-dot'); if(dot) dot.remove();
   const ring=document.getElementById('cursor-fx-ring'); if(ring) ring.remove();

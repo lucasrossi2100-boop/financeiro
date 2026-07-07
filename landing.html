@@ -29,6 +29,14 @@
   --green-s:rgba(74,222,128,0.1);
   --red:#f87171;
 }
+#cursor-fx-dot,#cursor-fx-ring{position:fixed;top:0;left:0;pointer-events:none;z-index:9999;border-radius:50%;transform:translate(-50%,-50%);opacity:0;transition:opacity .2s,width .2s,height .2s,box-shadow .2s,border-width .2s}
+#cursor-fx-dot{width:6px;height:6px;background:var(--gold);box-shadow:0 0 6px var(--gold),0 0 14px var(--gold)}
+#cursor-fx-ring{width:26px;height:26px;border:1.5px solid var(--gold);box-shadow:0 0 8px rgba(201,168,76,.5)}
+#cursor-fx-dot.on,#cursor-fx-ring.on{opacity:1}
+#cursor-fx-ring.cfx-hover{width:40px;height:40px;border-width:2px;box-shadow:0 0 18px var(--gold),0 0 32px rgba(201,168,76,.6)}
+#cursor-fx-dot.cfx-hover{box-shadow:0 0 10px var(--gold),0 0 22px var(--gold)}
+.cursor-fx-ripple{position:fixed;top:0;left:0;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--gold);pointer-events:none;z-index:9999;transform:translate(-50%,-50%) scale(0);opacity:.7;animation:cfx-ripple .5s ease-out forwards}
+@keyframes cfx-ripple{to{transform:translate(-50%,-50%) scale(3);opacity:0}}
 html{font-size:16px;scroll-behavior:smooth}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
 
@@ -387,7 +395,7 @@ footer strong{color:var(--gold)}
         <div class="plan-name">Starter</div>
         <div class="plan-price">
           <span class="currency">R$</span>
-          <span class="amount">19</span>
+          <span class="amount">9</span>
           <span class="period">,90/mês</span>
         </div>
         <p class="plan-desc">Controle básico do dia a dia.</p>
@@ -405,11 +413,11 @@ footer strong{color:var(--gold)}
 
       <!-- ESSENCIAL -->
       <div class="plan-card featured">
-        <span class="plan-badge">Completo</span>
+        <span class="plan-badge">⭐ Mais popular</span>
         <div class="plan-name">Essencial</div>
         <div class="plan-price">
           <span class="currency">R$</span>
-          <span class="amount">39</span>
+          <span class="amount">24</span>
           <span class="period">,90/mês</span>
         </div>
         <p class="plan-desc">Controle financeiro completo.</p>
@@ -425,26 +433,24 @@ footer strong{color:var(--gold)}
         <button class="plan-btn gold-btn" onclick="assinar('essencial')">Assinar Essencial</button>
       </div>
 
-      <!-- CONSULTORIA -->
+      <!-- PERFORMANCE -->
       <div class="plan-card">
         <span class="plan-badge">Premium</span>
-        <div class="plan-name">Consultoria</div>
+        <div class="plan-name">Performance</div>
         <div class="plan-price">
           <span class="currency">R$</span>
-          <span class="amount">89</span>
+          <span class="amount">49</span>
           <span class="period">,90/mês</span>
         </div>
-        <p class="plan-desc">Controle completo + acompanhamento pessoal.</p>
+        <p class="plan-desc">Controle completo + acompanhamento personalizado.</p>
         <ul class="plan-features">
           <li>Tudo do Essencial</li>
-          <li>Consultor acessa seus dados</li>
-          <li>Reunião mensal de análise</li>
+          <li>Sessão mensal de acompanhamento</li>
           <li>Relatório mensal personalizado</li>
-          <li>Metas definidas com o consultor</li>
           <li>Suporte via WhatsApp</li>
           <li>Atendimento prioritário</li>
         </ul>
-        <button class="plan-btn outline-btn" onclick="assinar('consultoria')">Assinar Consultoria</button>
+        <button class="plan-btn outline-btn" onclick="assinar('performance')">Assinar Performance</button>
       </div>
 
     </div>
@@ -532,9 +538,9 @@ function toggleFaq(btn){
 // ─── Config ───────────────────────────────────────────────────────────────────
 const BACKEND_URL = 'https://finrossi-backend-production.up.railway.app';
 
-const PLANO_MENSAL  = {starter:19.90, essencial:39.90, consultoria:89.90};
-const PLANO_ANUAL   = {starter:191.04, essencial:383.04, consultoria:863.04};
-const PLANO_NOME    = {gratuito:'Gratuito', starter:'Starter', essencial:'Essencial', consultoria:'Consultoria'};
+const PLANO_MENSAL  = {starter:9.90, essencial:24.90, performance:49.90};
+const PLANO_ANUAL   = {starter:95.04, essencial:239.04, performance:479.04};
+const PLANO_NOME    = {gratuito:'Gratuito', starter:'Starter', essencial:'Essencial', performance:'Performance'};
 
 let _periodoAtual = 'mensal'; // 'mensal' | 'anual'
 
@@ -695,6 +701,43 @@ document.querySelectorAll('.feature-card,.plan-card,.step').forEach(el=>{
   el.style.opacity='0';el.style.transform='translateY(20px)';el.style.transition='opacity .5s ease, transform .5s ease';
   observer.observe(el);
 });
+
+// Cursor neon
+if(window.matchMedia('(pointer:fine)').matches){
+  const dot=document.createElement('div'); dot.id='cursor-fx-dot';
+  const ring=document.createElement('div'); ring.id='cursor-fx-ring';
+  document.body.appendChild(dot); document.body.appendChild(ring);
+  let mx=0,my=0,rx=0,ry=0,ease=0.15;
+  const INTERATIVOS='a,button,.btn,input,select,textarea,[onclick],.feature-card,.plan-card';
+  document.addEventListener('mousemove', e=>{
+    mx=e.clientX; my=e.clientY;
+    dot.style.left=mx+'px'; dot.style.top=my+'px';
+    dot.classList.add('on'); ring.classList.add('on');
+  });
+  document.addEventListener('mouseleave', ()=>{
+    dot.classList.remove('on'); ring.classList.remove('on');
+  });
+  document.addEventListener('mouseover', e=>{
+    if(!e.target.closest(INTERATIVOS)) return;
+    ease=0.35; dot.classList.add('cfx-hover'); ring.classList.add('cfx-hover');
+  });
+  document.addEventListener('mouseout', e=>{
+    if(!e.target.closest(INTERATIVOS)) return;
+    ease=0.15; dot.classList.remove('cfx-hover'); ring.classList.remove('cfx-hover');
+  });
+  document.addEventListener('click', e=>{
+    const r=document.createElement('div');
+    r.className='cursor-fx-ripple';
+    r.style.left=e.clientX+'px'; r.style.top=e.clientY+'px';
+    document.body.appendChild(r);
+    setTimeout(()=>r.remove(),500);
+  });
+  (function loop(){
+    rx+=(mx-rx)*ease; ry+=(my-ry)*ease;
+    ring.style.left=rx+'px'; ring.style.top=ry+'px';
+    requestAnimationFrame(loop);
+  })();
+}
 </script>
 <!-- MODAL CADASTRO -->
 <div id="modal-cadastro" style="display:none;position:fixed;inset:0;background:rgba(8,8,8,0.92);backdrop-filter:blur(6px);align-items:center;justify-content:center;z-index:999;padding:20px">
