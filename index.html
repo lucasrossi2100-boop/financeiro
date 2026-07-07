@@ -3342,11 +3342,20 @@ function refreshDash(){
   doMes.filter(l=>l.tipo==='despesa').forEach(l=>catMap[l.cat]=(catMap[l.cat]||0)+l.val);
   destroyChart('cat');
   const ctxCat=document.getElementById('c-cat');
-  const cL=Object.keys(catMap),cV=Object.values(catMap);
+  // Ordena do maior gasto pro menor — "Outros" sempre fica por último
+  const catOrdenadas=Object.entries(catMap).sort((a,b)=>{
+    if(a[0]==='Outros') return 1;
+    if(b[0]==='Outros') return -1;
+    return b[1]-a[1];
+  });
+  const cL=catOrdenadas.map(c=>c[0]),cV=catOrdenadas.map(c=>c[1]);
   const totalCat=cV.reduce((a,b)=>a+b,0);
 
   // Paleta variada, tons terrosos/dourados como na referência
-  const CAT_COLORS=['#6B7A6E','#E8C560','#C8A96E','#B8935A','#8A7050','#D4B896','#6A5838','#9A8560'];
+  const GOLD_PALETTE=['#6B7A6E','#E8C560','#C8A96E','#B8935A','#D4B896','#9A8560','#6A5838'];
+  const COR_OUTROS='#5F5E5A';
+  let _goldIdx=0;
+  const CAT_COLORS=cL.map(c=>c==='Outros'?COR_OUTROS:GOLD_PALETTE[_goldIdx++%GOLD_PALETTE.length]);
 
   if(ctxCat){
     if(!cL.length){
