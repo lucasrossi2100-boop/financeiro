@@ -780,7 +780,7 @@ tr:hover td{background:var(--surface2)}
         <label style="font-size:12px;color:#888;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Senha</label>
         <div style="position:relative">
           <input id="login-senha" type="password" placeholder="••••••••" style="width:100%;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);color:#f5f0e8;border-radius:8px;padding:12px 42px 12px 14px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s" onfocus="this.style.borderColor='rgba(201,168,76,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'" onkeydown="if(event.key==='Enter')fazerLogin()">
-          <button type="button" onclick="toggleSenha('login-senha','olho-login')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#555;padding:4px;font-size:16px;line-height:1" id="olho-login">👁</button>
+          <button type="button" onclick="toggleSenha('login-senha','olho-login')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#555;padding:4px;font-size:16px;line-height:1" id="olho-login"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
         </div>
       </div>
 
@@ -2243,7 +2243,7 @@ tr:hover td{background:var(--surface2)}
       <div class="field"><label>Senha</label>
         <div style="position:relative">
           <input id="nc-senha" type="password" placeholder="Senha de acesso" style="padding-right:38px">
-          <button type="button" onclick="toggleSenha('nc-senha','olho-nc')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;font-size:15px;line-height:1" id="olho-nc">👁</button>
+          <button type="button" onclick="toggleSenha('nc-senha','olho-nc')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;font-size:15px;line-height:1" id="olho-nc"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
         </div>
       </div>
       <div class="field"><label>Role</label>
@@ -2353,7 +2353,7 @@ tr:hover td{background:var(--surface2)}
             onfocus="this.style.borderColor='rgba(200,169,110,0.5)'"
             onblur="this.style.borderColor='rgba(255,255,255,0.1)'"
             onkeydown="if(event.key==='Enter')confirmarSenhaFinRossi()">
-          <button type="button" onclick="toggleSenha('inp-senha-finrossi','olho-fr')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#555;padding:4px;font-size:16px;line-height:1" id="olho-fr">👁</button>
+          <button type="button" onclick="toggleSenha('inp-senha-finrossi','olho-fr')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#555;padding:4px;font-size:16px;line-height:1" id="olho-fr"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
         </div>
       </div>
 
@@ -6207,13 +6207,15 @@ document.getElementById('modal-config').addEventListener('click', e=>{
 
 // ─── LOGIN / LOGOUT ──────────────────────────────────────────────────────────
 // ─── VALIDAÇÃO DE EMAIL ───────────────────────────────────────────────────────
+const ICONE_OLHO = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+const ICONE_OLHO_OFF = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.94 10.94 0 0112 20c-7 0-11-8-11-8a21.8 21.8 0 015.06-6.06M9.9 4.24A10.94 10.94 0 0112 4c7 0 11 8 11 8a21.77 21.77 0 01-2.16 3.19M14.12 14.12a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
 function toggleSenha(inputId, btnId){
   const inp = document.getElementById(inputId);
   const btn = document.getElementById(btnId);
   if(!inp) return;
   const mostrar = inp.type === 'password';
   inp.type = mostrar ? 'text' : 'password';
-  if(btn) btn.textContent = mostrar ? '🙈' : '👁';
+  if(btn) btn.innerHTML = mostrar ? ICONE_OLHO_OFF : ICONE_OLHO;
 }
 
 function validarEmail(email){
