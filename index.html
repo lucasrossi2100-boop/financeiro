@@ -167,13 +167,25 @@
 /* ALL BLACK — variante do tema Escuro com preto puro */
 [data-theme=""][data-allblack="1"]{
   --bg:#000000;
-  --surface:#0a0a0a;
-  --surface2:#141414;
-  --surface3:#1c1c1c;
-  --surface4:#262626;
-  --border:rgba(255,255,255,0.09);
-  --border2:rgba(255,255,255,0.17);
+  --surface:#000000;
+  --surface2:#000000;
+  --surface3:#000000;
+  --surface4:#000000;
+  --border:rgba(255,255,255,0.12);
+  --border2:rgba(255,255,255,0.22);
   --accent-s:rgba(200,169,110,0.16);
+}
+/* Brilho de borda simulando reflexo de luz — só no All Black */
+[data-allblack="1"] .card,
+[data-allblack="1"] .mc,
+[data-allblack="1"] .modal,
+[data-allblack="1"] .sidebar,
+[data-allblack="1"] .tabs,
+[data-allblack="1"] .field input,
+[data-allblack="1"] .field select,
+[data-allblack="1"] .field textarea,
+[data-allblack="1"] .dp-popup{
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.09), inset 0 0 0 1px rgba(255,255,255,.03);
 }
 
 /* TEMA CLARO */
