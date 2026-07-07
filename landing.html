@@ -369,6 +369,16 @@ footer strong{color:var(--gold)}
     <span class="section-label">Planos</span>
     <h2 class="section-title">Escolha o plano ideal para você</h2>
     <p class="section-sub">Comece grátis. Faça upgrade quando quiser. Cancele a qualquer momento.</p>
+
+    <div style="display:flex;justify-content:center;margin-bottom:32px">
+      <div style="display:inline-flex;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border2);border-radius:30px;padding:4px">
+        <button id="toggle-mensal" onclick="setPeriodo('mensal')" style="padding:9px 20px;border:none;border-radius:24px;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer;transition:all .2s;background:#C8A96E;color:#0f0f0f">Mensal</button>
+        <button id="toggle-anual" onclick="setPeriodo('anual')" style="padding:9px 20px;border:none;border-radius:24px;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer;transition:all .2s;background:transparent;color:#888;display:flex;align-items:center;gap:6px">
+          Anual <span style="background:rgba(74,222,128,0.15);color:#4ade80;font-size:11px;padding:2px 8px;border-radius:10px">-20%</span>
+        </button>
+      </div>
+    </div>
+
     <div class="pricing-grid">
 
       <!-- GRATUITO -->
@@ -395,9 +405,10 @@ footer strong{color:var(--gold)}
         <div class="plan-name">Starter</div>
         <div class="plan-price">
           <span class="currency">R$</span>
-          <span class="amount">9</span>
-          <span class="period">,90/mês</span>
+          <span class="amount" id="amount-starter">9</span>
+          <span class="period" id="period-starter">,90/mês</span>
         </div>
+        <div id="anual-note-starter" style="font-size:11px;color:var(--muted);margin:-4px 0 8px;display:none"></div>
         <p class="plan-desc">Controle básico do dia a dia.</p>
         <ul class="plan-features">
           <li>Lançamentos ilimitados</li>
@@ -417,9 +428,10 @@ footer strong{color:var(--gold)}
         <div class="plan-name">Essencial</div>
         <div class="plan-price">
           <span class="currency">R$</span>
-          <span class="amount">24</span>
-          <span class="period">,90/mês</span>
+          <span class="amount" id="amount-essencial">24</span>
+          <span class="period" id="period-essencial">,90/mês</span>
         </div>
+        <div id="anual-note-essencial" style="font-size:11px;color:var(--muted);margin:-4px 0 8px;display:none"></div>
         <p class="plan-desc">Controle financeiro completo.</p>
         <ul class="plan-features">
           <li>Tudo do Starter</li>
@@ -439,9 +451,10 @@ footer strong{color:var(--gold)}
         <div class="plan-name">Performance</div>
         <div class="plan-price">
           <span class="currency">R$</span>
-          <span class="amount">49</span>
-          <span class="period">,90/mês</span>
+          <span class="amount" id="amount-performance">49</span>
+          <span class="period" id="period-performance">,90/mês</span>
         </div>
+        <div id="anual-note-performance" style="font-size:11px;color:var(--muted);margin:-4px 0 8px;display:none"></div>
         <p class="plan-desc">Controle completo + acompanhamento personalizado.</p>
         <ul class="plan-features">
           <li>Tudo do Essencial</li>
@@ -550,7 +563,34 @@ function setPeriodo(p){
   document.getElementById('toggle-mensal').style.color = p==='mensal'?'#0f0f0f':'#888';
   document.getElementById('toggle-anual').style.background = p==='anual'?'#C8A96E':'transparent';
   document.getElementById('toggle-anual').style.color = p==='anual'?'#0f0f0f':'#888';
+  renderPlanPrices();
 }
+
+function renderPlanPrices(){
+  const anual = _periodoAtual === 'anual';
+  ['starter','essencial','performance'].forEach(p=>{
+    const amountEl = document.getElementById('amount-'+p);
+    const periodEl = document.getElementById('period-'+p);
+    const noteEl   = document.getElementById('anual-note-'+p);
+    if(!amountEl) return;
+    if(anual){
+      const equivMensal = PLANO_ANUAL[p] / 12;
+      const [intPart, decPart] = equivMensal.toFixed(2).split('.');
+      amountEl.textContent = intPart;
+      periodEl.textContent = ','+decPart+'/mês';
+      if(noteEl){
+        noteEl.style.display = 'block';
+        noteEl.textContent = `R$ ${PLANO_ANUAL[p].toFixed(2).replace('.',',')} cobrado uma vez por ano`;
+      }
+    } else {
+      const [intPart, decPart] = PLANO_MENSAL[p].toFixed(2).split('.');
+      amountEl.textContent = intPart;
+      periodEl.textContent = ','+decPart+'/mês';
+      if(noteEl) noteEl.style.display = 'none';
+    }
+  });
+}
+renderPlanPrices();
 
 function assinar(plano){
   abrirModalCadastro(plano, _periodoAtual);
