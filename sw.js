@@ -1,5 +1,5 @@
-// FinRossi SW v8
-const CACHE_NAME = 'finrossi-v8';
+// FinRossi SW v9
+const CACHE_NAME = 'finrossi-v9';
 const ASSETS = ['/', '/index.html'];
 
 // URLs que NUNCA devem ser interceptadas pelo SW
