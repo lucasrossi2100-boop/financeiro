@@ -1075,7 +1075,10 @@ tr:hover td{background:var(--surface2)}
       <div style="margin-bottom:16px">
         <div style="font-size:15px;font-weight:700;color:var(--text)">Gastos por categoria</div>
       </div>
-      <div class="chart-wrap" style="height:180px"><canvas id="c-cat"></canvas></div>
+      <div style="display:flex;align-items:center;gap:16px">
+        <div class="chart-wrap" style="height:180px;width:180px;flex-shrink:0"><canvas id="c-cat"></canvas></div>
+        <div id="cat-legend" style="flex:1;display:flex;flex-direction:column;gap:11px;min-width:0"></div>
+      </div>
     </div>
   </div>
 
@@ -3376,6 +3379,8 @@ function refreshDash(){
   if(ctxCat){
     if(!cL.length){
       ctxCat.parentElement.innerHTML='<p class="empty" style="padding:60px 0;text-align:center;color:var(--muted)">Sem despesas este mês</p>';
+      const legendElVazio=document.getElementById('cat-legend');
+      if(legendElVazio) legendElVazio.innerHTML='';
     } else {
       charts['cat']=new Chart(ctxCat,{
         type:'doughnut',
@@ -3394,44 +3399,7 @@ function refreshDash(){
           maintainAspectRatio:false,
           cutout:'70%',
           plugins:{
-            legend:{
-              position:'right',
-              labels:{
-                color:'#ffffff',
-                font:{size:12},
-                padding:14,
-                boxWidth:8,
-                boxHeight:8,
-                usePointStyle:true,
-                pointStyle:'circle',
-                generateLabels:(chart)=>{
-                  const data=chart.data;
-                  return data.labels.map((label,i)=>{
-                    const val=data.datasets[0].data[i];
-                    const pct=totalCat>0?Math.round(val/totalCat*100):0;
-                    const hidden=chart.getDatasetMeta(0).data[i]?.hidden;
-                    return {
-                      text:`${label}    ${pct}%`,
-                      fillStyle:hidden?'#444':data.datasets[0].backgroundColor[i],
-                      strokeStyle:hidden?'#444':data.datasets[0].backgroundColor[i],
-                      fontColor:hidden?'#555':'#ffffff',
-                      lineWidth:0,
-                      pointStyle:'circle',
-                      hidden:hidden,
-                      index:i,
-                      datasetIndex:0
-                    };
-                  });
-                }
-              },
-              onClick:(e,legendItem,legend)=>{
-                const idx=legendItem.index;
-                const meta=legend.chart.getDatasetMeta(0);
-                const item=meta.data[idx];
-                item.hidden=!item.hidden;
-                legend.chart.update();
-              }
-            },
+            legend:{display:false},
             tooltip:{
               callbacks:{
                 label:(ctx)=>`${ctx.label}: ${fmtR(ctx.raw)} (${totalCat>0?Math.round(ctx.raw/totalCat*100):0}%)`
@@ -3457,6 +3425,19 @@ function refreshDash(){
           }
         }]
       });
+
+      // Legenda HTML própria — porcentagens sempre alinhadas em coluna reta
+      const legendEl=document.getElementById('cat-legend');
+      if(legendEl){
+        legendEl.innerHTML=cL.map((label,i)=>{
+          const pct=totalCat>0?Math.round(cV[i]/totalCat*100):0;
+          return `<div onclick="toggleCatSlice(${i})" data-cat-idx="${i}" style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <span style="width:8px;height:8px;border-radius:50%;background:${CAT_COLORS[i]};flex-shrink:0"></span>
+            <span style="font-size:12px;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${label}</span>
+            <span style="font-size:12px;color:var(--text);font-variant-numeric:tabular-nums;text-align:right;min-width:34px">${pct}%</span>
+          </div>`;
+        }).join('');
+      }
     }
   }
 
@@ -6140,6 +6121,17 @@ function initCursorFx(){
   const enabled=localStorage.getItem('fin_cursor_fx')==='1';
   _updateCursorFxToggleUI(enabled);
   if(enabled) startCursorFx();
+}
+
+function toggleCatSlice(idx){
+  const chart=charts['cat'];
+  if(!chart) return;
+  const meta=chart.getDatasetMeta(0);
+  const item=meta.data[idx];
+  item.hidden=!item.hidden;
+  chart.update();
+  const row=document.querySelector(`#cat-legend [data-cat-idx="${idx}"]`);
+  if(row) row.style.opacity=item.hidden?'.4':'1';
 }
 
 function toggleSidebar(){
