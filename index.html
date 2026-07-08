@@ -2355,7 +2355,7 @@ tr:hover td{background:var(--surface2)}
     </div>
     <div class="form-row">
       <div class="field"><label>Número final (4 dígitos)</label><input id="cartao-final" type="text" placeholder="1234" maxlength="4" oninput="atualizarPreviewCartao()"></div>
-      <div class="field"><label>Limite (R$)</label><input id="cartao-limite" type="number" placeholder="5000" min="0" step="100"></div>
+      <div class="field"><label>Limite (R$)</label><input id="cartao-limite" type="text" inputmode="decimal" placeholder="0,00" class="currency-input" oninput="maskCurrency(this)"></div>
     </div>
     <div class="form-row">
       <div class="field"><label>Vencimento da fatura (dia)</label><input id="cartao-venc" type="number" placeholder="10" min="1" max="31"></div>
@@ -2486,6 +2486,7 @@ const PNAMES={pessoal:'Pessoal',finrossi:'FinRossi'};
 const PALETTE=['#4ade80','#60a5fa','#fbbf24','#c084fc','#2dd4bf','#f87171','#fb923c','#a78bfa','#34d399'];
 const MONTHS=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 let cp='pessoal', charts={}, fbOk=false;
+let _cartaoPage=0;
 let _db,_ref,_set,_get,_onValue,_remove,_push;
 
 // Dados em memória (sincronizados do Firebase ou localStorage)
@@ -5320,7 +5321,7 @@ function openModalCartao(id){
       document.getElementById('cartao-nome').value=c.nome;
       document.getElementById('cartao-banco').value=c.banco;
       document.getElementById('cartao-final').value=c.final;
-      document.getElementById('cartao-limite').value=c.limite;
+      document.getElementById('cartao-limite').value=(c.limite||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
       document.getElementById('cartao-venc').value=c.venc;
       document.getElementById('cartao-fecha').value=c.fecha||'';
       document.getElementById('cartao-cor').value=c.cor||'#C8A96E';
@@ -5339,7 +5340,7 @@ async function salvarCartao(){
   const nome=document.getElementById('cartao-nome').value.trim();
   const banco=document.getElementById('cartao-banco').value;
   const final=document.getElementById('cartao-final').value.trim();
-  const limite=parseFloat(document.getElementById('cartao-limite').value)||0;
+  const limite=parseCurrency(document.getElementById('cartao-limite'));
   const venc=parseInt(document.getElementById('cartao-venc').value)||0;
   const fecha=parseInt(document.getElementById('cartao-fecha').value)||0;
   const cor=document.getElementById('cartao-cor').value;
@@ -5399,6 +5400,11 @@ function cartaoVisualHTML(c, w, h){
   </div>`;
 }
 
+function mudarPaginaCartao(delta){
+  _cartaoPage += delta;
+  renderCartoes();
+}
+
 function renderCartoes(){
   try{
   populateCartaoSelect();
@@ -5439,10 +5445,14 @@ function renderCartoes(){
   if(hdrBtn) hdrBtn.innerHTML='<button class="btn primary" onclick="openModalCartao()">+ Novo cartão</button>';
   const lancs=pd().lancs.filter(l=>l.tipo==='despesa'&&l.data.startsWith(mes));
 
-  // Grid de cartões — visual premium
-  const numCartoes = cartoes.length;
-  const gridCols = numCartoes === 1 ? '1fr' : 'repeat(auto-fit,minmax(320px,1fr))';
-  const gridMaxW = numCartoes === 1 ? '420px' : '100%';
+  // Grid de cartões — tamanho padrão fixo, paginado de 3 em 3
+  const CARTAO_PAGE_SIZE = 3;
+  const totalPaginas = Math.ceil(cartoes.length / CARTAO_PAGE_SIZE) || 1;
+  if(_cartaoPage >= totalPaginas) _cartaoPage = totalPaginas - 1;
+  if(_cartaoPage < 0) _cartaoPage = 0;
+  const cartoesVisiveis = cartoes.slice(_cartaoPage*CARTAO_PAGE_SIZE, _cartaoPage*CARTAO_PAGE_SIZE + CARTAO_PAGE_SIZE);
+  const gridCols = 'repeat(auto-fit,minmax(280px,300px))';
+  const gridMaxW = '956px';
 
   const BANDEIRAS = {
     visa: '<svg width="44" height="14" viewBox="0 0 44 14"><text x="0" y="12" font-family="Arial" font-weight="900" font-size="14" fill="white" letter-spacing="-1">VISA</text></svg>',
@@ -5453,8 +5463,10 @@ function renderCartoes(){
   };
   const CHIP = '<svg width="34" height="26" viewBox="0 0 34 26" fill="none"><rect x="0" y="0" width="34" height="26" rx="4" fill="#D4AF5A" opacity=".9"/><rect x="11" y="0" width="12" height="26" fill="#C4992A" opacity=".5"/><rect x="0" y="8" width="34" height="10" fill="#C4992A" opacity=".5"/><rect x="11" y="8" width="12" height="10" fill="#B8881A" opacity=".7"/></svg>';
 
-  const gridHTML=`<div style="display:grid;grid-template-columns:${gridCols};gap:24px;margin-bottom:24px;max-width:${gridMaxW}" id="cartoes-grid-inner">
-    ${cartoes.map(c=>{
+  const gridHTML=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:24px;max-width:${gridMaxW}">
+    ${cartoes.length>CARTAO_PAGE_SIZE?`<button class="btn xs" onclick="mudarPaginaCartao(-1)" ${_cartaoPage===0?'disabled':''} style="flex-shrink:0;${_cartaoPage===0?'opacity:.3;cursor:default':''}">‹</button>`:''}
+    <div style="display:grid;grid-template-columns:${gridCols};gap:24px;flex:1" id="cartoes-grid-inner">
+    ${cartoesVisiveis.map(c=>{
       const gastos=lancs.filter(l=>l.cartaoId===c.id).reduce((a,b)=>a+b.val,0);
       const pct=c.limite>0?Math.min(100,(gastos/c.limite)*100):0;
       const disponivel=Math.max(0,c.limite-gastos);
@@ -5519,7 +5531,10 @@ function renderCartoes(){
           </div>
         </div>`:''}</div>`;
     }).join('')}
-  </div>`;
+  </div>
+    ${cartoes.length>CARTAO_PAGE_SIZE?`<button class="btn xs" onclick="mudarPaginaCartao(1)" ${_cartaoPage>=totalPaginas-1?'disabled':''} style="flex-shrink:0;${_cartaoPage>=totalPaginas-1?'opacity:.3;cursor:default':''}">›</button>`:''}
+  </div>
+  ${cartoes.length>CARTAO_PAGE_SIZE?`<div style="text-align:center;font-size:11px;color:var(--muted2);margin-top:-16px;margin-bottom:20px">${_cartaoPage+1} / ${totalPaginas}</div>`:''}`;
 
   // Linhas de gastos do mês agrupados por cartão (estava faltando — causava erro e travava o render)
   const gastosCartao = lancs.filter(l=>l.cartaoId).sort((a,b)=>b.data.localeCompare(a.data));
