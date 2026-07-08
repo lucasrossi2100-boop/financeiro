@@ -6963,6 +6963,8 @@ async function mostrarPWABanner(){
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone;
   if(_pwaPrompt){
     document.getElementById('pwa-banner').style.display='block';
+    const fab = document.getElementById('pwa-fab');
+    if(fab) fab.style.display='flex';
   } else if(isIOS){
     document.getElementById('ios-banner').style.display='block';
   }
