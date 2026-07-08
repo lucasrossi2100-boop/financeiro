@@ -1835,37 +1835,27 @@ tr:hover td{background:var(--surface2)}
       </div>
 
       <!-- Notificações -->
-      <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:12px">Notificações</label>
-      <div style="background:var(--surface2);border-radius:12px;padding:16px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <div>
-            <div style="font-size:13px;font-weight:500">Alertas de vencimento</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px">Notificação quando contas estiverem próximas</div>
+      <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:10px">Notificações</label>
+      <div style="background:var(--surface2);border-radius:10px;padding:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px">
+          <div style="min-width:0">
+            <div style="font-size:12px;font-weight:500">Alertas de vencimento</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:1px">Quando contas estiverem próximas</div>
           </div>
-          <span id="cfg-notif-status" style="font-size:11px;padding:3px 10px;border-radius:20px;background:var(--surface3);color:var(--muted)">Verificando...</span>
+          <span id="cfg-notif-status" style="font-size:10px;padding:2px 8px;border-radius:20px;background:var(--surface3);color:var(--muted);white-space:nowrap;flex-shrink:0">Verificando...</span>
         </div>
-        <button onclick="solicitarPermissaoNotificacoes()" id="cfg-notif-btn" style="width:100%;padding:10px;background:var(--accent);color:#0f0f0f;border:none;border-radius:8px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer">
+        <button onclick="solicitarPermissaoNotificacoes()" id="cfg-notif-btn" style="width:100%;padding:7px;background:var(--accent);color:#0f0f0f;border:none;border-radius:7px;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer">
           🔔 Ativar notificações
         </button>
-        <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">
-          <div style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px">
-            <span>📱</span> Push notification no celular e notebook
-          </div>
-          <div style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px">
-            <span>📧</span> Email automático 3 dias antes do vencimento
-          </div>
-          <div style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px">
-            <span>🔔</span> Alerta visual no Dashboard
-          </div>
-        </div>
+        <div style="margin-top:8px;font-size:10px;color:var(--muted2);text-align:center">📱 Push · 📧 Email · 🔔 Dashboard</div>
       </div>
 
       <!-- Efeitos visuais -->
-      <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;display:block;margin:20px 0 12px">Efeitos</label>
-      <label style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;gap:12px">
+      <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;display:block;margin:16px 0 10px">Efeitos</label>
+      <label style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;gap:12px">
         <div>
-          <div style="font-size:13px;font-weight:500">Cursor neon</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px">Anel luminoso que acompanha o mouse pela tela</div>
+          <div style="font-size:12px;font-weight:500">Cursor neon</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:1px">Anel luminoso que acompanha o mouse</div>
         </div>
         <div onclick="toggleCursorFx()" id="cursor-fx-toggle" style="width:36px;height:20px;border-radius:10px;background:var(--surface3);border:1px solid var(--border2);cursor:pointer;transition:all .2s;position:relative;flex-shrink:0">
           <div style="position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s"></div>
@@ -1873,19 +1863,19 @@ tr:hover td{background:var(--surface2)}
       </label>
 
       <!-- Aplicativo -->
-      <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;display:block;margin:20px 0 12px">Aplicativo</label>
-      <div style="background:var(--surface2);border-radius:12px;padding:16px">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px">
-          <div>
-            <div style="font-size:13px;font-weight:500">Instalar FinRossi</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px">Acesso rápido direto da tela inicial</div>
+      <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;display:block;margin:16px 0 10px">Aplicativo</label>
+      <div style="background:var(--surface2);border-radius:10px;padding:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px">
+          <div style="min-width:0">
+            <div style="font-size:12px;font-weight:500">Instalar FinRossi</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:1px">Acesso rápido na tela inicial</div>
           </div>
-          <span id="cfg-pwa-status" style="font-size:11px;padding:3px 10px;border-radius:20px;background:var(--surface3);color:var(--muted);white-space:nowrap">Verificando...</span>
+          <span id="cfg-pwa-status" style="font-size:10px;padding:2px 8px;border-radius:20px;background:var(--surface3);color:var(--muted);white-space:nowrap;flex-shrink:0">Verificando...</span>
         </div>
-        <button onclick="instalarPWAConfig()" id="cfg-pwa-btn" style="width:100%;padding:10px;background:var(--accent);color:#0f0f0f;border:none;border-radius:8px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer">
+        <button onclick="instalarPWAConfig()" id="cfg-pwa-btn" style="width:100%;padding:7px;background:var(--accent);color:#0f0f0f;border:none;border-radius:7px;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer">
           📲 Instalar aplicativo
         </button>
-        <div id="msg-pwa-config" class="msg" style="margin-top:8px"></div>
+        <div id="msg-pwa-config" class="msg" style="margin-top:6px;font-size:10px"></div>
       </div>
     </div>
 
