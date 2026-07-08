@@ -6973,8 +6973,8 @@ async function instalarPWA(){
   _pwaPrompt.prompt();
   const result = await _pwaPrompt.userChoice;
   _pwaPrompt = null;
-  fecharPWABanner(true);
   if(result.outcome === 'accepted'){
+    fecharPWABanner(true);
     // Salva que instalou — localStorage e Firebase
     localStorage.setItem('fin_pwa_instalado','1');
     if(window._db && window._set && window._ref && window._firebaseUser){
@@ -6982,6 +6982,14 @@ async function instalarPWA(){
     }
     const fab = document.getElementById('pwa-fab');
     if(fab) fab.style.display='none';
+  } else {
+    // Cancelou o diálogo nativo — trata como recusa: reagenda lembrete em 3h.
+    // Esconde banner e FAB (o prompt nativo já foi consumido e só volta
+    // quando o Chrome disparar um novo 'beforeinstallprompt', geralmente no próximo carregamento)
+    document.getElementById('pwa-banner').style.display='none';
+    const fab = document.getElementById('pwa-fab');
+    if(fab) fab.style.display='none';
+    localStorage.setItem('fin_pwa_ultimo_aviso', String(Date.now()));
   }
 }
 
