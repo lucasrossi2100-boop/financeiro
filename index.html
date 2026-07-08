@@ -252,14 +252,21 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
   border-right:1px solid var(--border);
   padding:20px 0;
   height:100vh;
-  overflow-y:auto;
-  overflow-x:hidden;
+  overflow:hidden;
   display:flex;
   flex-direction:column;
   transition:width .22s ease;
   position:relative;
   z-index:10;
 }
+.sb-scroll-mid{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+}
+.sb-scroll-mid::-webkit-scrollbar{width:3px}
+.sb-scroll-mid::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:2px}
 .sidebar.collapsed{width:56px;overflow:hidden}
 .sidebar::-webkit-scrollbar{width:3px}
 .sidebar::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:2px}
@@ -940,6 +947,7 @@ tr:hover td{background:var(--surface2)}
     </div>
   </div>
 
+  <div class="sb-scroll-mid">
   <div class="sb-section" style="margin-top:8px" id="sb-nav-menu">
     <div class="sb-group-label" onclick="toggleNavGroup('menu')">
       <span>Menu</span><span class="sb-group-arrow" id="sb-arrow-menu">›</span>
@@ -1000,6 +1008,7 @@ tr:hover td{background:var(--surface2)}
     </button>
     </div><!-- /sb-group-controles -->
   </div><!-- /sb-nav-controles -->
+  </div><!-- /sb-scroll-mid -->
 
   <div style="margin-top:auto;padding:10px 8px;border-top:1px solid var(--border)">
     <button onclick="abrirConfiguracoes()" class="sb-avatar-wrap" style="display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;background:none;border:1px solid transparent;color:var(--muted);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;border-radius:var(--radius-sm);transition:all .2s;text-align:left" onmouseover="this.style.borderColor='var(--border2)';this.style.color='var(--text)';this.style.background='var(--surface2)'" onmouseout="this.style.borderColor='transparent';this.style.color='var(--muted)';this.style.background='none'">
