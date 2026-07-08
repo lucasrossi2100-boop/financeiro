@@ -2354,21 +2354,32 @@ tr:hover td{background:var(--surface2)}
       </div>
     </div>
     <div class="form-row">
-      <div class="field"><label>Número final (4 dígitos)</label><input id="cartao-final" type="text" placeholder="1234" maxlength="4"></div>
+      <div class="field"><label>Número final (4 dígitos)</label><input id="cartao-final" type="text" placeholder="1234" maxlength="4" oninput="atualizarPreviewCartao()"></div>
       <div class="field"><label>Limite (R$)</label><input id="cartao-limite" type="number" placeholder="5000" min="0" step="100"></div>
     </div>
     <div class="form-row">
       <div class="field"><label>Vencimento da fatura (dia)</label><input id="cartao-venc" type="number" placeholder="10" min="1" max="31"></div>
       <div class="field"><label>Fechamento (dia)</label><input id="cartao-fecha" type="number" placeholder="3" min="1" max="31"></div>
     </div>
-    <div class="field"><label>Cor</label>
-      <select id="cartao-cor">
-        <option value="#6366f1">Roxo</option><option value="#60a5fa">Azul</option>
-        <option value="#4ade80">Verde</option><option value="#fbbf24">Âmbar</option>
-        <option value="#f87171">Vermelho</option><option value="#c084fc">Lilás</option>
-        <option value="#2dd4bf">Teal</option><option value="#111">Preto</option>
-      </select>
+    <div class="form-row">
+      <div class="field"><label>Modelo</label>
+        <select id="cartao-modelo" onchange="atualizarPreviewCartao()">
+          <option value="preto">Preto fosco + friso</option>
+          <option value="solido">Cor sólida premium</option>
+          <option value="carbono">Carbono + brilho</option>
+          <option value="minimalista">Linhas finas</option>
+        </select>
+      </div>
+      <div class="field"><label>Cor</label>
+        <select id="cartao-cor" onchange="atualizarPreviewCartao()">
+          <option value="#C8A96E">Dourado</option><option value="#6366f1">Roxo</option><option value="#60a5fa">Azul</option>
+          <option value="#4ade80">Verde</option><option value="#fbbf24">Âmbar</option>
+          <option value="#f87171">Vermelho</option><option value="#c084fc">Lilás</option>
+          <option value="#2dd4bf">Teal</option>
+        </select>
+      </div>
     </div>
+    <div style="display:flex;justify-content:center;margin:14px 0" id="cartao-preview-wrap"></div>
     <div class="btn-row">
       <button class="btn primary" onclick="salvarCartao()">Salvar</button>
       <button class="btn" onclick="closeModal('modal-cartao')">Cancelar</button>
@@ -3598,26 +3609,18 @@ function renderDashCartaoWidget(){
   const pct=c.limite>0?Math.min(100,(gastos/c.limite)*100):0;
   const cor=c.cor||'#C8A96E';
   el.innerHTML=`
-    <div style="display:flex;align-items:center;gap:16px">
-      <div style="width:140px;height:88px;flex-shrink:0;border-radius:12px;background:linear-gradient(135deg,${cor}ee 0%,${cor}99 50%,#1a1a1a 100%);padding:12px;position:relative;overflow:hidden">
-        <div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.06)"></div>
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;position:relative">
-          <div style="font-size:9px;letter-spacing:1px;color:rgba(255,255,255,.8);font-weight:600">FinRossi</div>
-          <svg width="24" height="15" viewBox="0 0 36 22" style="flex-shrink:0"><circle cx="13" cy="11" r="11" fill="#EB001B" opacity=".9"/><circle cx="23" cy="11" r="11" fill="#F79E1B" opacity=".9"/><path d="M18 4.5a11 11 0 010 13A11 11 0 0118 4.5z" fill="#FF5F00" opacity=".9"/></svg>
-        </div>
-        <svg width="22" height="16" viewBox="0 0 34 26" fill="none" style="position:relative;margin-top:12px"><rect x="0" y="0" width="34" height="26" rx="4" fill="#D4AF5A" opacity=".9"/><rect x="11" y="0" width="12" height="26" fill="#C4992A" opacity=".5"/><rect x="0" y="8" width="34" height="10" fill="#C4992A" opacity=".5"/></svg>
-        <div style="font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.75);font-family:monospace;margin-top:10px;position:relative">•••• •••• •••• ${c.final||'0000'}</div>
-      </div>
+    <div style="display:flex;align-items:center;gap:20px">
+      ${cartaoVisualHTML(c, 190, 120)}
       <div style="flex:1;min-width:0">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Limite disponível</div>
-        <div style="font-size:20px;font-weight:700;color:var(--text);letter-spacing:-.3px;margin-bottom:10px">${fmtR(disponivel)}</div>
-        <div style="background:var(--surface3);border-radius:4px;height:5px;overflow:hidden">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:5px">Limite disponível</div>
+        <div style="font-size:24px;font-weight:700;color:var(--text);letter-spacing:-.3px;margin-bottom:12px">${fmtR(disponivel)}</div>
+        <div style="background:var(--surface3);border-radius:4px;height:6px;overflow:hidden">
           <div style="width:${pct.toFixed(1)}%;height:100%;background:var(--accent);border-radius:4px;transition:width .6s ease"></div>
         </div>
-        <div style="font-size:10px;color:var(--muted2);margin-top:5px">de ${fmtR(c.limite||0)}</div>
+        <div style="font-size:11px;color:var(--muted2);margin-top:6px">de ${fmtR(c.limite||0)}</div>
       </div>
     </div>
-    ${cartoes.length>1?`<div style="font-size:10px;color:var(--muted2);margin-top:12px;text-align:right">+${cartoes.length-1} outro(s) cartão(ões) →</div>`:''}`;
+    ${cartoes.length>1?`<div style="font-size:10px;color:var(--muted2);margin-top:14px;text-align:right">+${cartoes.length-1} outro(s) cartão(ões) →</div>`:''}`;
 }
 
 // ─── LANÇAMENTOS ─────────────────────────────────────────────────────────────
@@ -5292,9 +5295,20 @@ function populateCartaoSelect(){
   const sel=document.getElementById('d-cartao');
   if(!sel)return;
   const cur=sel.value;
-  sel.innerHTML='<option value="">Débito / Dinheiro / Pix</option>'+
+  sel.innerHTML='<option value="">Selecione o cartão usado</option>'+
     cartoes.map(c=>`<option value="${c.id}">${c.nome} •••• ${c.final} (${c.banco})</option>`).join('');
   sel.value=cur;
+}
+
+function atualizarPreviewCartao(){
+  const wrap=document.getElementById('cartao-preview-wrap');
+  if(!wrap) return;
+  const c={
+    final: document.getElementById('cartao-final')?.value || '0000',
+    cor: document.getElementById('cartao-cor')?.value || '#C8A96E',
+    modelo: document.getElementById('cartao-modelo')?.value || 'preto',
+  };
+  wrap.innerHTML=cartaoVisualHTML(c, 220, 138);
 }
 
 function openModalCartao(id){
@@ -5309,12 +5323,16 @@ function openModalCartao(id){
       document.getElementById('cartao-limite').value=c.limite;
       document.getElementById('cartao-venc').value=c.venc;
       document.getElementById('cartao-fecha').value=c.fecha||'';
-      document.getElementById('cartao-cor').value=c.cor||'#6366f1';
+      document.getElementById('cartao-cor').value=c.cor||'#C8A96E';
+      document.getElementById('cartao-modelo').value=c.modelo||'preto';
     }
   } else {
     ['cartao-nome','cartao-final','cartao-limite','cartao-venc','cartao-fecha'].forEach(i=>document.getElementById(i).value='');
+    document.getElementById('cartao-cor').value='#C8A96E';
+    document.getElementById('cartao-modelo').value='preto';
   }
   document.getElementById('modal-cartao').classList.add('open');
+  atualizarPreviewCartao();
 }
 
 async function salvarCartao(){
@@ -5325,10 +5343,11 @@ async function salvarCartao(){
   const venc=parseInt(document.getElementById('cartao-venc').value)||0;
   const fecha=parseInt(document.getElementById('cartao-fecha').value)||0;
   const cor=document.getElementById('cartao-cor').value;
+  const modelo=document.getElementById('cartao-modelo').value;
   if(!nome){showMsg('msg-cartao','Informe o nome','err');return}
   if(!final||final.length!==4){showMsg('msg-cartao','Informe os 4 dígitos finais','err');return}
   const id=document.getElementById('cartao-edit-id').value;
-  const obj={id:id||uid(),nome,banco,final,limite,venc,fecha,cor};
+  const obj={id:id||uid(),nome,banco,final,limite,venc,fecha,cor,modelo};
   if(id){const i=pd().cartoes.findIndex(c=>c.id===id);if(i>=0)pd().cartoes[i]=obj;}
   else{if(!pd().cartoes)pd().cartoes=[];pd().cartoes.push(obj);}
   await saveCartoes();
@@ -5341,6 +5360,43 @@ async function remCartao(id){
   if(!confirm('Excluir este cartão?'))return;
   pd().cartoes=getCartoes().filter(c=>c.id!==id);
   renderCartoes();saveCartoes();populateCartaoSelect();
+}
+
+// ─── Visual do cartão (modelo + cor) — reaproveitado no dashboard e na página Cartões ──
+const CARTAO_MODELOS = {
+  preto:       'Preto fosco + friso',
+  solido:      'Cor sólida premium',
+  carbono:     'Carbono + brilho',
+  minimalista: 'Linhas finas',
+};
+function cartaoVisualHTML(c, w, h){
+  const cor = c.cor || '#C8A96E';
+  const modelo = CARTAO_MODELOS[c.modelo] ? c.modelo : 'preto';
+  const final = c.final || '0000';
+  const bandeira = `<svg width="${Math.round(w*0.17)}" height="${Math.round(h*0.14)}" viewBox="0 0 36 22" style="flex-shrink:0"><circle cx="13" cy="11" r="11" fill="#EB001B" opacity=".9"/><circle cx="23" cy="11" r="11" fill="#F79E1B" opacity=".9"/><path d="M18 4.5a11 11 0 010 13A11 11 0 0118 4.5z" fill="#FF5F00" opacity=".9"/></svg>`;
+  const chip = `<svg width="${Math.round(w*0.16)}" height="${Math.round(h*0.18)}" viewBox="0 0 34 26" fill="none"><rect x="0" y="0" width="34" height="26" rx="4" fill="#D4AF5A" opacity=".9"/><rect x="11" y="0" width="12" height="26" fill="#C4992A" opacity=".5"/><rect x="0" y="8" width="34" height="10" fill="#C4992A" opacity=".5"/></svg>`;
+  const bgByModelo = {
+    preto:       `background:linear-gradient(135deg,#1a1a1a 0%,#000 100%);border:1px solid ${cor}55`,
+    solido:      `background:linear-gradient(135deg,${cor} 0%,${cor}99 60%,#1a1a1a 100%)`,
+    carbono:     `background:radial-gradient(circle at 30% 20%,#2a2a2a,#050505 70%);border:1px solid rgba(255,255,255,.08)`,
+    minimalista: `background:#0a0a0a;border:1px solid ${cor}66`,
+  };
+  const textByModelo = { preto:cor, solido:'#1a1400', carbono:'#eee', minimalista:cor };
+  const numByModelo   = { preto:'rgba(255,255,255,.7)', solido:'rgba(26,20,0,.7)', carbono:'#999', minimalista:'#ccc' };
+  let extra = '';
+  if(modelo==='preto') extra = `<div style="position:absolute;inset:0;background:linear-gradient(115deg,transparent 40%,${cor}22 50%,transparent 60%)"></div>`;
+  else if(modelo==='solido') extra = `<div style="position:absolute;top:-30px;right:-30px;width:${Math.round(w*0.6)}px;height:${Math.round(w*0.6)}px;border-radius:50%;background:rgba(255,255,255,.12)"></div>`;
+  else if(modelo==='carbono') extra = `<div style="position:absolute;top:10px;left:10px;width:5px;height:5px;border-radius:50%;background:${cor};box-shadow:0 0 8px ${cor}"></div>`;
+  else if(modelo==='minimalista') extra = `<svg width="100%" height="100%" style="position:absolute;inset:0;opacity:.4"><line x1="0" y1="25%" x2="100%" y2="25%" stroke="${cor}" stroke-width=".5"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="${cor}" stroke-width=".5"/><line x1="0" y1="75%" x2="100%" y2="75%" stroke="${cor}" stroke-width=".5"/></svg>`;
+  return `<div style="width:${w}px;height:${h}px;flex-shrink:0;border-radius:${Math.round(h*0.13)}px;${bgByModelo[modelo]};padding:${Math.round(w*0.08)}px;position:relative;overflow:hidden">
+    ${extra}
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;position:relative">
+      <div style="font-size:${Math.round(w*0.063)}px;letter-spacing:1px;color:${textByModelo[modelo]};font-weight:700">FinRossi</div>
+      ${bandeira}
+    </div>
+    <div style="position:relative;margin-top:${Math.round(h*0.15)}px">${chip}</div>
+    <div style="font-size:${Math.round(w*0.073)}px;letter-spacing:2px;color:${numByModelo[modelo]};font-family:monospace;margin-top:${Math.round(h*0.1)}px;position:relative">•••• •••• •••• ${final}</div>
+  </div>`;
 }
 
 function renderCartoes(){
@@ -5404,11 +5460,25 @@ function renderCartoes(){
       const disponivel=Math.max(0,c.limite-gastos);
       const corS=pct>=90?'var(--red)':pct>=70?'var(--amber)':'var(--green)';
       const cor=c.cor||'#C8A96E';
+      const modelo=CARTAO_MODELOS[c.modelo]?c.modelo:'preto';
       const bandSVG=BANDEIRAS[(c.bandeira||'visa').toLowerCase()]||BANDEIRAS['visa'];
+      const MODELO_BG_FULL={
+        preto:       `background:linear-gradient(135deg,#1a1a1a 0%,#000 100%);border:1px solid ${cor}55`,
+        solido:      `background:linear-gradient(135deg,${cor}ee 0%,${cor}99 50%,#1a1a1a 100%)`,
+        carbono:     `background:radial-gradient(circle at 25% 15%,#2a2a2a,#050505 75%);border:1px solid rgba(255,255,255,.08)`,
+        minimalista: `background:#0a0a0a;border:1px solid ${cor}66`,
+      };
+      const decorFull = modelo==='preto'
+        ? `<div style="position:absolute;inset:0;background:linear-gradient(115deg,transparent 40%,${cor}22 50%,transparent 60%)"></div>`
+        : modelo==='carbono'
+        ? `<div style="position:absolute;top:16px;left:16px;width:6px;height:6px;border-radius:50%;background:${cor};box-shadow:0 0 10px ${cor}"></div>`
+        : modelo==='minimalista'
+        ? `<svg width="100%" height="100%" style="position:absolute;inset:0;opacity:.35"><line x1="0" y1="30%" x2="100%" y2="30%" stroke="${cor}" stroke-width=".5"/><line x1="0" y1="55%" x2="100%" y2="55%" stroke="${cor}" stroke-width=".5"/><line x1="0" y1="80%" x2="100%" y2="80%" stroke="${cor}" stroke-width=".5"/></svg>`
+        : `<div style="position:absolute;top:-40px;right:-40px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.06)"></div>
+           <div style="position:absolute;bottom:-60px;left:-20px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.03)"></div>`;
       return`<div>
-        <div style="background:linear-gradient(135deg,${cor}ee 0%,${cor}99 50%,#1a1a1a 100%);border-radius:18px;padding:24px;position:relative;overflow:hidden;height:190px;box-shadow:0 8px 32px ${cor}33,0 2px 8px rgba(0,0,0,.5);margin-bottom:16px">
-          <div style="position:absolute;top:-40px;right:-40px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.06)"></div>
-          <div style="position:absolute;bottom:-60px;left:-20px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.03)"></div>
+        <div style="${MODELO_BG_FULL[modelo]};border-radius:18px;padding:24px;position:relative;overflow:hidden;height:190px;box-shadow:0 8px 32px ${cor}33,0 2px 8px rgba(0,0,0,.5);margin-bottom:16px">
+          ${decorFull}
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;position:relative">
             <div style="font-size:13px;color:rgba(255,255,255,.75);font-weight:500">${c.banco}</div>
             <div style="display:flex;gap:6px">
