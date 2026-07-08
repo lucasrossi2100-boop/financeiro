@@ -5431,6 +5431,21 @@ function renderCartoes(){
     }).join('')}
   </div>`;
 
+  // Linhas de gastos do mês agrupados por cartão (estava faltando — causava erro e travava o render)
+  const gastosCartao = lancs.filter(l=>l.cartaoId).sort((a,b)=>b.data.localeCompare(a.data));
+  const rowsHTML = gastosCartao.length ? `<div style="display:flex;flex-direction:column;gap:8px">
+    ${gastosCartao.map(l=>{
+      const cartao = cartoes.find(c=>c.id===l.cartaoId);
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--surface2);border-radius:var(--radius-sm)">
+        <div style="min-width:0">
+          <div style="font-size:13px;color:var(--text)">${l.desc}</div>
+          <div style="font-size:11px;color:var(--muted)">${l.cat} · ${cartao?`${cartao.nome} ••${cartao.final}`:'Cartão removido'} · ${l.data.split('-').reverse().join('/')}</div>
+        </div>
+        <div style="font-size:13px;font-weight:600;color:var(--red);white-space:nowrap;margin-left:12px">${fmtR(l.val)}</div>
+      </div>`;
+    }).join('')}
+  </div>` : '';
+
   el.innerHTML=gridHTML+`
     <div class="card card-full" style="margin-bottom:20px">
       <h3><span class="dot" style="background:var(--blue)"></span>Gastos por cartão — ${MONTHS[parseInt(mes.split('-')[1])-1]}</h3>
