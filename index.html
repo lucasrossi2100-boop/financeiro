@@ -521,22 +521,26 @@ tr:hover td{background:var(--surface2)}
 }
 .dp-popup.open{display:block}
 .dp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.dp-nav{background:none;border:none;color:var(--muted);cursor:pointer;padding:4px 8px;border-radius:6px;font-size:16px}
-.dp-nav:hover{color:var(--text);background:var(--surface3)}
-.dp-month-year{font-size:13px;font-weight:600;color:var(--text)}
-.dp-days-header{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;margin-bottom:4px}
-.dp-days-header span{font-size:10px;color:var(--muted);padding:4px 0}
-.dp-days{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.dp-month-label{font-size:13px;font-weight:600;color:var(--text)}
+.dp-nav{display:flex;gap:2px}
+.dp-nav button{background:none;border:none;color:var(--muted);cursor:pointer;padding:4px 9px;border-radius:6px;font-size:16px;font-family:inherit;transition:all .15s}
+.dp-nav button:hover{color:var(--text);background:var(--surface3)}
+.dp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.dp-day-name{font-size:10px;color:var(--muted);text-align:center;padding:4px 0 6px;font-weight:500}
 .dp-day{
   aspect-ratio:1;display:flex;align-items:center;justify-content:center;
   font-size:12px;border-radius:7px;cursor:pointer;position:relative;
-  color:var(--text);transition:all .1s;
+  color:var(--text);background:none;border:none;font-family:inherit;
+  transition:all .1s;
 }
 .dp-day:hover{background:var(--surface3)}
 .dp-day.other-month{color:var(--muted2)}
 .dp-day.today::after{content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--accent)}
 .dp-day.selected{background:var(--accent)!important;color:#0f0f0f!important;font-weight:600}
-.dp-today-btn{width:100%;margin-top:8px;padding:6px;background:var(--surface3);border:none;color:var(--text);border-radius:7px;cursor:pointer;font-size:12px}
+.dp-footer{display:flex;gap:8px;margin-top:8px}
+.dp-clear{flex:1;padding:6px;background:none;border:1px solid var(--border2);color:var(--muted);border-radius:7px;cursor:pointer;font-size:12px;font-family:inherit;transition:all .15s}
+.dp-clear:hover{color:var(--text);border-color:var(--muted)}
+.dp-today-btn{flex:1;padding:6px;background:var(--surface3);border:none;color:var(--text);border-radius:7px;cursor:pointer;font-size:12px;font-family:inherit;transition:all .15s}
 .dp-today-btn:hover{background:var(--accent-s)}
 
 /* ── TABS ──────────────────────────────────────────────── */
@@ -3632,7 +3636,7 @@ function renderDashCartaoWidget(){
   }
   el.innerHTML=`
     <div style="display:flex;align-items:center;gap:20px">
-      ${cartaoVisualHTML(c, 190, 120)}
+      ${cartaoVisualHTML(c, 230, 145)}
       <div style="flex:1;min-width:0">
         <div style="font-size:12px;color:var(--muted);margin-bottom:5px">Limite disponível</div>
         <div style="font-size:24px;font-weight:700;color:var(--text);letter-spacing:-.3px;margin-bottom:12px">${fmtR(disponivel)}</div>
