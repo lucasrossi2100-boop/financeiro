@@ -5859,38 +5859,53 @@ function abrirConfiguracoes(){
     // Atualiza status das notificações
     const nStatus = document.getElementById('cfg-notif-status');
     const nBtn = document.getElementById('cfg-notif-btn');
-    if(nStatus && nBtn){
-      if(!('Notification' in window)){
-        nStatus.textContent='Não suportado';
-        nStatus.style.background='rgba(248,113,113,.1)';
-        nStatus.style.color='var(--red)';
-        nBtn.style.display='none';
-      } else if(Notification.permission==='granted'){
-        nStatus.textContent='✅ Ativo';
-        nStatus.style.background='rgba(74,222,128,.1)';
-        nStatus.style.color='var(--green)';
-        nBtn.textContent='🔔 Notificações ativas';
-        nBtn.style.background='var(--surface3)';
-        nBtn.style.color='var(--green)';
-      } else if(Notification.permission==='denied'){
-        nStatus.textContent='🚫 Bloqueado';
-        nStatus.style.background='rgba(248,113,113,.1)';
-        nStatus.style.color='var(--red)';
-        nBtn.textContent='⚙️ Habilitar nas configurações do navegador';
-        nBtn.style.background='var(--surface3)';
-        nBtn.style.color='var(--muted)';
-      } else {
-        nStatus.textContent='Desativado';
-        nBtn.textContent='🔔 Ativar notificações';
-        nBtn.style.background='var(--accent)';
-        nBtn.style.color='#0f0f0f';
-      }
-    }
+    atualizarStatusNotificacoesConfig(nStatus, nBtn);
     el('modal-config').style.display='flex';
   }catch(err){
     console.error('[Config] Erro:',err);
     const m=document.getElementById('modal-config');
     if(m) m.style.display='flex';
+  }
+}
+
+function atualizarStatusNotificacoesConfig(nStatus, nBtn){
+  nStatus = nStatus || document.getElementById('cfg-notif-status');
+  nBtn = nBtn || document.getElementById('cfg-notif-btn');
+  if(!nStatus || !nBtn) return;
+  if(!('Notification' in window)){
+    nStatus.textContent='Não suportado';
+    nStatus.style.background='rgba(248,113,113,.1)';
+    nStatus.style.color='var(--red)';
+    nBtn.style.display='none';
+  } else if(Notification.permission==='granted'){
+    const ativo = localStorage.getItem('fin_notif_ok') !== '0';
+    if(ativo){
+      nStatus.textContent='✅ Ativo';
+      nStatus.style.background='rgba(74,222,128,.1)';
+      nStatus.style.color='var(--green)';
+      nBtn.textContent='🔕 Desativar notificações';
+      nBtn.style.background='var(--surface3)';
+      nBtn.style.color='var(--text)';
+    } else {
+      nStatus.textContent='Desativado';
+      nStatus.style.background='var(--surface3)';
+      nStatus.style.color='var(--muted)';
+      nBtn.textContent='🔔 Reativar notificações';
+      nBtn.style.background='var(--accent)';
+      nBtn.style.color='#0f0f0f';
+    }
+  } else if(Notification.permission==='denied'){
+    nStatus.textContent='🚫 Bloqueado';
+    nStatus.style.background='rgba(248,113,113,.1)';
+    nStatus.style.color='var(--red)';
+    nBtn.textContent='⚙️ Habilitar nas configurações do navegador';
+    nBtn.style.background='var(--surface3)';
+    nBtn.style.color='var(--muted)';
+  } else {
+    nStatus.textContent='Desativado';
+    nBtn.textContent='🔔 Ativar notificações';
+    nBtn.style.background='var(--accent)';
+    nBtn.style.color='#0f0f0f';
   }
 }
 
@@ -7140,7 +7155,17 @@ async function solicitarPermissaoNotificacoes(){
     return;
   }
   if(Notification.permission === 'granted'){
-    mostrarNotificacaoTeste();
+    const ativo = localStorage.getItem('fin_notif_ok') !== '0';
+    if(ativo){
+      // Estava ativo — desativa (o app para de disparar, sem precisar mexer na permissão do navegador)
+      localStorage.setItem('fin_notif_ok','0');
+    } else {
+      // Estava desativado — reativa
+      localStorage.setItem('fin_notif_ok','1');
+      mostrarNotificacaoTeste();
+      agendarNotificacoes();
+    }
+    atualizarStatusNotificacoesConfig();
     return;
   }
   if(Notification.permission === 'denied'){
@@ -7153,6 +7178,7 @@ async function solicitarPermissaoNotificacoes(){
     mostrarNotificacaoTeste();
     agendarNotificacoes();
   }
+  atualizarStatusNotificacoesConfig();
 }
 
 function mostrarNotificacaoTeste(){
@@ -7165,6 +7191,7 @@ function mostrarNotificacaoTeste(){
 
 function agendarNotificacoes(){
   if(Notification.permission !== 'granted') return;
+  if(localStorage.getItem('fin_notif_ok') === '0') return;
   const alertas = getVencimentosProximos(3);
   alertas.forEach(a=>{
     const msg = a.diasFaltam === 0
@@ -7189,14 +7216,14 @@ function agendarNotificacoes(){
 function iniciarSistemaNotificacoes(){
   // Fase 1: sempre mostra no dashboard
   renderAlertasVencimento();
-  // Fase 3: push se permitido
-  if(Notification.permission === 'granted'){
+  // Fase 3: push se permitido e ativado
+  if(Notification.permission === 'granted' && localStorage.getItem('fin_notif_ok') !== '0'){
     agendarNotificacoes();
   }
   // Verifica a cada hora
   setInterval(()=>{
     renderAlertasVencimento();
-    if(Notification.permission === 'granted') agendarNotificacoes();
+    if(Notification.permission === 'granted' && localStorage.getItem('fin_notif_ok') !== '0') agendarNotificacoes();
   }, 3600000);
 }
 
