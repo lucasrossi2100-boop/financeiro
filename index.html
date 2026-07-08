@@ -2351,9 +2351,9 @@ tr:hover td{background:var(--surface2)}
     <h3 id="mcartao-title">Novo cartão</h3>
     <input type="hidden" id="cartao-edit-id">
     <div class="form-row">
-      <div class="field"><label>Nome do cartão</label><input id="cartao-nome" type="text" placeholder="Ex: Nubank, Itaú Platinum..."></div>
+      <div class="field"><label>Nome do cartão</label><input id="cartao-nome" type="text" placeholder="Ex: Nubank, Itaú Platinum..." oninput="atualizarPreviewCartao()"></div>
       <div class="field"><label>Banco</label>
-        <select id="cartao-banco">
+        <select id="cartao-banco" onchange="atualizarPreviewCartao()">
           <option>Nubank</option><option>Itaú</option><option>Bradesco</option>
           <option>Santander</option><option>Banco Inter</option><option>C6 Bank</option>
           <option>XP</option><option>BTG</option><option>Outro</option>
@@ -3636,7 +3636,7 @@ function renderDashCartaoWidget(){
   }
   el.innerHTML=`
     <div style="display:flex;align-items:center;gap:20px">
-      ${cartaoVisualHTML(c, 230, 145)}
+      ${cartaoVisualHTML(c, 270, 170)}
       <div style="flex:1;min-width:0">
         <div style="font-size:12px;color:var(--muted);margin-bottom:5px">Limite disponível</div>
         <div style="font-size:24px;font-weight:700;color:var(--text);letter-spacing:-.3px;margin-bottom:12px">${fmtR(disponivel)}</div>
@@ -5332,6 +5332,8 @@ function atualizarPreviewCartao(){
     final: document.getElementById('cartao-final')?.value || '0000',
     cor: document.getElementById('cartao-cor')?.value || '#C8A96E',
     modelo: document.getElementById('cartao-modelo')?.value || 'preto',
+    nome: document.getElementById('cartao-nome')?.value || '',
+    banco: document.getElementById('cartao-banco')?.value || '',
   };
   wrap.innerHTML=cartaoVisualHTML(c, 220, 138);
 }
@@ -5398,29 +5400,39 @@ function cartaoVisualHTML(c, w, h){
   const cor = c.cor || '#C8A96E';
   const modelo = CARTAO_MODELOS[c.modelo] ? c.modelo : 'preto';
   const final = c.final || '0000';
-  const bandeira = `<svg width="${Math.round(w*0.17)}" height="${Math.round(h*0.14)}" viewBox="0 0 36 22" style="flex-shrink:0"><circle cx="13" cy="11" r="11" fill="#EB001B" opacity=".9"/><circle cx="23" cy="11" r="11" fill="#F79E1B" opacity=".9"/><path d="M18 4.5a11 11 0 010 13A11 11 0 0118 4.5z" fill="#FF5F00" opacity=".9"/></svg>`;
-  const chip = `<svg width="${Math.round(w*0.16)}" height="${Math.round(h*0.18)}" viewBox="0 0 34 26" fill="none"><rect x="0" y="0" width="34" height="26" rx="4" fill="#D4AF5A" opacity=".9"/><rect x="11" y="0" width="12" height="26" fill="#C4992A" opacity=".5"/><rect x="0" y="8" width="34" height="10" fill="#C4992A" opacity=".5"/></svg>`;
+  const banco = c.banco || 'FinRossi';
+  const nome = (c.nome || '').toUpperCase();
+  const bandeira = `<svg width="${Math.round(w*0.15)}" height="${Math.round(h*0.12)}" viewBox="0 0 36 22" style="flex-shrink:0"><circle cx="13" cy="11" r="11" fill="#EB001B" opacity=".9"/><circle cx="23" cy="11" r="11" fill="#F79E1B" opacity=".9"/><path d="M18 4.5a11 11 0 010 13A11 11 0 0118 4.5z" fill="#FF5F00" opacity=".9"/></svg>`;
+  const chip = `<svg width="${Math.round(w*0.15)}" height="${Math.round(h*0.16)}" viewBox="0 0 34 26" fill="none"><rect x="0" y="0" width="34" height="26" rx="4" fill="#D4AF5A" opacity=".9"/><rect x="11" y="0" width="12" height="26" fill="#C4992A" opacity=".5"/><rect x="0" y="8" width="34" height="10" fill="#C4992A" opacity=".5"/></svg>`;
   const bgByModelo = {
     preto:       `background:linear-gradient(135deg,#1a1a1a 0%,#000 100%);border:1px solid ${cor}55`,
     solido:      `background:linear-gradient(135deg,${cor} 0%,${cor}99 60%,#1a1a1a 100%)`,
     carbono:     `background:radial-gradient(circle at 30% 20%,#2a2a2a,#050505 70%);border:1px solid rgba(255,255,255,.08)`,
     minimalista: `background:#0a0a0a;border:1px solid ${cor}66`,
   };
-  const textByModelo = { preto:cor, solido:'#1a1400', carbono:'#eee', minimalista:cor };
+  const textByModelo = { preto:'#fff', solido:'#1a1400', carbono:'#fff', minimalista:'#fff' };
   const numByModelo   = { preto:'rgba(255,255,255,.7)', solido:'rgba(26,20,0,.7)', carbono:'#999', minimalista:'#ccc' };
+  const subByModelo   = { preto:'rgba(255,255,255,.55)', solido:'rgba(26,20,0,.55)', carbono:'#888', minimalista:'#999' };
   let extra = '';
   if(modelo==='preto') extra = `<div style="position:absolute;inset:0;background:linear-gradient(115deg,transparent 40%,${cor}22 50%,transparent 60%)"></div>`;
   else if(modelo==='solido') extra = `<div style="position:absolute;top:-30px;right:-30px;width:${Math.round(w*0.6)}px;height:${Math.round(w*0.6)}px;border-radius:50%;background:rgba(255,255,255,.12)"></div>`;
   else if(modelo==='carbono') extra = `<div style="position:absolute;top:10px;left:10px;width:5px;height:5px;border-radius:50%;background:${cor};box-shadow:0 0 8px ${cor}"></div>`;
   else if(modelo==='minimalista') extra = `<svg width="100%" height="100%" style="position:absolute;inset:0;opacity:.4"><line x1="0" y1="25%" x2="100%" y2="25%" stroke="${cor}" stroke-width=".5"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="${cor}" stroke-width=".5"/><line x1="0" y1="75%" x2="100%" y2="75%" stroke="${cor}" stroke-width=".5"/></svg>`;
-  return `<div style="width:${w}px;height:${h}px;flex-shrink:0;border-radius:${Math.round(h*0.13)}px;${bgByModelo[modelo]};padding:${Math.round(w*0.08)}px;position:relative;overflow:hidden">
+  const pad = Math.round(w*0.07);
+  return `<div style="width:${w}px;height:${h}px;flex-shrink:0;border-radius:${Math.round(h*0.11)}px;${bgByModelo[modelo]};padding:${pad}px;position:relative;overflow:hidden;box-shadow:0 8px 24px ${cor}22,0 2px 8px rgba(0,0,0,.4)">
     ${extra}
     <div style="display:flex;justify-content:space-between;align-items:flex-start;position:relative">
-      <div style="font-size:${Math.round(w*0.063)}px;letter-spacing:1px;color:${textByModelo[modelo]};font-weight:700">FinRossi</div>
+      <div style="font-size:${Math.round(w*0.052)}px;letter-spacing:.5px;color:${subByModelo[modelo]};font-weight:500;max-width:60%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${banco}</div>
       ${bandeira}
     </div>
-    <div style="position:relative;margin-top:${Math.round(h*0.15)}px">${chip}</div>
-    <div style="font-size:${Math.round(w*0.073)}px;letter-spacing:2px;color:${numByModelo[modelo]};font-family:monospace;margin-top:${Math.round(h*0.1)}px;position:relative">•••• •••• •••• ${final}</div>
+    <div style="position:relative;margin-top:${Math.round(h*0.1)}px">${chip}</div>
+    <div style="font-size:${Math.round(w*0.062)}px;letter-spacing:2px;color:${numByModelo[modelo]};font-family:monospace;margin-top:${Math.round(h*0.07)}px;position:relative">•••• •••• •••• ${final}</div>
+    <div style="position:absolute;bottom:${pad}px;left:${pad}px;right:${pad}px;display:flex;justify-content:space-between;align-items:flex-end;gap:8px">
+      <div style="min-width:0">
+        <div style="font-size:${Math.round(w*0.028)}px;letter-spacing:1px;color:${subByModelo[modelo]};text-transform:uppercase;margin-bottom:2px">Titular</div>
+        <div style="font-size:${Math.round(w*0.05)}px;font-weight:700;color:${textByModelo[modelo]};text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${nome||'—'}</div>
+      </div>
+    </div>
   </div>`;
 }
 
