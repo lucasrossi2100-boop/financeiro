@@ -7201,6 +7201,10 @@ function iniciarSistemaNotificacoes(){
 
 // ─── PWA SERVICE WORKER + AUTO-UPDATE ────────────────────────────────────────
 if ('serviceWorker' in navigator) {
+  // Marca se a página JÁ estava controlada por um SW antes de registrar.
+  // Isso diferencia "primeira instalação" (não deve recarregar) de "atualização real" (deve recarregar).
+  let _swJaTinhaControlador = !!navigator.serviceWorker.controller;
+
   window.addEventListener('load', async () => {
     try {
       const reg = await navigator.serviceWorker.register('/sw.js');
@@ -7217,8 +7221,14 @@ if ('serviceWorker' in navigator) {
         });
       });
 
-      // Quando o SW assumir controle, recarrega a página
+      // Quando o SW assumir controle, recarrega SÓ se já havia um SW controlando antes
+      // (evita recarregar na primeira instalação, o que derrubava o prompt de instalação do Android)
       navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!_swJaTinhaControlador) {
+          _swJaTinhaControlador = true;
+          console.log('[SW] Primeira instalação — sem reload');
+          return;
+        }
         console.log('[SW] Atualização aplicada — recarregando');
         window.location.reload();
       });
