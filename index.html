@@ -6890,7 +6890,14 @@ window.addEventListener('beforeinstallprompt', e => {
 });
 
 async function instalarPWALogin() {
-  if (!_deferredPromptLogin) return;
+  if (!_deferredPromptLogin) {
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    if (isIOS) {
+      document.getElementById('login-pwa-card').style.display = 'none';
+      document.getElementById('ios-banner').style.display = 'block';
+    }
+    return;
+  }
   _deferredPromptLogin.prompt();
   const { outcome } = await _deferredPromptLogin.userChoice;
   if (outcome === 'accepted') {
@@ -7225,6 +7232,17 @@ if ('serviceWorker' in navigator) {
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 initTema();
 initDatePickers();
+
+// Verifica instalação do PWA de forma incondicional — necessário pro iOS,
+// que nunca dispara o evento 'beforeinstallprompt' (só Android/Chrome/Edge disparam)
+setTimeout(mostrarPWABanner, 4000);
+setTimeout(() => {
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone;
+  const card = document.getElementById('login-pwa-card');
+  const jaInstalou = localStorage.getItem('fin_pwa_instalado');
+  const fechou = localStorage.getItem('fin_pwa_login_fechou');
+  if (isIOS && card && !jaInstalou && !fechou) card.style.display = 'block';
+}, 2000);
 </script>
 </body>
 </html>
