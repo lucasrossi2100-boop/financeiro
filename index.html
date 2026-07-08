@@ -6884,8 +6884,7 @@ window.addEventListener('beforeinstallprompt', e => {
   setTimeout(() => {
     const card = document.getElementById('login-pwa-card');
     const jaInstalou = localStorage.getItem('fin_pwa_instalado');
-    const fechou = localStorage.getItem('fin_pwa_login_fechou');
-    if (card && !jaInstalou && !fechou) card.style.display = 'block';
+    if (card && !jaInstalou && _pwaDeveMostrarAgora()) card.style.display = 'block';
   }, 2000);
 });
 
@@ -6904,7 +6903,8 @@ async function instalarPWALogin() {
     localStorage.setItem('fin_pwa_instalado', '1');
     document.getElementById('login-pwa-card').style.display = 'none';
   } else {
-    localStorage.setItem('fin_pwa_login_fechou', '1');
+    // Recusou — mostra de novo em 3h (mesma regra do banner)
+    localStorage.setItem('fin_pwa_ultimo_aviso', String(Date.now()));
   }
   _deferredPromptLogin = null;
 }
@@ -6930,15 +6930,16 @@ async function _pwaJaInstalou(){
   return false;
 }
 
-function _pwaDeveMostrarHoje(){
-  const hoje = new Date().toDateString();
+function _pwaDeveMostrarAgora(){
+  const TRES_HORAS_MS = 3 * 60 * 60 * 1000;
   const ultimo = localStorage.getItem('fin_pwa_ultimo_aviso');
-  return !ultimo || ultimo !== hoje;
+  if(!ultimo) return true;
+  return (Date.now() - parseInt(ultimo)) >= TRES_HORAS_MS;
 }
 
 async function mostrarPWABanner(){
   if(await _pwaJaInstalou()) return;
-  if(!_pwaDeveMostrarHoje()) return;
+  if(!_pwaDeveMostrarAgora()) return;
 
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone;
   if(_pwaPrompt){
@@ -6968,8 +6969,8 @@ async function instalarPWA(){
 function fecharPWABanner(instalou=false){
   document.getElementById('pwa-banner').style.display='none';
   if(!instalou){
-    // Recusou — registra hoje, mostra de novo amanhã
-    localStorage.setItem('fin_pwa_ultimo_aviso', new Date().toDateString());
+    // Recusou — registra agora, mostra de novo em 3h
+    localStorage.setItem('fin_pwa_ultimo_aviso', String(Date.now()));
     // Mostra FAB para instalar quando quiser
     if(_pwaPrompt){
       const fab = document.getElementById('pwa-fab');
@@ -6980,7 +6981,7 @@ function fecharPWABanner(instalou=false){
 
 function fecharIOSBanner(){
   document.getElementById('ios-banner').style.display='none';
-  localStorage.setItem('fin_pwa_ultimo_aviso', new Date().toDateString());
+  localStorage.setItem('fin_pwa_ultimo_aviso', String(Date.now()));
 }
 
 async function abrirPWAManual(){
@@ -7250,9 +7251,12 @@ setTimeout(() => {
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone;
   const card = document.getElementById('login-pwa-card');
   const jaInstalou = localStorage.getItem('fin_pwa_instalado');
-  const fechou = localStorage.getItem('fin_pwa_login_fechou');
-  if (isIOS && card && !jaInstalou && !fechou) card.style.display = 'block';
+  if (isIOS && card && !jaInstalou && _pwaDeveMostrarAgora()) card.style.display = 'block';
 }, 2000);
+
+// Verifica de novo periodicamente — cobre quem deixa o app aberto por horas
+// (o próprio mostrarPWABanner já checa se já se passaram 3h desde o último aviso)
+setInterval(mostrarPWABanner, 30 * 60 * 1000); // a cada 30min, só mostra se já passaram 3h
 </script>
 </body>
 </html>
