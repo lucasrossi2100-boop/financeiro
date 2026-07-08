@@ -1192,10 +1192,10 @@ tr:hover td{background:var(--surface2)}
         <div class="field" id="d-parcelas-wrap" style="display:none"><label>Nº de parcelas</label><input id="d-parcelas" type="number" placeholder="12" min="2" max="120" step="1" oninput="calcParcela()"></div>
         <div class="field"><label>Observação</label><input id="d-obs" type="text" placeholder="Opcional"></div>
       </div>
-      <div class="form-row">
+      <div class="form-row" style="display:none">
         <div class="field" style="grid-column:1/-1">
           <label>Cartão de crédito <span style="color:var(--muted);font-weight:400">(opcional)</span></label>
-          <select id="d-cartao" onchange="populateCartaoSelect()"><option value="">Débito / Dinheiro / Pix</option></select>
+          <select id="d-cartao"><option value="">Selecione o cartão usado</option></select>
         </div>
       </div>
       <!-- Preview parcela -->
@@ -2852,6 +2852,7 @@ function getCats(tipo){
 }
 
 function populateCatSelects(){
+  populateCartaoSelect();
   // Despesa
   const dCat = document.getElementById('d-cat');
   if(dCat){
@@ -3621,14 +3622,14 @@ function parseCurrency(el){
 function toggleMetodoPagamento(){
   const metodo = document.getElementById('d-metodo')?.value;
   const cartaoRow = document.querySelector('#d-cartao')?.closest('.form-row');
-  // Se método é crédito, seleciona cartão automaticamente e mostra parcelado
+  // Se método é crédito, mostra o campo de qual cartão foi usado
   if(metodo==='credito'){
     if(cartaoRow) cartaoRow.style.display='';
   } else {
-    // Limpa seleção de cartão se não é crédito
+    // Não é crédito: limpa seleção e esconde o campo
     const cartaoSel = document.getElementById('d-cartao');
     if(cartaoSel) cartaoSel.value='';
-    if(cartaoRow) cartaoRow.style.display='';
+    if(cartaoRow) cartaoRow.style.display='none';
   }
   // Parcelado só faz sentido em crédito
   const parcWrap = document.getElementById('d-parcelado-wrap');
