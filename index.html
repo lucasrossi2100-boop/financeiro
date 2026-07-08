@@ -1091,7 +1091,7 @@ tr:hover td{background:var(--surface2)}
     </div>
 
     <!-- Cartões -->
-    <div class="card" style="padding:20px">
+    <div class="card" style="padding:20px;cursor:pointer" onclick="goTo('cartoes')" title="Ver todos os cartões">
       <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:16px">Cartões</div>
       <div id="dash-cartao-widget"></div>
     </div>
@@ -1864,6 +1864,22 @@ tr:hover td{background:var(--surface2)}
           <div style="position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s"></div>
         </div>
       </label>
+
+      <!-- Aplicativo -->
+      <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;display:block;margin:20px 0 12px">Aplicativo</label>
+      <div style="background:var(--surface2);border-radius:12px;padding:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px">
+          <div>
+            <div style="font-size:13px;font-weight:500">Instalar FinRossi</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Acesso rápido direto da tela inicial</div>
+          </div>
+          <span id="cfg-pwa-status" style="font-size:11px;padding:3px 10px;border-radius:20px;background:var(--surface3);color:var(--muted);white-space:nowrap">Verificando...</span>
+        </div>
+        <button onclick="instalarPWAConfig()" id="cfg-pwa-btn" style="width:100%;padding:10px;background:var(--accent);color:#0f0f0f;border:none;border-radius:8px;font-size:13px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer">
+          📲 Instalar aplicativo
+        </button>
+        <div id="msg-pwa-config" class="msg" style="margin-top:8px"></div>
+      </div>
     </div>
 
     <!-- Tab: Dashboard -->
@@ -3570,7 +3586,7 @@ function renderDashCartaoWidget(){
   if(!cartoes.length){
     el.innerHTML=`<div style="text-align:center;padding:20px 0">
       <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Nenhum cartão cadastrado</div>
-      <button class="btn sm" onclick="goTo('cartoes')">+ Cadastrar cartão</button>
+      <button class="btn sm" onclick="event.stopPropagation();goTo('cartoes')">+ Cadastrar cartão</button>
     </div>`;
     return;
   }
@@ -3583,11 +3599,14 @@ function renderDashCartaoWidget(){
   const cor=c.cor||'#C8A96E';
   el.innerHTML=`
     <div style="display:flex;align-items:center;gap:16px">
-      <div style="width:130px;height:82px;flex-shrink:0;border-radius:12px;background:linear-gradient(135deg,${cor}ee 0%,${cor}99 50%,#1a1a1a 100%);padding:12px;position:relative;overflow:hidden">
+      <div style="width:140px;height:88px;flex-shrink:0;border-radius:12px;background:linear-gradient(135deg,${cor}ee 0%,${cor}99 50%,#1a1a1a 100%);padding:12px;position:relative;overflow:hidden">
         <div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.06)"></div>
-        <svg width="22" height="16" viewBox="0 0 34 26" fill="none" style="position:relative"><rect x="0" y="0" width="34" height="26" rx="4" fill="#D4AF5A" opacity=".9"/><rect x="11" y="0" width="12" height="26" fill="#C4992A" opacity=".5"/><rect x="0" y="8" width="34" height="10" fill="#C4992A" opacity=".5"/></svg>
-        <div style="font-size:9px;letter-spacing:1.5px;color:rgba(255,255,255,.85);margin-top:8px;font-weight:600">FinRossi</div>
-        <div style="font-size:9px;letter-spacing:1px;color:rgba(255,255,255,.6);font-family:monospace;margin-top:14px">•••• ${c.final||'0000'}</div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;position:relative">
+          <div style="font-size:9px;letter-spacing:1px;color:rgba(255,255,255,.8);font-weight:600">FinRossi</div>
+          <svg width="24" height="15" viewBox="0 0 36 22" style="flex-shrink:0"><circle cx="13" cy="11" r="11" fill="#EB001B" opacity=".9"/><circle cx="23" cy="11" r="11" fill="#F79E1B" opacity=".9"/><path d="M18 4.5a11 11 0 010 13A11 11 0 0118 4.5z" fill="#FF5F00" opacity=".9"/></svg>
+        </div>
+        <svg width="22" height="16" viewBox="0 0 34 26" fill="none" style="position:relative;margin-top:12px"><rect x="0" y="0" width="34" height="26" rx="4" fill="#D4AF5A" opacity=".9"/><rect x="11" y="0" width="12" height="26" fill="#C4992A" opacity=".5"/><rect x="0" y="8" width="34" height="10" fill="#C4992A" opacity=".5"/></svg>
+        <div style="font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.75);font-family:monospace;margin-top:10px;position:relative">•••• •••• •••• ${c.final||'0000'}</div>
       </div>
       <div style="flex:1;min-width:0">
         <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Limite disponível</div>
@@ -3598,7 +3617,7 @@ function renderDashCartaoWidget(){
         <div style="font-size:10px;color:var(--muted2);margin-top:5px">de ${fmtR(c.limite||0)}</div>
       </div>
     </div>
-    ${cartoes.length>1?`<div style="font-size:10px;color:var(--muted2);margin-top:12px;text-align:right;cursor:pointer" onclick="goTo('cartoes')">+${cartoes.length-1} outro(s) cartão(ões) →</div>`:''}`;
+    ${cartoes.length>1?`<div style="font-size:10px;color:var(--muted2);margin-top:12px;text-align:right">+${cartoes.length-1} outro(s) cartão(ões) →</div>`:''}`;
 }
 
 // ─── LANÇAMENTOS ─────────────────────────────────────────────────────────────
@@ -5767,6 +5786,7 @@ function cfgTab(tab){
       btn.style.color = t===tab ? 'var(--accent)' : 'var(--muted)';
     }
   });
+  if(tab==='aparencia') atualizarStatusPWAConfig();
 }
 
 function carregarFoto(event){
@@ -6842,6 +6862,56 @@ async function abrirPWAManual(){
   } else {
     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
     if(isIOS) document.getElementById('ios-banner').style.display='block';
+  }
+}
+
+async function atualizarStatusPWAConfig(){
+  const statusEl=document.getElementById('cfg-pwa-status');
+  const btnEl=document.getElementById('cfg-pwa-btn');
+  if(!statusEl||!btnEl) return;
+  const instalado = await _pwaJaInstalou();
+  if(instalado){
+    statusEl.textContent='✅ Instalado';
+    statusEl.style.background='var(--green-s)';
+    statusEl.style.color='var(--green)';
+    btnEl.style.display='none';
+  } else {
+    statusEl.textContent='Não instalado';
+    statusEl.style.background='var(--surface3)';
+    statusEl.style.color='var(--muted)';
+    btnEl.style.display='';
+  }
+}
+
+async function instalarPWAConfig(){
+  const msg=document.getElementById('msg-pwa-config');
+  if(msg){msg.textContent='';msg.style.color='';}
+  if(await _pwaJaInstalou()){
+    atualizarStatusPWAConfig();
+    return;
+  }
+  if(_pwaPrompt){
+    _pwaPrompt.prompt();
+    const result = await _pwaPrompt.userChoice;
+    _pwaPrompt = null;
+    if(result.outcome==='accepted'){
+      localStorage.setItem('fin_pwa_instalado','1');
+      if(window._db && window._set && window._ref && window._firebaseUser){
+        try{ window._set(window._ref(window._db,`usuarios/${window._firebaseUser.uid}/pwaInstalado`), true); }catch(e){}
+      }
+      if(msg){msg.textContent='App instalado!';msg.style.color='var(--green)';}
+    } else if(msg){
+      msg.textContent='Instalação cancelada.';msg.style.color='var(--muted)';
+    }
+    atualizarStatusPWAConfig();
+    return;
+  }
+  const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  if(msg){
+    msg.textContent = isIOS
+      ? 'No iPhone: toque em Compartilhar (□↑) e depois "Adicionar à Tela de Início".'
+      : 'Seu navegador ainda não liberou a instalação automática. Tente pelo Chrome ou Edge.';
+    msg.style.color='var(--amber)';
   }
 }
 
