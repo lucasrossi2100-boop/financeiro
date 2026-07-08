@@ -3591,6 +3591,13 @@ function renderDashMeta(){
     <div style="text-align:center;margin-top:4px;font-size:13px;font-weight:500">${pct.toFixed(1)}% — ${meta.icone||'🎯'} ${meta.nome}</div>`;
 }
 
+let _dashCartaoSelId=null;
+
+function selecionarCartaoDash(id){
+  _dashCartaoSelId=id;
+  renderDashCartaoWidget();
+}
+
 function renderDashCartaoWidget(){
   const el=document.getElementById('dash-cartao-widget');
   if(!el) return;
@@ -3602,14 +3609,23 @@ function renderDashCartaoWidget(){
     </div>`;
     return;
   }
-  const c=cartoes[0];
+  // Mantém o cartão selecionado se ainda existir, senão volta pro primeiro
+  if(!_dashCartaoSelId || !cartoes.find(x=>x.id===_dashCartaoSelId)){
+    _dashCartaoSelId=cartoes[0].id;
+  }
+  const c=cartoes.find(x=>x.id===_dashCartaoSelId)||cartoes[0];
   const mes=getMesFiltro();
   const lancsMes=pd().lancs.filter(l=>l.tipo==='despesa'&&l.data.startsWith(mes));
   const gastos=lancsMes.filter(l=>l.cartaoId===c.id).reduce((a,b)=>a+b.val,0);
   const disponivel=Math.max(0,(c.limite||0)-gastos);
   const pct=c.limite>0?Math.min(100,(gastos/c.limite)*100):0;
-  const cor=c.cor||'#C8A96E';
   el.innerHTML=`
+    ${cartoes.length>1?`
+    <div style="margin-bottom:14px" onclick="event.stopPropagation()">
+      <select onchange="selecionarCartaoDash(this.value)" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius-sm);padding:6px 10px;font-size:12px;font-family:'DM Sans',sans-serif;outline:none;width:100%;cursor:pointer">
+        ${cartoes.map(cc=>`<option value="${cc.id}" ${cc.id===c.id?'selected':''}>${cc.nome} •••• ${cc.final}</option>`).join('')}
+      </select>
+    </div>`:''}
     <div style="display:flex;align-items:center;gap:20px">
       ${cartaoVisualHTML(c, 190, 120)}
       <div style="flex:1;min-width:0">
@@ -3620,8 +3636,7 @@ function renderDashCartaoWidget(){
         </div>
         <div style="font-size:11px;color:var(--muted2);margin-top:6px">de ${fmtR(c.limite||0)}</div>
       </div>
-    </div>
-    ${cartoes.length>1?`<div style="font-size:10px;color:var(--muted2);margin-top:14px;text-align:right">+${cartoes.length-1} outro(s) cartão(ões) →</div>`:''}`;
+    </div>`;
 }
 
 // ─── LANÇAMENTOS ─────────────────────────────────────────────────────────────
