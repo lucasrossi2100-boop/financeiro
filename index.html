@@ -6929,11 +6929,16 @@ async function _pwaJaInstalou(){
   if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) return true;
   // 2. Se salvou localmente que instalou
   if(localStorage.getItem('fin_pwa_instalado') === '1') return true;
-  // 3. Verifica no Firebase (instalou em outro dispositivo)
+  // 3. Verifica no Firebase (instalou em outro dispositivo) — com timeout de segurança,
+  // pra nunca travar em "Verificando..." caso o Firebase não responda
   if(window._db && window._ref && window._onValue && window._firebaseUser){
     try{
-      const snap = await new Promise(res=>{
-        window._onValue(window._ref(window._db,`usuarios/${window._firebaseUser.uid}/pwaInstalado`),res,{onlyOnce:true});
+      const snap = await new Promise((res,rej)=>{
+        const timeoutId = setTimeout(()=>rej(new Error('timeout')), 4000);
+        window._onValue(window._ref(window._db,`usuarios/${window._firebaseUser.uid}/pwaInstalado`),(s)=>{
+          clearTimeout(timeoutId);
+          res(s);
+        },{onlyOnce:true});
       });
       if(snap.val() === true){
         localStorage.setItem('fin_pwa_instalado','1');
@@ -7012,7 +7017,12 @@ async function atualizarStatusPWAConfig(){
   const statusEl=document.getElementById('cfg-pwa-status');
   const btnEl=document.getElementById('cfg-pwa-btn');
   if(!statusEl||!btnEl) return;
-  const instalado = await _pwaJaInstalou();
+  let instalado = false;
+  try{
+    instalado = await _pwaJaInstalou();
+  }catch(e){
+    console.warn('[PWA] erro ao verificar status:', e);
+  }
   if(instalado){
     statusEl.textContent='✅ Instalado';
     statusEl.style.background='var(--green-s)';
