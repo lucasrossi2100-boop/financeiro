@@ -42,8 +42,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);lin
 
 /* NAV */
 nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;background:rgba(8,8,8,0.85);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
-.nav-logo{font-family:'DM Serif Display',serif;font-size:22px;letter-spacing:-.5px;color:var(--gold-light)}
-.nav-logo span{color:var(--text)}
+.nav-logo{font-family:'DM Serif Display',serif;font-size:22px;letter-spacing:-.5px;color:var(--text)}
+.nav-logo span{color:var(--gold-light)}
 .nav-links{display:flex;align-items:center;gap:24px}
 .nav-links a{font-size:14px;color:var(--muted);text-decoration:none;transition:color .2s}
 .nav-links a:hover{color:var(--text)}
@@ -174,13 +174,19 @@ footer strong{color:var(--gold)}
   .plan-card.featured{transform:scale(1)}
   section{padding:60px 20px}
 }
+#portal-transition{position:fixed;inset:0;z-index:99999;pointer-events:none;overflow:hidden;display:none}
+#portal-circle{position:absolute;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle,#e8c96d 0%,#c9a84c 45%,rgba(201,168,76,0) 70%);transform:translate(-50%,-50%) scale(0);opacity:0}
+#portal-circle.go{transition:transform .65s cubic-bezier(.65,0,.35,1),opacity .65s ease}
+body.portal-zoom{transition:transform .65s cubic-bezier(.65,0,.35,1),opacity .65s ease}
 </style>
 </head>
 <body>
 
 <!-- NAV -->
+<div id="portal-transition"><div id="portal-circle"></div></div>
+
 <nav>
-  <div class="nav-logo">Fin<span>Rossi</span></div>
+  <div class="nav-logo" style="display:flex;align-items:center;gap:9px"><img src="icon-192.png?v=2" width="28" height="28" alt="FinRossi" style="display:block;border-radius:8px">Fin<span>Rossi</span></div>
   <div class="nav-links">
     <a href="#funcionalidades">Funcionalidades</a>
     <a href="#como-funciona">Como funciona</a>
@@ -188,8 +194,8 @@ footer strong{color:var(--gold)}
     <a href="#faq">FAQ</a>
   </div>
   <div style="display:flex;align-items:center;gap:10px">
-    <a href="https://finrossi.com.br/" class="nav-login">Entrar</a>
-    <a href="#planos" class="nav-cta">Começar agora</a>
+    <a href="https://finrossi.com.br/" class="nav-login" onclick="event.preventDefault();portalTransition(event,()=>{window.location.href='https://finrossi.com.br/'})">Entrar</a>
+    <a href="#planos" class="nav-cta" onclick="event.preventDefault();portalTransition(event,()=>{document.getElementById('planos').scrollIntoView({behavior:'smooth'})})">Começar agora</a>
   </div>
 </nav>
 
@@ -200,7 +206,7 @@ footer strong{color:var(--gold)}
     <h1>Seu dinheiro,<br><em>finalmente organizado</em></h1>
     <p>Controle financeiro pessoal simples e inteligente. Receitas, despesas, investimentos e metas — tudo em um só lugar.</p>
     <div class="hero-btns">
-      <a href="#planos" class="btn-primary">
+      <a href="#planos" class="btn-primary" onclick="event.preventDefault();portalTransition(event,()=>{document.getElementById('planos').scrollIntoView({behavior:'smooth'})})">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         Começar grátis
       </a>
@@ -396,7 +402,7 @@ footer strong{color:var(--gold)}
           <li class="no">Calendário e recorrentes</li>
           <li class="no">Suporte</li>
         </ul>
-        <button class="plan-btn free-btn" onclick="assinar('gratuito')">Começar grátis</button>
+        <button class="plan-btn free-btn" onclick="portalTransition(event,()=>assinar('gratuito'))">Começar grátis</button>
       </div>
 
       <!-- STARTER -->
@@ -419,7 +425,7 @@ footer strong{color:var(--gold)}
           <li class="no">Calendário e recorrentes</li>
           <li class="no">Suporte prioritário</li>
         </ul>
-        <button class="plan-btn outline-btn" onclick="assinar('starter')">Assinar Starter</button>
+        <button class="plan-btn outline-btn" onclick="portalTransition(event,()=>assinar('starter'))">Assinar Starter</button>
       </div>
 
       <!-- ESSENCIAL -->
@@ -442,7 +448,7 @@ footer strong{color:var(--gold)}
           <li>Notas e anotações</li>
           <li>Calculadora renda passiva</li>
         </ul>
-        <button class="plan-btn gold-btn" onclick="assinar('essencial')">Assinar Essencial</button>
+        <button class="plan-btn gold-btn" onclick="portalTransition(event,()=>assinar('essencial'))">Assinar Essencial</button>
       </div>
 
       <!-- PERFORMANCE -->
@@ -463,7 +469,7 @@ footer strong{color:var(--gold)}
           <li>Suporte via WhatsApp</li>
           <li>Atendimento prioritário</li>
         </ul>
-        <button class="plan-btn outline-btn" onclick="assinar('performance')">Assinar Performance</button>
+        <button class="plan-btn outline-btn" onclick="portalTransition(event,()=>assinar('performance'))">Assinar Performance</button>
       </div>
 
     </div>
@@ -515,11 +521,11 @@ footer strong{color:var(--gold)}
     <h2>Comece a controlar<br>seu dinheiro hoje</h2>
     <p>Gratuito para começar. Sem cartão de crédito.</p>
     <div class="hero-btns">
-      <a href="#planos" class="btn-primary">
+      <a href="#planos" class="btn-primary" onclick="event.preventDefault();portalTransition(event,()=>{document.getElementById('planos').scrollIntoView({behavior:'smooth'})})">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         Criar conta grátis
       </a>
-      <a href="https://finrossi.com.br/" class="btn-secondary">
+      <a href="https://finrossi.com.br/" class="btn-secondary" onclick="event.preventDefault();portalTransition(event,()=>{window.location.href='https://finrossi.com.br/'})">
         Já tenho conta →
       </a>
     </div>
@@ -528,6 +534,7 @@ footer strong{color:var(--gold)}
 
 <!-- FOOTER -->
 <footer>
+  <img src="icon-192.png?v=2" width="36" height="36" alt="FinRossi" style="display:block;border-radius:10px;margin:0 auto 14px">
   <p><strong>FinRossi</strong> — Controle financeiro pessoal simples e inteligente</p>
   <p style="margin-top:8px">© 2025 FinRossi · Todos os direitos reservados</p>
   <p style="margin-top:12px;font-size:12px">
@@ -546,6 +553,51 @@ function toggleFaq(btn){
   document.querySelectorAll('.faq-a').forEach(el=>el.classList.remove('open'));
   document.querySelectorAll('.faq-q').forEach(el=>el.classList.remove('open'));
   if(!isOpen){a.classList.add('open');btn.classList.add('open');}
+}
+
+// ─── Transição "portal" (animação de entrar na tela) ──────────────────────────
+function portalTransition(e, callback){
+  const x = e ? e.clientX : window.innerWidth/2;
+  const y = e ? e.clientY : window.innerHeight/2;
+  const wrap = document.getElementById('portal-transition');
+  const circle = document.getElementById('portal-circle');
+  if(!wrap || !circle){ callback(); return; }
+
+  // Raio necessário pra cobrir a tela inteira a partir do ponto clicado
+  const maxDist = Math.max(
+    Math.hypot(x, y),
+    Math.hypot(window.innerWidth - x, y),
+    Math.hypot(x, window.innerHeight - y),
+    Math.hypot(window.innerWidth - x, window.innerHeight - y)
+  );
+  const scaleTarget = (maxDist * 2.2) / 20;
+
+  circle.classList.remove('go');
+  circle.style.left = x + 'px';
+  circle.style.top = y + 'px';
+  circle.style.transform = 'translate(-50%,-50%) scale(0)';
+  circle.style.opacity = '1';
+  wrap.style.display = 'block';
+  document.body.classList.add('portal-zoom');
+  document.body.style.transformOrigin = x + 'px ' + y + 'px';
+
+  requestAnimationFrame(()=>{
+    circle.classList.add('go');
+    circle.style.transform = `translate(-50%,-50%) scale(${scaleTarget})`;
+    document.body.style.transform = 'scale(1.08)';
+    document.body.style.opacity = '0.15';
+  });
+
+  setTimeout(()=>{
+    callback();
+    // Reseta pro estado inicial (útil se a ação for abrir um modal, sem sair da página)
+    document.body.classList.remove('portal-zoom');
+    document.body.style.transform = '';
+    document.body.style.opacity = '';
+    wrap.style.display = 'none';
+    circle.classList.remove('go');
+    circle.style.opacity = '0';
+  }, 650);
 }
 
 // ─── Config ───────────────────────────────────────────────────────────────────
@@ -785,6 +837,7 @@ if(window.matchMedia('(pointer:fine)').matches){
 
     <!-- Logo -->
     <div style="text-align:center;margin-bottom:28px">
+      <img src="icon-192.png?v=2" width="44" height="44" alt="FinRossi" style="display:block;border-radius:10px;margin:0 auto 10px">
       <div style="font-family:'DM Serif Display',serif;font-size:30px;color:#C8A96E;letter-spacing:-1px">FinRossi</div>
       <div style="font-size:12px;color:#555;margin-top:4px">Controle financeiro pessoal</div>
     </div>
