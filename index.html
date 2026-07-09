@@ -1624,9 +1624,9 @@ tr:hover td{background:var(--surface2)}
     <select id="cli-filtro-plano" onchange="renderClientes()" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius-sm);padding:7px 12px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none">
       <option value="">Todos os planos</option>
       <option value="gratuito">Gratuito</option>
-      <option value="starter">Starter</option>
       <option value="essencial">Essencial</option>
-      <option value="performance">Performance</option>
+      <option value="evolucao">Evolução</option>
+      <option value="patrimonio">Patrimônio</option>
     </select>
     <input id="cli-busca" type="text" placeholder="Buscar por nome ou email..." oninput="renderClientes()" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius-sm);padding:7px 12px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;flex:1;max-width:260px">
   </div>
@@ -1649,9 +1649,9 @@ tr:hover td{background:var(--surface2)}
       <div style="font-size:13px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Simular plano:</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap" id="preview-plan-btns">
         <button onclick="setPreviewPlano('gratuito')" id="prev-btn-gratuito" class="btn" style="font-size:12px">🆓 Gratuito</button>
-        <button onclick="setPreviewPlano('starter')" id="prev-btn-starter" class="btn" style="font-size:12px">⚡ Starter</button>
-        <button onclick="setPreviewPlano('essencial')" id="prev-btn-essencial" class="btn" style="font-size:12px">✨ Essencial</button>
-        <button onclick="setPreviewPlano('performance')" id="prev-btn-performance" class="btn primary" style="font-size:12px">🚀 Performance</button>
+        <button onclick="setPreviewPlano('essencial')" id="prev-btn-essencial" class="btn" style="font-size:12px">⚡ Essencial</button>
+        <button onclick="setPreviewPlano('evolucao')" id="prev-btn-evolucao" class="btn" style="font-size:12px">🎨 Evolução</button>
+        <button onclick="setPreviewPlano('patrimonio')" id="prev-btn-patrimonio" class="btn primary" style="font-size:12px">💎 Patrimônio</button>
       </div>
       <div id="preview-plano-badge" style="margin-left:auto;font-size:12px;padding:4px 12px;border-radius:20px;background:var(--accent-s);color:var(--accent);font-weight:500"></div>
     </div>
@@ -1687,8 +1687,8 @@ tr:hover td{background:var(--surface2)}
           <tr style="border-bottom:1px solid var(--border)">
             <th style="text-align:left;padding:10px;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px">Funcionalidade</th>
             <th style="text-align:center;padding:10px;color:var(--muted);font-size:11px;text-transform:uppercase">Gratuito</th>
-            <th style="text-align:center;padding:10px;color:var(--muted);font-size:11px;text-transform:uppercase">Starter</th>
             <th style="text-align:center;padding:10px;color:var(--muted);font-size:11px;text-transform:uppercase">Essencial</th>
+            <th style="text-align:center;padding:10px;color:var(--muted);font-size:11px;text-transform:uppercase">Evolução</th>
             <th style="text-align:center;padding:10px;color:var(--accent);font-size:11px;text-transform:uppercase">Consultoria</th>
           </tr>
         </thead>
@@ -2202,9 +2202,9 @@ tr:hover td{background:var(--surface2)}
         <label>Plano</label>
         <select id="ec-plano">
           <option value="gratuito">🆓 Gratuito (30 dias)</option>
-          <option value="starter">⚡ Starter — R$9,90/mês</option>
-          <option value="essencial">⭐ Essencial — R$24,90/mês</option>
-          <option value="performance">🚀 Performance — R$49,90/mês</option>
+          <option value="essencial">⚡ Essencial — R$9,90/mês</option>
+          <option value="evolucao">🎨 Evolução — R$24,90/mês</option>
+          <option value="patrimonio">💎 Patrimônio — R$49,90/mês</option>
         </select>
       </div>
       <!-- Status -->
@@ -2339,9 +2339,9 @@ tr:hover td{background:var(--surface2)}
         <div class="field"><label>Plano</label>
           <select id="nc-plano">
             <option value="gratuito">Gratuito (trial)</option>
-            <option value="starter">Starter — R$9,90</option>
-            <option value="essencial">Essencial — R$24,90</option>
-            <option value="performance">Performance — R$49,90</option>
+            <option value="essencial">Essencial — R$9,90</option>
+            <option value="evolucao">Evolução — R$24,90</option>
+            <option value="patrimonio">Patrimônio — R$49,90</option>
           </select>
         </div>
         <div class="field"><label>Origem</label>
@@ -4863,7 +4863,7 @@ async function cadastrarNovoCliente(){
   const email=document.getElementById('nc-email').value.trim();
   const senha=document.getElementById('nc-senha').value;
   const role=document.getElementById('nc-role')?.value||'cliente';
-  const plano=role==='cliente'?(document.getElementById('nc-plano')?.value||'gratuito'):'performance';
+  const plano=role==='cliente'?(document.getElementById('nc-plano')?.value||'gratuito'):'patrimonio';
   const origem=role==='cliente'?(document.getElementById('nc-origem')?.value||'teste'):'interno';
   const msg=document.getElementById('msg-novo-cliente');
 
@@ -4939,7 +4939,7 @@ async function renderClientes(){
     const pagantes=clientesReais.filter(c=>c.origem==='pagante'&&c.status==='ativo');
     const emTrial=clientesReais.filter(c=>c.origem==='trial'&&c.status!=='inativo');
     const inativos=clientesReais.filter(c=>c.status==='inativo');
-    const mrr=pagantes.reduce((a,c)=>{ const p={starter:9.90,essencial:24.90,performance:49.90}; return a+(p[c.plano]||0); },0);
+    const mrr=pagantes.reduce((a,c)=>{ const p={essencial:9.90,evolucao:24.90,patrimonio:49.90}; return a+(p[c.plano]||0); },0);
 
     document.getElementById('clientes-metrics').innerHTML=`
       <div class="mc"><div class="mc-label">Pagantes ativos</div><div class="mc-val green">${pagantes.length}</div><div class="mc-sub">geram receita</div></div>
@@ -4954,7 +4954,7 @@ async function renderClientes(){
       return;
     }
 
-    const PLANO_CORES={gratuito:'var(--muted)',starter:'var(--blue)',essencial:'var(--green)',performance:'var(--accent)'};
+    const PLANO_CORES={gratuito:'var(--muted)',essencial:'var(--blue)',evolucao:'var(--green)',patrimonio:'var(--accent)'};
     const STATUS_CORES={ativo:'var(--green)',trial:'var(--amber)',inativo:'var(--red)',pendente:'var(--amber)'};
     const ROLE_BADGE={socio:['👑','var(--accent)','Sócio'],admin:['👔','var(--purple)','Admin'],dev:['💻','var(--blue)','Dev'],cliente:['👤','var(--muted)','Cliente']};
     const ROLES_INTERNOS_TBL=['socio','admin','dev'];
@@ -5188,23 +5188,23 @@ const PLANOS_CONFIG = {
     edicao: 'nenhuma',
     desc: 'Acesso por 30 dias com até 20 lançamentos. Sem investimentos, metas ou controles avançados.'
   },
-  starter: {
-    label: 'Starter', preco: 'R$ 9,90/mês', cor: 'var(--blue)', dias: null,
+  essencial: {
+    label: 'Essencial', preco: 'R$ 9,90/mês', cor: 'var(--blue)', dias: null,
     limites: { lancamentos: true, investimentos: true, metas: false, cartoes: false, assinaturas: false, recorrentes: false, calendario: false, notas: false, renda: false, 'minha-assinatura': true },
     edicao: 'visualizacao',
     desc: 'Lançamentos ilimitados, gráficos e investimentos simples. Sem metas, objetivos ou controles.'
   },
-  essencial: {
-    label: 'Essencial', preco: 'R$ 24,90/mês', cor: 'var(--green)', dias: null,
+  evolucao: {
+    label: 'Evolução', preco: 'R$ 24,90/mês', cor: 'var(--green)', dias: null,
     limites: { lancamentos: true, investimentos: true, metas: true, cartoes: true, assinaturas: true, recorrentes: true, calendario: true, notas: true, renda: true, 'minha-assinatura': true },
     edicao: 'observacao',
     desc: 'Acesso completo ao app. Pode adicionar observações. Sem edição direta pelo consultor.'
   },
-  performance: {
-    label: 'Performance', preco: 'R$ 49,90/mês', cor: 'var(--accent)', dias: null,
+  patrimonio: {
+    label: 'Patrimônio', preco: 'R$ 49,90/mês', cor: 'var(--accent)', dias: null,
     limites: { lancamentos: true, investimentos: true, metas: true, cartoes: true, assinaturas: true, recorrentes: true, calendario: true, notas: true, renda: true, 'minha-assinatura': true },
     edicao: 'completa',
-    desc: 'Tudo do Essencial + acesso do consultor para edição, reunião mensal e relatório.'
+    desc: 'Tudo do Evolução + acesso do consultor para edição, reunião mensal e relatório.'
   }
 };
 
@@ -5245,13 +5245,13 @@ const PERMS_TABLE = [
   {label:'Período gratuito (dias)',  g:'30d',  s:false, e:false, c:false},
 ];
 
-let _previewPlano = 'performance';
+let _previewPlano = 'patrimonio';
 
 function setPreviewPlano(plano){
   _previewPlano = plano;
   renderPreview();
   // Atualiza botões
-  ['gratuito','starter','essencial','performance'].forEach(p=>{
+  ['gratuito','essencial','evolucao','patrimonio'].forEach(p=>{
     const btn = document.getElementById('prev-btn-'+p);
     if(btn) btn.className = 'btn' + (p===plano?' primary':'');
   });
@@ -5269,7 +5269,7 @@ function renderPreview(){
   // Descrição
   const desc = document.getElementById('preview-plano-desc');
   if(desc) desc.innerHTML=`<div class="card" style="border-left:3px solid ${cfg.cor};padding:14px 18px;display:flex;align-items:center;gap:12px">
-    <div style="font-size:24px">${plano==='gratuito'?'🆓':plano==='starter'?'⚡':plano==='essencial'?'✨':'👑'}</div>
+    <div style="font-size:24px">${plano==='gratuito'?'🆓':plano==='essencial'?'⚡':plano==='evolucao'?'✨':'👑'}</div>
     <div><div style="font-size:14px;font-weight:500;color:${cfg.cor};margin-bottom:3px">Plano ${cfg.label} — ${cfg.preco}</div>
     <div style="font-size:13px;color:var(--muted)">${cfg.desc}</div>
     ${cfg.dias?`<div style="font-size:12px;margin-top:4px;color:var(--amber)">⏱ Expira em ${cfg.dias} dias após o cadastro</div>`:''}</div>
@@ -5323,9 +5323,9 @@ function renderPreview(){
     tbody.innerHTML = PERMS_TABLE.map(row=>`<tr style="border-bottom:1px solid var(--border)">
       <td style="padding:9px 10px;font-size:13px">${row.label}</td>
       ${cell(row.g, plano==='gratuito')}
-      ${cell(row.s, plano==='starter')}
-      ${cell(row.e, plano==='essencial')}
-      ${cell(row.c, plano==='performance')}
+      ${cell(row.s, plano==='essencial')}
+      ${cell(row.e, plano==='evolucao')}
+      ${cell(row.c, plano==='patrimonio')}
     </tr>`).join('');
   }
 }
@@ -5644,7 +5644,7 @@ function renderManual(){
   el.innerHTML=`
     <div class="card card-full" style="margin-bottom:16px;background:linear-gradient(135deg,rgba(74,222,128,0.06) 0%,rgba(96,165,250,0.04) 100%);border-color:rgba(74,222,128,0.15)">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
-        <div style="font-size:32px">🚀</div>
+        <div style="font-size:32px">💎</div>
         <div>
           <div style="font-family:'DM Serif Display',serif;font-size:18px">Bem-vindo ao FinRossi</div>
           <div style="font-size:13px;color:var(--muted)">Controle financeiro pessoal simples e inteligente</div>
@@ -6104,9 +6104,9 @@ async function renderMinhaAssinatura(){
 
   const PLANO_INFO = {
     gratuito:    {label:'Gratuito',    cor:'var(--muted)',   icone:'🆓', preco:'R$ 0,00',    desc:'Acesso por 30 dias, até 20 lançamentos'},
-    starter:     {label:'Starter',     cor:'var(--blue)',    icone:'⚡', preco:'R$ 9,90/mês',desc:'Lançamentos ilimitados + investimentos'},
-    essencial:   {label:'Essencial',   cor:'var(--green)',   icone:'⭐', preco:'R$ 24,90/mês',desc:'Acesso completo ao app'},
-    performance: {label:'Performance', cor:'var(--accent)',  icone:'🚀', preco:'R$ 49,90/mês',desc:'Tudo + suporte prioritário'},
+    essencial:     {label:'Essencial',     cor:'var(--blue)',    icone:'⚡', preco:'R$ 9,90/mês',desc:'Lançamentos ilimitados + investimentos'},
+    evolucao:   {label:'Evolução',   cor:'var(--green)',   icone:'⭐', preco:'R$ 24,90/mês',desc:'Acesso completo ao app'},
+    patrimonio: {label:'Patrimônio', cor:'var(--accent)',  icone:'💎', preco:'R$ 49,90/mês',desc:'Tudo + suporte prioritário'},
   };
 
   const STATUS_INFO = {
@@ -6185,11 +6185,11 @@ async function renderMinhaAssinatura(){
           ${[
             ['Lançamentos', plano==='gratuito'?'Até 20':'Ilimitados', true],
             ['Investimentos', plano==='gratuito'?false:true, plano!=='gratuito'],
-            ['Metas e Objetivos', ['essencial','performance'].includes(plano), ['essencial','performance'].includes(plano)],
-            ['Cartões e Assinaturas', ['essencial','performance'].includes(plano), ['essencial','performance'].includes(plano)],
-            ['Calendário e Notas', ['essencial','performance'].includes(plano), ['essencial','performance'].includes(plano)],
-            ['Suporte prioritário', plano==='performance', plano==='performance'],
-            ['Suporte WhatsApp', plano==='performance', plano==='performance'],
+            ['Metas e Objetivos', ['evolucao','patrimonio'].includes(plano), ['evolucao','patrimonio'].includes(plano)],
+            ['Cartões e Assinaturas', ['evolucao','patrimonio'].includes(plano), ['evolucao','patrimonio'].includes(plano)],
+            ['Calendário e Notas', ['evolucao','patrimonio'].includes(plano), ['evolucao','patrimonio'].includes(plano)],
+            ['Suporte prioritário', plano==='patrimonio', plano==='patrimonio'],
+            ['Suporte WhatsApp', plano==='patrimonio', plano==='patrimonio'],
           ].map(([label, detalhe, ok])=>`
             <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px">
               <span style="color:${ok?'var(--text)':'var(--muted2)'}">${label}</span>
@@ -6200,7 +6200,7 @@ async function renderMinhaAssinatura(){
     </div>
 
     <!-- Upgrade / Suporte -->
-    ${plano!=='performance'?`
+    ${plano!=='patrimonio'?`
     <div class="card card-full" style="margin-bottom:20px;border-color:rgba(200,169,110,0.2);background:rgba(200,169,110,0.04)">
       <h3><span class="dot" style="background:var(--accent)"></span>Quer mais recursos?</h3>
       <p style="font-size:13px;color:var(--muted);margin:8px 0 16px;line-height:1.7">
@@ -6208,7 +6208,7 @@ async function renderMinhaAssinatura(){
         suporte prioritário e muito mais.
       </p>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
-        ${plano==='gratuito'||plano==='starter'?`<a href="https://finrossi.com.br/landing.html#planos" target="_blank" class="btn primary" style="text-decoration:none">⚡ Ver planos disponíveis</a>`:''}
+        ${plano==='gratuito'||plano==='essencial'?`<a href="https://finrossi.com.br/landing.html#planos" target="_blank" class="btn primary" style="text-decoration:none">⚡ Ver planos disponíveis</a>`:''}
         <a href="mailto:finrossiapp@gmail.com?subject=Upgrade de plano FinRossi" class="btn" style="text-decoration:none">✉ Falar com suporte</a>
       </div>
     </div>`:''}
@@ -6220,7 +6220,7 @@ async function renderMinhaAssinatura(){
         <a href="mailto:finrossiapp@gmail.com?subject=Suporte FinRossi" class="btn" style="text-decoration:none;font-size:13px">✉ Enviar e-mail</a>
         <a href="https://finrossi.com.br/legal/termos.html" target="_blank" class="btn" style="text-decoration:none;font-size:13px">📄 Termos de Uso</a>
         <a href="https://finrossi.com.br/legal/privacidade.html" target="_blank" class="btn" style="text-decoration:none;font-size:13px">🔒 Privacidade</a>
-        ${plano==='performance'?`<a href="mailto:finrossiapp@gmail.com?subject=Agendamento sessão FinRossi" class="btn primary" style="text-decoration:none;font-size:13px">📅 Agendar sessão</a>`:''}
+        ${plano==='patrimonio'?`<a href="mailto:finrossiapp@gmail.com?subject=Agendamento sessão FinRossi" class="btn primary" style="text-decoration:none;font-size:13px">📅 Agendar sessão</a>`:''}
       </div>
     </div>
   `;
@@ -6907,7 +6907,7 @@ window._abrirComBoasVindas = function(nome, callback){
 
   const hora = new Date().getHours();
   const saudacao = hora<12?'Bom dia':hora<18?'Boa tarde':'Boa noite';
-  const frases = ['Suas finanças estão te esperando ✨','Vamos organizar o seu dia 💛','Controle total nas suas mãos 📊','Cada real conta. Vamos lá! 🚀'];
+  const frases = ['Suas finanças estão te esperando ✨','Vamos organizar o seu dia 💛','Controle total nas suas mãos 📊','Cada real conta. Vamos lá! 💎'];
 
   set('bv-saudacao', saudacao+',');
   set('bv-nome', nome.split(' ')[0]);

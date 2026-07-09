@@ -186,7 +186,7 @@ body.portal-zoom{transition:transform .65s cubic-bezier(.65,0,.35,1),opacity .65
 <div id="portal-transition"><div id="portal-circle"></div></div>
 
 <nav>
-  <div class="nav-logo" style="display:flex;align-items:center;gap:9px"><img src="icon-192.png?v=2" width="28" height="28" alt="FinRossi" style="display:block;border-radius:8px">Fin<span>Rossi</span></div>
+  <div class="nav-logo" style="display:flex;align-items:center;gap:9px"><img src="icon-192.png?v=3" width="28" height="28" alt="FinRossi" style="display:block;border-radius:8px">Fin<span>Rossi</span></div>
   <div class="nav-links">
     <a href="#funcionalidades">Funcionalidades</a>
     <a href="#como-funciona">Como funciona</a>
@@ -408,13 +408,13 @@ body.portal-zoom{transition:transform .65s cubic-bezier(.65,0,.35,1),opacity .65
       <!-- STARTER -->
       <div class="plan-card">
         <span class="plan-badge">Para começar</span>
-        <div class="plan-name">Starter</div>
+        <div class="plan-name">Essencial</div>
         <div class="plan-price">
           <span class="currency">R$</span>
-          <span class="amount" id="amount-starter">9</span>
-          <span class="period" id="period-starter">,90/mês</span>
+          <span class="amount" id="amount-essencial">9</span>
+          <span class="period" id="period-essencial">,90/mês</span>
         </div>
-        <div id="anual-note-starter" style="font-size:11px;color:var(--muted);margin:-4px 0 8px;display:none"></div>
+        <div id="anual-note-essencial" style="font-size:11px;color:var(--muted);margin:-4px 0 8px;display:none"></div>
         <p class="plan-desc">Controle básico do dia a dia.</p>
         <ul class="plan-features">
           <li>Lançamentos ilimitados</li>
@@ -425,22 +425,22 @@ body.portal-zoom{transition:transform .65s cubic-bezier(.65,0,.35,1),opacity .65
           <li class="no">Calendário e recorrentes</li>
           <li class="no">Suporte prioritário</li>
         </ul>
-        <button class="plan-btn outline-btn" onclick="portalTransition(event,()=>assinar('starter'))">Assinar Starter</button>
+        <button class="plan-btn outline-btn" onclick="portalTransition(event,()=>assinar('essencial'))">Assinar Essencial</button>
       </div>
 
-      <!-- ESSENCIAL -->
+      <!-- EVOLUÇÃO -->
       <div class="plan-card featured">
         <span class="plan-badge">⭐ Mais popular</span>
-        <div class="plan-name">Essencial</div>
+        <div class="plan-name">Evolução</div>
         <div class="plan-price">
           <span class="currency">R$</span>
-          <span class="amount" id="amount-essencial">24</span>
-          <span class="period" id="period-essencial">,90/mês</span>
+          <span class="amount" id="amount-evolucao">24</span>
+          <span class="period" id="period-evolucao">,90/mês</span>
         </div>
-        <div id="anual-note-essencial" style="font-size:11px;color:var(--muted);margin:-4px 0 8px;display:none"></div>
-        <p class="plan-desc">Controle financeiro completo.</p>
+        <div id="anual-note-evolucao" style="font-size:11px;color:var(--muted);margin:-4px 0 8px;display:none"></div>
+        <p class="plan-desc">Controle financeiro completo, do seu jeito.</p>
         <ul class="plan-features">
-          <li>Tudo do Starter</li>
+          <li>Tudo do Essencial</li>
           <li>Metas de investimento</li>
           <li>Objetivos diários e mensais</li>
           <li>Calendário financeiro</li>
@@ -448,28 +448,28 @@ body.portal-zoom{transition:transform .65s cubic-bezier(.65,0,.35,1),opacity .65
           <li>Notas e anotações</li>
           <li>Calculadora renda passiva</li>
         </ul>
-        <button class="plan-btn gold-btn" onclick="portalTransition(event,()=>assinar('essencial'))">Assinar Essencial</button>
+        <button class="plan-btn gold-btn" onclick="portalTransition(event,()=>assinar('evolucao'))">Assinar Evolução</button>
       </div>
 
       <!-- PERFORMANCE -->
       <div class="plan-card">
         <span class="plan-badge">Premium</span>
-        <div class="plan-name">Performance</div>
+        <div class="plan-name">Patrimônio</div>
         <div class="plan-price">
           <span class="currency">R$</span>
-          <span class="amount" id="amount-performance">49</span>
-          <span class="period" id="period-performance">,90/mês</span>
+          <span class="amount" id="amount-patrimonio">49</span>
+          <span class="period" id="period-patrimonio">,90/mês</span>
         </div>
-        <div id="anual-note-performance" style="font-size:11px;color:var(--muted);margin:-4px 0 8px;display:none"></div>
+        <div id="anual-note-patrimonio" style="font-size:11px;color:var(--muted);margin:-4px 0 8px;display:none"></div>
         <p class="plan-desc">Controle completo + acompanhamento personalizado.</p>
         <ul class="plan-features">
-          <li>Tudo do Essencial</li>
+          <li>Tudo do Evolução</li>
           <li>Sessão mensal de acompanhamento</li>
           <li>Relatório mensal personalizado</li>
           <li>Suporte via WhatsApp</li>
           <li>Atendimento prioritário</li>
         </ul>
-        <button class="plan-btn outline-btn" onclick="portalTransition(event,()=>assinar('performance'))">Assinar Performance</button>
+        <button class="plan-btn outline-btn" onclick="portalTransition(event,()=>assinar('patrimonio'))">Assinar Patrimônio</button>
       </div>
 
     </div>
@@ -498,8 +498,8 @@ body.portal-zoom{transition:transform .65s cubic-bezier(.65,0,.35,1),opacity .65
         <div class="faq-a">Sim. Os dados ficam armazenados de forma segura no Firebase (Google). Cada usuário acessa somente seus próprios dados. Ninguém além de você (e do consultor no plano Consultoria) tem acesso às suas informações.</div>
       </div>
       <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">O que muda entre o Starter e o Essencial? <span>+</span></button>
-        <div class="faq-a">O Starter tem o básico: lançamentos ilimitados, gráficos e investimentos simples. O Essencial inclui tudo isso mais metas, objetivos, calendário financeiro, controle de assinaturas, contas recorrentes, notas e a calculadora de renda passiva.</div>
+        <button class="faq-q" onclick="toggleFaq(this)">O que muda entre o Essencial e o Evolução? <span>+</span></button>
+        <div class="faq-a">O Essencial tem o básico: lançamentos ilimitados, gráficos e investimentos simples. O Evolução inclui tudo isso mais metas, objetivos, calendário financeiro, controle de assinaturas, contas recorrentes, notas e a calculadora de renda passiva.</div>
       </div>
       <div class="faq-item">
         <button class="faq-q" onclick="toggleFaq(this)">Como funciona o plano Consultoria? <span>+</span></button>
@@ -534,7 +534,7 @@ body.portal-zoom{transition:transform .65s cubic-bezier(.65,0,.35,1),opacity .65
 
 <!-- FOOTER -->
 <footer>
-  <img src="icon-192.png?v=2" width="36" height="36" alt="FinRossi" style="display:block;border-radius:10px;margin:0 auto 14px">
+  <img src="icon-192.png?v=3" width="36" height="36" alt="FinRossi" style="display:block;border-radius:10px;margin:0 auto 14px">
   <p><strong>FinRossi</strong> — Controle financeiro pessoal simples e inteligente</p>
   <p style="margin-top:8px">© 2025 FinRossi · Todos os direitos reservados</p>
   <p style="margin-top:12px;font-size:12px">
@@ -610,9 +610,9 @@ function portalTransitionCenter(callback){
 // ─── Config ───────────────────────────────────────────────────────────────────
 const BACKEND_URL = 'https://finrossi-backend-production.up.railway.app';
 
-const PLANO_MENSAL  = {starter:9.90, essencial:24.90, performance:49.90};
-const PLANO_ANUAL   = {starter:95.04, essencial:239.04, performance:479.04};
-const PLANO_NOME    = {gratuito:'Gratuito', starter:'Starter', essencial:'Essencial', performance:'Performance'};
+const PLANO_MENSAL  = {essencial:9.90, evolucao:24.90, patrimonio:49.90};
+const PLANO_ANUAL   = {essencial:95.04, evolucao:239.04, patrimonio:479.04};
+const PLANO_NOME    = {gratuito:'Gratuito', essencial:'Essencial', evolucao:'Evolução', patrimonio:'Patrimônio'};
 
 let _periodoAtual = 'mensal'; // 'mensal' | 'anual'
 
@@ -627,7 +627,7 @@ function setPeriodo(p){
 
 function renderPlanPrices(){
   const anual = _periodoAtual === 'anual';
-  ['starter','essencial','performance'].forEach(p=>{
+  ['essencial','evolucao','patrimonio'].forEach(p=>{
     const amountEl = document.getElementById('amount-'+p);
     const periodEl = document.getElementById('period-'+p);
     const noteEl   = document.getElementById('anual-note-'+p);
@@ -844,7 +844,7 @@ if(window.matchMedia('(pointer:fine)').matches){
 
     <!-- Logo -->
     <div style="text-align:center;margin-bottom:28px">
-      <img src="icon-192.png?v=2" width="44" height="44" alt="FinRossi" style="display:block;border-radius:10px;margin:0 auto 10px">
+      <img src="icon-192.png?v=3" width="44" height="44" alt="FinRossi" style="display:block;border-radius:10px;margin:0 auto 10px">
       <div style="font-family:'DM Serif Display',serif;font-size:30px;color:#C8A96E;letter-spacing:-1px">FinRossi</div>
       <div style="font-size:12px;color:#555;margin-top:4px">Controle financeiro pessoal</div>
     </div>
