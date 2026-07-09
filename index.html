@@ -39,15 +39,23 @@
 
   const irParaLogin = () => { hide('loading'); show('tela-login','flex'); hide('tela-app'); };
   const irParaApp   = (nome) => {
-    hide('loading'); hide('tela-login');
-    const hoje = new Date().toDateString();
-    const primeiro = localStorage.getItem('fin_ultimo_acesso') !== hoje;
-    localStorage.setItem('fin_ultimo_acesso', hoje);
-    if(primeiro && nome){
-      // Delega para função global (definida no script principal)
-      window._abrirComBoasVindas(nome, () => show('tela-app','flex'));
+    hide('loading');
+    const trocarTela = () => {
+      hide('tela-login');
+      const hoje = new Date().toDateString();
+      const primeiro = localStorage.getItem('fin_ultimo_acesso') !== hoje;
+      localStorage.setItem('fin_ultimo_acesso', hoje);
+      if(primeiro && nome){
+        // Delega para função global (definida no script principal)
+        window._abrirComBoasVindas(nome, () => show('tela-app','flex'));
+      } else {
+        show('tela-app','flex');
+      }
+    };
+    if(typeof window.irisTransition === 'function'){
+      window.irisTransition(trocarTela);
     } else {
-      show('tela-app','flex');
+      trocarTela();
     }
   };
 
@@ -163,6 +171,14 @@
   --radius:14px;
   --radius-sm:9px;
 }
+
+/* Entrada suave da tela de login */
+#tela-login{animation:loginFadeIn .5s ease both}
+@keyframes loginFadeIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
+
+/* Transição "íris" ao entrar no app (login bem-sucedido) */
+body.iris-in{transition:transform .35s ease-in}
+body.iris-out{transition:transform .5s cubic-bezier(.34,1.56,.64,1),opacity .5s ease}
 
 /* ALL BLACK — variante do tema Escuro com preto puro */
 [data-theme=""][data-allblack="1"]{
@@ -795,6 +811,10 @@ tr:hover td{background:var(--surface2)}
 </div>
 
 <!-- TELA DE LOGIN -->
+<div id="portal-transition-app" style="display:none;position:fixed;inset:0;z-index:99999;pointer-events:none;overflow:hidden">
+  <div id="portal-circle-app" style="position:absolute;top:50%;left:50%;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle,#e8c96d 0%,#c8a96e 45%,rgba(200,169,110,0) 70%);transform:translate(-50%,-50%) scale(0);opacity:0"></div>
+</div>
+
 <div id="tela-login" style="display:none;position:fixed;inset:0;background:#080808;align-items:center;justify-content:center;z-index:200;padding:20px">
   <div style="width:100%;max-width:380px">
     <!-- Logo -->
@@ -1811,8 +1831,8 @@ tr:hover td{background:var(--surface2)}
 
       <div style="height:1px;background:var(--border);margin:16px 0"></div>
 
-      <button onclick="fazerLogout()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 12px;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);color:var(--red);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;border-radius:var(--radius-sm);transition:all .2s" onmouseover="this.style.background='rgba(248,113,113,0.15)'" onmouseout="this.style.background='rgba(248,113,113,0.08)'">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <button onclick="fazerLogout()" style="display:flex;align-items:center;gap:6px;width:100%;padding:7px 10px;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);color:var(--red);font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;border-radius:var(--radius-sm);transition:all .2s" onmouseover="this.style.background='rgba(248,113,113,0.15)'" onmouseout="this.style.background='rgba(248,113,113,0.08)'">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         Sair da conta
       </button>
     </div>
@@ -6487,6 +6507,46 @@ function toggleSenha(inputId, btnId){
 
 function validarEmail(email){
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
+}
+
+// ─── Transição "íris" ao entrar no app (contrai e explode a partir do centro) ──
+function irisTransition(callback){
+  const wrap = document.getElementById('portal-transition-app');
+  const circle = document.getElementById('portal-circle-app');
+  if(!wrap || !circle){ callback(); return; }
+
+  const maxDist = Math.hypot(window.innerWidth/2, window.innerHeight/2);
+  const scaleTarget = (maxDist * 2.4) / 20;
+
+  circle.style.transition = 'none';
+  circle.style.transform = 'translate(-50%,-50%) scale(0)';
+  circle.style.opacity = '1';
+  wrap.style.display = 'block';
+  document.body.classList.add('iris-in');
+  document.body.style.transformOrigin = '50% 50%';
+  void circle.offsetHeight;
+
+  requestAnimationFrame(()=>{
+    circle.style.transition = 'transform .35s ease-in';
+    circle.style.transform = 'translate(-50%,-50%) scale(0.15)';
+    document.body.style.transform = 'scale(0.96)';
+  });
+
+  setTimeout(()=>{
+    document.body.classList.remove('iris-in');
+    document.body.classList.add('iris-out');
+    circle.style.transition = 'transform .5s cubic-bezier(.34,1.56,.64,1),opacity .5s ease';
+    circle.style.transform = `translate(-50%,-50%) scale(${scaleTarget})`;
+    document.body.style.transform = 'scale(1)';
+    callback();
+    setTimeout(()=>{ circle.style.opacity = '0'; }, 350);
+  }, 350);
+
+  setTimeout(()=>{
+    document.body.classList.remove('iris-out');
+    document.body.style.transform = '';
+    wrap.style.display = 'none';
+  }, 900);
 }
 
 async function fazerLogin(){
