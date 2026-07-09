@@ -579,7 +579,10 @@ function portalTransition(e, callback){
   circle.style.opacity = '1';
   wrap.style.display = 'block';
   document.body.classList.add('portal-zoom');
-  document.body.style.transformOrigin = x + 'px ' + y + 'px';
+  // Corrige o ponto de origem considerando o scroll da página — sem isso, o zoom
+  // "puxava" o ponto errado do documento (ex: a seção de planos) quando a página
+  // estava rolada, fazendo ela aparecer rapidamente antes de navegar
+  document.body.style.transformOrigin = (x + window.scrollX) + 'px ' + (y + window.scrollY) + 'px';
 
   requestAnimationFrame(()=>{
     circle.classList.add('go');
