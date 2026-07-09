@@ -1689,7 +1689,7 @@ tr:hover td{background:var(--surface2)}
             <th style="text-align:center;padding:10px;color:var(--muted);font-size:11px;text-transform:uppercase">Gratuito</th>
             <th style="text-align:center;padding:10px;color:var(--muted);font-size:11px;text-transform:uppercase">Essencial</th>
             <th style="text-align:center;padding:10px;color:var(--muted);font-size:11px;text-transform:uppercase">Evolução</th>
-            <th style="text-align:center;padding:10px;color:var(--accent);font-size:11px;text-transform:uppercase">Consultoria</th>
+            <th style="text-align:center;padding:10px;color:var(--accent);font-size:11px;text-transform:uppercase">Patrimônio</th>
           </tr>
         </thead>
         <tbody id="preview-comparativo"></tbody>
@@ -1829,6 +1829,20 @@ tr:hover td{background:var(--surface2)}
         <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Email</label>
         <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-size:14px;color:var(--muted)" id="cfg-email-readonly">—</div>
         <div style="font-size:11px;color:var(--muted2);margin-top:4px">Para alterar o email entre em contato com o suporte.</div>
+      </div>
+
+      <div id="cfg-vercomo-wrap" style="display:none">
+        <div style="height:1px;background:var(--border);margin:16px 0"></div>
+        <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:8px">Ver como (sócio)</label>
+        <div style="background:var(--surface2);border-radius:10px;padding:12px">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Simula na sua própria tela o que cada plano vê, sem precisar deslogar.</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <button onclick="ativarVerComo('gratuito')" class="btn" style="font-size:11px">🆓 Gratuito</button>
+            <button onclick="ativarVerComo('essencial')" class="btn" style="font-size:11px">⚡ Essencial</button>
+            <button onclick="ativarVerComo('evolucao')" class="btn" style="font-size:11px">🎨 Evolução</button>
+            <button onclick="ativarVerComo('patrimonio')" class="btn" style="font-size:11px">💎 Patrimônio</button>
+          </div>
+        </div>
       </div>
 
       <div style="height:1px;background:var(--border);margin:16px 0"></div>
@@ -2738,6 +2752,8 @@ function setupPerfilUI(){
   // Preview só para sócio
   const navPreview=document.getElementById('nav-preview');
   if(navPreview) navPreview.style.display=socio?'':'none';
+  const verComoWrap=document.getElementById('cfg-vercomo-wrap');
+  if(verComoWrap) verComoWrap.style.display=socio?'block':'none';
   if(role==='cliente'&&window._firebaseUser){
     const uid=window._firebaseUser.uid;
     cp=uid;
@@ -2877,6 +2893,9 @@ document.addEventListener('keydown', e=>{
 
 const SECS=['dashboard','lancamentos','investimentos','historico','metas','objetivos','renda','empresas','notas','assinaturas','recorrentes','calendario','manual','cartoes','clientes','preview','minha-assinatura'];
 function goTo(name){
+  if(_verComoPlano && !verComoPlanoPermite(name)){
+    name = 'dashboard'; // plano simulado não libera essa seção — redireciona
+  }
   SECS.forEach(s=>{
     const el=document.getElementById('sec-'+s);
     if(el) el.classList.toggle('section-hidden',s!==name);
@@ -6368,6 +6387,50 @@ function toggleCatSlice(idx){
   if(row) row.style.opacity=item.hidden?'.4':'1';
 }
 
+// ─── VER COMO (sócio simula outro plano na própria tela) ─────────────────────
+let _verComoPlano = null;
+
+const NAV_TO_LIMITE = {
+  investimentos:'investimentos', metas:'metas', objetivos:'metas',
+  renda:'renda', cartoes:'cartoes', assinaturas:'assinaturas',
+  recorrentes:'assinaturas', calendario:'calendario', notas:'calendario'
+};
+
+function verComoPlanoPermite(name){
+  if(!_verComoPlano) return true;
+  const key = NAV_TO_LIMITE[name];
+  if(!key) return true; // seções não controladas por plano (dashboard, histórico, manual...) ficam sempre liberadas
+  const cfg = PLANOS_CONFIG[_verComoPlano];
+  return !!(cfg && cfg.limites && cfg.limites[key]);
+}
+
+function ativarVerComo(plano){
+  _verComoPlano = plano;
+  aplicarNavConfig();
+  mostrarBannerVerComo();
+  goTo('dashboard');
+}
+
+function sairVerComo(){
+  _verComoPlano = null;
+  aplicarNavConfig();
+  const banner = document.getElementById('vercomo-banner');
+  if(banner) banner.style.display = 'none';
+}
+
+function mostrarBannerVerComo(){
+  let banner = document.getElementById('vercomo-banner');
+  const cfg = PLANOS_CONFIG[_verComoPlano];
+  if(!banner){
+    banner = document.createElement('div');
+    banner.id = 'vercomo-banner';
+    banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99998;background:var(--accent);color:#0f0f0f;padding:10px 16px;display:flex;align-items:center;justify-content:center;gap:12px;font-size:13px;font-weight:600;font-family:\'DM Sans\',sans-serif;box-shadow:0 2px 12px rgba(0,0,0,.3)';
+    document.body.appendChild(banner);
+  }
+  banner.innerHTML = `👁 Visualizando como: ${cfg?cfg.label:_verComoPlano} <button onclick="sairVerComo()" style="background:#0f0f0f;color:var(--accent);border:none;padding:5px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;margin-left:8px">Sair da visualização</button>`;
+  banner.style.display = 'flex';
+}
+
 function toggleSidebar(){
   const sb=document.getElementById('sidebar');
   const btn=document.getElementById('sb-toggle');
@@ -6407,7 +6470,10 @@ function aplicarNavConfig(){
   const cfg=getNavConfig();
   NAV_ITEMS_DEF.forEach(item=>{
     const el=document.getElementById('nav-'+item.id);
-    if(el&&item.removable) el.style.display=cfg[item.id]!==false?'':'none';
+    if(!el||!item.removable) return;
+    const usuarioQuer = cfg[item.id]!==false;
+    const planoPermite = verComoPlanoPermite(item.id);
+    el.style.display = (usuarioQuer && planoPermite) ? '' : 'none';
   });
 }
 function renderNavConfigCards(){
