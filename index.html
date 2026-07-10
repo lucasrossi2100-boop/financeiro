@@ -97,6 +97,7 @@
       if(user){
         if(user.email === 'lucasrossi2100@gmail.com'){
           window._userRole = 'socio';
+          window._userPlano = 'patrimonio';
         } else {
           try{
             const snap = await new Promise((res,rej) => {
@@ -105,8 +106,16 @@
             });
             window._userRole = snap.val() || 'cliente';
           }catch(e){ window._userRole = 'cliente'; }
+          try{
+            const snapP = await new Promise((res,rej) => {
+              const u = onValue(ref(db,`usuarios/${user.uid}/plano`), s=>{ u(); res(s); }, {onlyOnce:true});
+              setTimeout(()=>rej(), 3000);
+            });
+            window._userPlano = snapP.val() || 'gratuito';
+          }catch(e){ window._userPlano = 'gratuito'; }
         }
         _userRole = window._userRole;
+        _userPlano = window._userPlano;
         const nome = user.displayName || user.email?.split('@')[0] || '';
         irParaApp(nome);
         const nEl = document.getElementById('user-nome');
@@ -996,6 +1005,9 @@ tr:hover td{background:var(--surface2)}
     <button class="nav-item" id="nav-renda" onclick="goTo('renda')" data-nav="renda">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg><span class="nav-text">Renda Passiva</span>
     </button>
+    <button class="nav-item" id="nav-score" onclick="goTo('score')" data-nav="score">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><span class="nav-text">Score de Saúde</span>
+    </button>
     <button class="nav-item" id="nav-clientes-item" style="display:none" onclick="goTo('clientes')" data-nav="clientes">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg><span class="nav-text">Clientes</span>
     </button>
@@ -1437,6 +1449,14 @@ tr:hover td{background:var(--surface2)}
     <div id="rp-prazo" style="margin-top:12px"></div>
   </div>
 
+</section>
+
+<section id="sec-score" class="section-hidden">
+  <div class="mobile-topbar" id="mob-top-score">
+    <div style="font-family:'DM Serif Display',serif;font-size:20px;letter-spacing:-.3px">Score de Saúde</div>
+  </div>
+  <div class="page-header"><div class="page-title"><h2>💎 Score de Saúde Financeira</h2><p>Um retrato de como está sua saúde financeira agora</p></div></div>
+  <div id="score-content"></div>
 </section>
 
 <section id="sec-assinaturas" class="section-hidden">
@@ -2682,6 +2702,7 @@ const ADMIN_EMAIL = 'lucasrossi2100@gmail.com';
 
 // Role do usuário logado (atualizado após login via Firebase)
 let _userRole = null; // 'socio' | 'admin' | 'dev' | 'cliente' | null
+let _userPlano = null; // plano real do cliente logado: 'gratuito' | 'essencial' | 'evolucao' | 'patrimonio' | null
 
 // Busca role do Firebase para o usuário logado
 async function fetchUserRole(uid){
@@ -2893,7 +2914,7 @@ document.addEventListener('keydown', e=>{
   }
 });
 
-const SECS=['dashboard','lancamentos','investimentos','historico','metas','objetivos','renda','empresas','notas','assinaturas','recorrentes','calendario','manual','cartoes','clientes','preview','minha-assinatura'];
+const SECS=['dashboard','lancamentos','investimentos','historico','metas','objetivos','renda','score','empresas','notas','assinaturas','recorrentes','calendario','manual','cartoes','clientes','preview','minha-assinatura'];
 function goTo(name){
   if(_verComoPlano && !verComoPlanoPermite(name)){
     name = 'dashboard'; // plano simulado não libera essa seção — redireciona
@@ -2906,7 +2927,7 @@ function goTo(name){
     const oc=b.getAttribute('onclick');
     if(oc) b.classList.toggle('active',oc.includes("'"+name+"'"));
   });
-  const fn={dashboard:refreshDash,investimentos:renderInvs,historico:renderHistorico,metas:renderMetas,objetivos:renderObjs,renda:renderRP,notas:renderNotas,assinaturas:renderAssinaturas,recorrentes:renderRecorrentes,calendario:renderCalendario,manual:renderManual,cartoes:renderCartoes,clientes:renderClientes,preview:renderPreview,'minha-assinatura':renderMinhaAssinatura};
+  const fn={dashboard:refreshDash,investimentos:renderInvs,historico:renderHistorico,metas:renderMetas,objetivos:renderObjs,renda:renderRP,score:renderScore,notas:renderNotas,assinaturas:renderAssinaturas,recorrentes:renderRecorrentes,calendario:renderCalendario,manual:renderManual,cartoes:renderCartoes,clientes:renderClientes,preview:renderPreview,'minha-assinatura':renderMinhaAssinatura};
   if(fn[name]) fn[name]();
 }
 
@@ -4167,6 +4188,131 @@ function renderObjDash(){
 }
 
 // ─── RENDA PASSIVA (dois cenários) ───────────────────────────────────────────
+// ─── SCORE DE SAÚDE FINANCEIRA (plano Patrimônio) ────────────────────────────
+function calcularScoreSaude(){
+  const lancs = pd().lancs || [];
+  const invs  = pd().invs  || [];
+  const hoje  = new Date();
+
+  // Últimos 6 meses (incluindo o atual)
+  const meses = [];
+  for(let i=5;i>=0;i--){
+    const dt = new Date(hoje.getFullYear(), hoje.getMonth()-i, 1);
+    meses.push(dt.toISOString().slice(0,7));
+  }
+  const porMes = meses.map(m=>{
+    const doMes = lancs.filter(l=>l.data && l.data.startsWith(m));
+    const rec = doMes.filter(l=>l.tipo==='receita').reduce((a,b)=>a+b.val,0);
+    const des = doMes.filter(l=>l.tipo==='despesa').reduce((a,b)=>a+b.val,0);
+    return {mes:m, receita:rec, despesa:des};
+  });
+  const atual = porMes[porMes.length-1];
+  const totalInv = invs.reduce((a,b)=>a+b.val,0);
+
+  // 1) Taxa de poupança este mês (peso 30)
+  const taxaPoupanca = atual.receita>0 ? (atual.receita-atual.despesa)/atual.receita : 0;
+  let pPoupanca = 0;
+  if(taxaPoupanca>=0.3) pPoupanca=30;
+  else if(taxaPoupanca>=0.2) pPoupanca=25;
+  else if(taxaPoupanca>=0.1) pPoupanca=18;
+  else if(taxaPoupanca>=0) pPoupanca=10;
+
+  // 2) Reserva de emergência: patrimônio investido ÷ média de despesas mensais (peso 25)
+  const despesasValidas = porMes.map(m=>m.despesa).filter(v=>v>0);
+  const mediaDespesa = despesasValidas.length ? despesasValidas.reduce((a,b)=>a+b,0)/despesasValidas.length : 0;
+  const mesesReserva = mediaDespesa>0 ? totalInv/mediaDespesa : 0;
+  let pReserva = 3;
+  if(mesesReserva>=6) pReserva=25;
+  else if(mesesReserva>=3) pReserva=18;
+  else if(mesesReserva>=1) pReserva=10;
+
+  // 3) Estabilidade de gastos: quão previsíveis são as despesas mês a mês (peso 20)
+  let pEstabilidade = 12; // neutro, sem dados suficientes
+  if(despesasValidas.length>=3){
+    const media = despesasValidas.reduce((a,b)=>a+b,0)/despesasValidas.length;
+    const variancia = despesasValidas.reduce((a,b)=>a+Math.pow(b-media,2),0)/despesasValidas.length;
+    const coefVar = media>0 ? Math.sqrt(variancia)/media : 1;
+    if(coefVar<=0.15) pEstabilidade=20;
+    else if(coefVar<=0.3) pEstabilidade=14;
+    else if(coefVar<=0.5) pEstabilidade=8;
+    else pEstabilidade=3;
+  }
+
+  // 4) Hábito de investir (peso 15)
+  let pInvestimento = 0;
+  if(totalInv>0 && invs.length>=3) pInvestimento=15;
+  else if(totalInv>0) pInvestimento=10;
+
+  // 5) Consistência de registro este mês (peso 10)
+  const diasComLanc = new Set(lancs.filter(l=>l.data && l.data.startsWith(curMes())).map(l=>l.data)).size;
+  const diasDoMes = new Date(hoje.getFullYear(), hoje.getMonth()+1, 0).getDate();
+  const pConsistencia = Math.min(10, Math.round((diasComLanc/diasDoMes)*10));
+
+  const score = pPoupanca+pReserva+pEstabilidade+pInvestimento+pConsistencia;
+
+  let nivel, cor;
+  if(score>=80){nivel='Excelente';cor='#4ade80';}
+  else if(score>=60){nivel='Bom';cor='#8ac97e';}
+  else if(score>=40){nivel='Regular';cor='#fbbf24';}
+  else if(score>=20){nivel='Atenção';cor='#f97316';}
+  else {nivel='Crítico';cor='#f87171';}
+
+  return {
+    score, nivel, cor,
+    fatores: [
+      {label:'Taxa de poupança',        pontos:pPoupanca,      max:30, valor:`${(taxaPoupanca*100).toFixed(1)}%`,        desc:'Quanto sobra da renda depois das despesas'},
+      {label:'Reserva de emergência',   pontos:pReserva,       max:25, valor:`${mesesReserva.toFixed(1)} meses`,          desc:'Quantos meses de despesas seu patrimônio cobre'},
+      {label:'Estabilidade de gastos',  pontos:pEstabilidade,  max:20, valor:despesasValidas.length>=3?`${(porMes.length)} meses analisados`:'poucos dados ainda', desc:'Quão previsíveis são seus gastos mês a mês'},
+      {label:'Hábito de investir',      pontos:pInvestimento,  max:15, valor:fmtR(totalInv),                              desc:'Se você investe com regularidade'},
+      {label:'Consistência de registro',pontos:pConsistencia,  max:10, valor:`${diasComLanc} dias este mês`,              desc:'Quantos dias você registrou lançamentos'},
+    ]
+  };
+}
+
+function renderScore(){
+  try{
+    const el = document.getElementById('score-content');
+    if(!el) return;
+    const r = calcularScoreSaude();
+    const raio = 54, circ = 2*Math.PI*raio;
+    const offset = circ - (r.score/100)*circ;
+
+    el.innerHTML = `
+      <div class="card card-full" style="margin-bottom:16px;text-align:center;padding:32px 20px">
+        <div style="position:relative;width:160px;height:160px;margin:0 auto 16px">
+          <svg width="160" height="160" viewBox="0 0 120 120" style="transform:rotate(-90deg)">
+            <circle cx="60" cy="60" r="${raio}" fill="none" stroke="var(--surface3)" stroke-width="10"/>
+            <circle cx="60" cy="60" r="${raio}" fill="none" stroke="${r.cor}" stroke-width="10" stroke-linecap="round"
+              stroke-dasharray="${circ}" stroke-dashoffset="${offset}" style="transition:stroke-dashoffset 1s ease"/>
+          </svg>
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+            <div style="font-size:38px;font-weight:700;color:${r.cor};line-height:1">${r.score}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">de 100</div>
+          </div>
+        </div>
+        <div style="font-size:19px;font-weight:600;color:${r.cor}">${r.nivel}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px">Sua saúde financeira está ${r.nivel.toLowerCase()} este mês</div>
+      </div>
+
+      <div class="card card-full">
+        <h3><span class="dot" style="background:var(--accent)"></span>O que compõe seu score</h3>
+        <div style="display:flex;flex-direction:column;gap:16px;margin-top:16px">
+          ${r.fatores.map(f=>`
+            <div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+                <span style="font-size:13px;font-weight:500">${f.label}</span>
+                <span style="font-size:12px;color:var(--muted)">${f.pontos}/${f.max} pts</span>
+              </div>
+              <div style="background:var(--surface3);border-radius:4px;height:6px;overflow:hidden">
+                <div style="width:${(f.pontos/f.max*100).toFixed(0)}%;height:100%;background:var(--accent);border-radius:4px;transition:width .6s ease"></div>
+              </div>
+              <div style="font-size:11px;color:var(--muted);margin-top:4px">${f.desc} · ${f.valor}</div>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  }catch(e){console.error('renderScore error:',e);}
+}
+
 function renderRP(){
   const cdi=(parseFloat(document.getElementById('rp-cdi').value)||0.8)/100;
   const custom=(parseFloat(document.getElementById('rp-custom').value)||1.0)/100;
@@ -5205,27 +5351,27 @@ async function reativarCliente(uid){
 const PLANOS_CONFIG = {
   gratuito: {
     label: 'Gratuito', preco: 'R$ 0', cor: 'var(--muted)', dias: 30,
-    limites: { lancamentos: 20, investimentos: false, metas: false, cartoes: false, assinaturas: false, recorrentes: false, calendario: false, notas: false, renda: false, 'minha-assinatura': true },
+    limites: { lancamentos: 20, investimentos: false, metas: false, cartoes: false, assinaturas: false, recorrentes: false, calendario: false, notas: false, renda: false, score: false, 'minha-assinatura': true },
     edicao: 'nenhuma',
     desc: 'Acesso por 30 dias com até 20 lançamentos. Sem investimentos, metas ou controles avançados.'
   },
   essencial: {
     label: 'Essencial', preco: 'R$ 9,90/mês', cor: 'var(--blue)', dias: null,
-    limites: { lancamentos: true, investimentos: true, metas: false, cartoes: false, assinaturas: false, recorrentes: false, calendario: false, notas: false, renda: false, 'minha-assinatura': true },
+    limites: { lancamentos: true, investimentos: true, metas: false, cartoes: false, assinaturas: false, recorrentes: false, calendario: false, notas: false, renda: false, score: false, 'minha-assinatura': true },
     edicao: 'visualizacao',
-    desc: 'Lançamentos ilimitados, gráficos e investimentos simples. Sem metas, objetivos ou controles.'
+    desc: 'O básico não deveria ser limitado: lançamentos ilimitados, gráficos e investimentos simples.'
   },
   evolucao: {
     label: 'Evolução', preco: 'R$ 24,90/mês', cor: 'var(--green)', dias: null,
-    limites: { lancamentos: true, investimentos: true, metas: true, cartoes: true, assinaturas: true, recorrentes: true, calendario: true, notas: true, renda: true, 'minha-assinatura': true },
+    limites: { lancamentos: true, investimentos: true, metas: true, cartoes: true, assinaturas: true, recorrentes: true, calendario: true, notas: true, renda: true, score: false, 'minha-assinatura': true },
     edicao: 'observacao',
-    desc: 'Acesso completo ao app. Pode adicionar observações. Sem edição direta pelo consultor.'
+    desc: 'Tudo do Essencial + personalização: dashboard editável, temas, cores e categorias personalizadas.'
   },
   patrimonio: {
     label: 'Patrimônio', preco: 'R$ 49,90/mês', cor: 'var(--accent)', dias: null,
-    limites: { lancamentos: true, investimentos: true, metas: true, cartoes: true, assinaturas: true, recorrentes: true, calendario: true, notas: true, renda: true, 'minha-assinatura': true },
+    limites: { lancamentos: true, investimentos: true, metas: true, cartoes: true, assinaturas: true, recorrentes: true, calendario: true, notas: true, renda: true, score: true, 'minha-assinatura': true },
     edicao: 'completa',
-    desc: 'Tudo do Evolução + acesso do consultor para edição, reunião mensal e relatório.'
+    desc: 'Tudo do Evolução + inteligência financeira: score de saúde, insights e projeções futuras.'
   }
 };
 
@@ -5237,6 +5383,7 @@ const NAV_PREVIEW = [
   {id:'metas',             icon:'◎', label:'Metas'},
   {id:'objetivos',         icon:'✓', label:'Objetivos'},
   {id:'renda',             icon:'$', label:'Renda Passiva'},
+  {id:'score',             icon:'♥', label:'Score de Saúde'},
   {id:'cartoes',           icon:'▭', label:'Cartões'},
   {id:'assinaturas',       icon:'◇', label:'Assinaturas'},
   {id:'recorrentes',       icon:'↻', label:'Recorrentes'},
@@ -5257,6 +5404,7 @@ const PERMS_TABLE = [
   {label:'Contas recorrentes',       g:false,  s:false, e:true,  c:true},
   {label:'Calendário financeiro',    g:false,  s:false, e:true,  c:true},
   {label:'Notas',                    g:false,  s:false, e:true,  c:true},
+  {label:'Score de saúde financeira',g:false,  s:false, e:false, c:true},
   {label:'Adicionar observação',     g:false,  s:false, e:true,  c:true},
   {label:'Edição pelo consultor',    g:false,  s:false, e:false, c:true},
   {label:'Reunião mensal',           g:false,  s:false, e:false, c:true},
@@ -5321,6 +5469,7 @@ function renderPreview(){
       {label:'Assinaturas e Recorrentes', ok: cfg.limites.assinaturas},
       {label:'Calendário e Notas', ok: cfg.limites.calendario},
       {label:'Renda Passiva', ok: cfg.limites.renda},
+      {label:'Score de Saúde Financeira', ok: cfg.limites.score},
     ];
     perms.innerHTML = items.map(i=>`
       <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--surface2);border-radius:6px">
@@ -6395,14 +6544,25 @@ let _verComoPlano = null;
 const NAV_TO_LIMITE = {
   investimentos:'investimentos', metas:'metas', objetivos:'metas',
   renda:'renda', cartoes:'cartoes', assinaturas:'assinaturas',
-  recorrentes:'assinaturas', calendario:'calendario', notas:'calendario'
+  recorrentes:'assinaturas', calendario:'calendario', notas:'calendario',
+  score:'score'
 };
 
 function verComoPlanoPermite(name){
-  if(!_verComoPlano) return true;
+  // Sócio simulando um plano (Ver como) — vale a simulação
+  if(_verComoPlano){
+    const key = NAV_TO_LIMITE[name];
+    if(!key) return true;
+    const cfg = PLANOS_CONFIG[_verComoPlano];
+    return !!(cfg && cfg.limites && cfg.limites[key]);
+  }
+  // Sócio/admin/dev sem simular nada — acesso total, sempre
+  if(isEquipe()) return true;
+  // Cliente de verdade — vale o plano real dele
   const key = NAV_TO_LIMITE[name];
-  if(!key) return true; // seções não controladas por plano (dashboard, histórico, manual...) ficam sempre liberadas
-  const cfg = PLANOS_CONFIG[_verComoPlano];
+  if(!key) return true;
+  const planoReal = _userPlano || 'gratuito';
+  const cfg = PLANOS_CONFIG[planoReal];
   return !!(cfg && cfg.limites && cfg.limites[key]);
 }
 
@@ -6480,6 +6640,7 @@ var NAV_ITEMS_DEF=[
   {id:'metas',        label:'Metas',        group:'menu',removable:true},
   {id:'objetivos',    label:'Objetivos',    group:'menu',removable:true},
   {id:'renda',        label:'Renda Passiva',group:'menu',removable:true},
+  {id:'score',        label:'Score de Saúde',group:'menu',removable:true},
   {id:'cartoes',      label:'Cartões',      group:'controles',removable:true},
   {id:'assinaturas',  label:'Assinaturas',  group:'controles',removable:true},
   {id:'recorrentes',  label:'Recorrentes',  group:'controles',removable:true},
@@ -6708,6 +6869,8 @@ async function fazerLogout(){
   cp = 'pessoal';
   _userRole = null;
   window._userRole = null;
+  _userPlano = null;
+  window._userPlano = null;
   window._firebaseUser = null;
   finrossiAutenticado = false;
   rossiAutenticado = false;
