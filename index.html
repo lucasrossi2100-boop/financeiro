@@ -2715,6 +2715,8 @@ function canAccess(area){ return (ROLE_PERMS[_userRole]||ROLE_PERMS.cliente)[are
 function setupPerfilUI(){
   const role = _userRole||'cliente';
   const socio = role==='socio';
+  const admin = role==='admin';
+  const dev = role==='dev';
   const equipe = isEquipe();
 
   // Sidebar — perfis admin (Pessoal + FinRossi) só para sócio
@@ -6407,6 +6409,21 @@ function verComoPlanoPermite(name){
 function ativarVerComo(plano){
   _verComoPlano = plano;
   aplicarNavConfig();
+
+  // Esconde tudo que é exclusivo de admin/sócio — o cliente não vê nada disso
+  ['sb-perfis-admin','nav-clientes-item','nav-preview','sb-perfil-equipe'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.style.display='none';
+  });
+
+  // Mostra o que um cliente de verdade vê: "Minha conta" e "Minha Assinatura"
+  const perfilCliente=document.getElementById('sb-perfil-cliente');
+  if(perfilCliente) perfilCliente.style.display='block';
+  const cliExtra=document.getElementById('sb-nav-cliente-extra');
+  if(cliExtra) cliExtra.style.display='block';
+  const navAssinatura=document.getElementById('nav-minha-assinatura');
+  if(navAssinatura) navAssinatura.style.display='';
+
   mostrarBannerVerComo();
   goTo('dashboard');
 }
@@ -6414,6 +6431,14 @@ function ativarVerComo(plano){
 function sairVerComo(){
   _verComoPlano = null;
   aplicarNavConfig();
+  setupPerfilUI(); // restaura sb-perfis-admin, sb-perfil-cliente, sb-perfil-equipe e nav-preview
+
+  // setupPerfilUI não cobre esses dois — dependem do perfil (Pessoal/FinRossi), não só do role
+  const navClientes=document.getElementById('nav-clientes-item');
+  if(navClientes) navClientes.style.display = cp==='finrossi' ? 'flex' : 'none';
+  const cliExtra=document.getElementById('sb-nav-cliente-extra');
+  if(cliExtra) cliExtra.style.display='none';
+
   const banner = document.getElementById('vercomo-banner');
   if(banner) banner.style.display = 'none';
 }
