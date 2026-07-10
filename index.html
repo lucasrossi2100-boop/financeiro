@@ -6144,12 +6144,17 @@ async function renderMinhaAssinatura(){
   const uid = window._firebaseUser?.uid;
   if(!uid){ el.innerHTML='<p class="empty">Usuário não autenticado.</p>'; return; }
 
-  // Busca dados do usuário no Firebase
+  // Busca dados do usuário no Firebase — com timeout de segurança,
+  // pra nunca travar em "Carregando..." caso o Firebase não responda
   let dadosUsuario = null;
   try{
     if(window._db && window._ref && window._onValue){
-      dadosUsuario = await new Promise(res=>{
-        window._onValue(window._ref(window._db,`usuarios/${uid}`), snap=>res(snap.val()), {onlyOnce:true});
+      dadosUsuario = await new Promise((res,rej)=>{
+        const timeoutId = setTimeout(()=>rej(new Error('timeout')), 5000);
+        window._onValue(window._ref(window._db,`usuarios/${uid}`), snap=>{
+          clearTimeout(timeoutId);
+          res(snap.val());
+        }, {onlyOnce:true});
       });
     }
   }catch(e){ console.warn('renderMinhaAssinatura:', e); }
@@ -6167,7 +6172,7 @@ async function renderMinhaAssinatura(){
     inativo: {label:'Inativo', cor:'var(--red)',    bg:'var(--red-s)',    icone:'❌'},
   };
 
-  const plano   = dadosUsuario?.plano  || 'gratuito';
+  const plano   = dadosUsuario?.plano  || _userPlano || 'gratuito';
   const status  = dadosUsuario?.status || 'trial';
   const origem  = dadosUsuario?.origem || 'trial';
   const dataCad = dadosUsuario?.dataCadastro?.slice(0,10) || '—';
