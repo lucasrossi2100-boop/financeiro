@@ -3564,6 +3564,10 @@ function refreshDash(){
 
   populateDashMetaSel();renderDashMeta();renderDashCartaoWidget();
   renderTodosMeses();
+
+  // Plano Patrimônio: mantém o Score/Insights/Tarefas sempre atualizados,
+  // sem precisar sair e voltar na tela (a função só existe se planos/patrimonio.js já carregou)
+  if(typeof renderScore==='function') renderScore();
 }
   const lancs=pd().lancs;
   const doMes=lancs.filter(l=>l.data.startsWith(mes));

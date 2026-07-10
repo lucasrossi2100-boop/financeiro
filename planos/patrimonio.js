@@ -186,15 +186,111 @@ function corInsight(tipo){
   return 'var(--accent)';
 }
 
-function renderInsightsHTML(){
-  const r = gerarInsights();
-  if(r.semDados || !r.insights.length) return '';
+// ─── TAREFAS SUGERIDAS ────────────────────────────────────────────────────────
+function gerarTarefas(){
+  const s = calcularScoreSaude();
+  if(s.semDados){
+    return [{icone:'📝', texto:'Registre sua primeira receita ou despesa pra começarmos a te ajudar.'}];
+  }
+  const porLabel = {};
+  s.fatores.forEach(f=>{ porLabel[f.label]=f; });
+  const tarefas = [];
+
+  if(porLabel['Taxa de poupança'] && porLabel['Taxa de poupança'].pontos < 18){
+    tarefas.push({icone:'💰', texto:'Registre todas as suas receitas do mês — sem isso não dá pra calcular sua taxa de poupança direito.'});
+  }
+  if(porLabel['Reserva de emergência'] && porLabel['Reserva de emergência'].pontos < 10){
+    tarefas.push({icone:'🏦', texto:'Comece (ou aumente) sua reserva de emergência investindo uma parte da renda todo mês.'});
+  }
+  if(porLabel['Estabilidade de gastos'] && porLabel['Estabilidade de gastos'].pontos < 14){
+    tarefas.push({icone:'📅', texto:'Continue registrando seus gastos por mais alguns meses — isso deixa seu score mais preciso.'});
+  }
+  if(porLabel['Hábito de investir'] && porLabel['Hábito de investir'].pontos < 15){
+    tarefas.push({icone:'📈', texto:'Registre um investimento este mês pra criar o hábito de investir com regularidade.'});
+  }
+  if(porLabel['Consistência de registro'] && porLabel['Consistência de registro'].pontos < 7){
+    tarefas.push({icone:'✍️', texto:'Registre um lançamento hoje — quanto mais consistente, melhor seu score.'});
+  }
+  if(tarefas.length===0){
+    tarefas.push({icone:'🎉', texto:'Você está indo muito bem! Continue registrando seus dados com regularidade.'});
+  }
+  return tarefas;
+}
+
+// ─── RENDERIZAÇÃO DAS ABAS ────────────────────────────────────────────────────
+let _patrimonioTab = 'score';
+
+function trocarAbaPatrimonio(tab){
+  _patrimonioTab = tab;
+  renderScore();
+}
+
+function renderScoreTabHTML(){
+  const r = calcularScoreSaude();
+
+  if(r.semDados){
+    return `
+      <div class="card card-full" style="text-align:center;padding:48px 20px">
+        <div style="font-size:38px;margin-bottom:12px">💎</div>
+        <div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px">Ainda não temos dados suficientes</div>
+        <div style="font-size:13px;color:var(--muted);max-width:340px;margin:0 auto">Registre suas receitas e despesas do mês pra começar a calcular seu Score de Saúde Financeira.</div>
+      </div>`;
+  }
+
+  const raio = 54, circ = 2*Math.PI*raio;
+  const offset = circ - (r.score/100)*circ;
+
   return `
-    <div class="card card-full" style="margin-top:16px">
+    <div class="card card-full" style="margin-bottom:16px;text-align:center;padding:32px 20px">
+      <div style="position:relative;width:160px;height:160px;margin:0 auto 16px">
+        <svg width="160" height="160" viewBox="0 0 120 120" style="transform:rotate(-90deg)">
+          <circle cx="60" cy="60" r="${raio}" fill="none" stroke="var(--surface3)" stroke-width="10"/>
+          <circle cx="60" cy="60" r="${raio}" fill="none" stroke="${r.cor}" stroke-width="10" stroke-linecap="round"
+            stroke-dasharray="${circ}" stroke-dashoffset="${offset}" style="transition:stroke-dashoffset .6s ease"/>
+        </svg>
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+          <div style="font-size:38px;font-weight:700;color:${r.cor};line-height:1">${r.score}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">de 100</div>
+        </div>
+      </div>
+      <div style="font-size:19px;font-weight:600;color:${r.cor}">${r.nivel}</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px">Sua saúde financeira está ${r.nivel.toLowerCase()} este mês</div>
+    </div>
+
+    <div class="card card-full">
+      <h3><span class="dot" style="background:var(--accent)"></span>O que compõe seu score</h3>
+      <div style="display:flex;flex-direction:column;gap:16px;margin-top:16px">
+        ${r.fatores.map(f=>`
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+              <span style="font-size:13px;font-weight:500">${f.label}</span>
+              <span style="font-size:12px;color:var(--muted)">${f.pontos}/${f.max} pts</span>
+            </div>
+            <div style="background:var(--surface3);border-radius:4px;height:6px;overflow:hidden">
+              <div style="width:${(f.pontos/f.max*100).toFixed(0)}%;height:100%;background:var(--accent);border-radius:4px;transition:width .6s ease"></div>
+            </div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">${f.desc} · ${f.valor}</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+function renderInsightsTabHTML(){
+  const r = gerarInsights();
+  if(r.semDados || !r.insights.length){
+    return `
+      <div class="card card-full" style="text-align:center;padding:48px 20px">
+        <div style="font-size:38px;margin-bottom:12px">💡</div>
+        <div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px">Sem insights ainda</div>
+        <div style="font-size:13px;color:var(--muted);max-width:340px;margin:0 auto">Registre alguns lançamentos pra começarmos a analisar seus dados.</div>
+      </div>`;
+  }
+  return `
+    <div class="card card-full">
       <h3><span class="dot" style="background:var(--accent)"></span>Insights automáticos</h3>
       <div style="display:flex;flex-direction:column;gap:2px;margin-top:12px">
         ${r.insights.map(i=>`
-          <div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+          <div style="display:flex;gap:10px;padding:12px 0;border-bottom:1px solid var(--border)">
             <div style="font-size:18px;flex-shrink:0">${i.icone}</div>
             <div style="min-width:0">
               <div style="font-size:13px;font-weight:600;color:${corInsight(i.tipo)}">${i.titulo}</div>
@@ -205,60 +301,40 @@ function renderInsightsHTML(){
     </div>`;
 }
 
+function renderTarefasTabHTML(){
+  const tarefas = gerarTarefas();
+  return `
+    <div class="card card-full">
+      <h3><span class="dot" style="background:var(--accent)"></span>O que fazer pra melhorar seu score</h3>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+        ${tarefas.map(t=>`
+          <div style="display:flex;gap:10px;align-items:flex-start;padding:12px;background:var(--surface2);border-radius:10px">
+            <div style="font-size:18px;flex-shrink:0">${t.icone}</div>
+            <div style="font-size:13px;color:var(--text);line-height:1.4">${t.texto}</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
 function renderScore(){
   try{
     const el = document.getElementById('score-content');
     if(!el) return;
-    const r = calcularScoreSaude();
 
-    if(r.semDados){
-      el.innerHTML = `
-        <div class="card card-full" style="text-align:center;padding:48px 20px">
-          <div style="font-size:38px;margin-bottom:12px">💎</div>
-          <div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px">Ainda não temos dados suficientes</div>
-          <div style="font-size:13px;color:var(--muted);max-width:340px;margin:0 auto">Registre suas receitas e despesas do mês pra começar a calcular seu Score de Saúde Financeira.</div>
-        </div>`;
-      return;
-    }
+    const abas = [['score','📊 Score'],['insights','💡 Insights'],['tarefas','✅ Tarefas']];
+    const tabBar = `
+      <div style="display:flex;gap:4px;margin-bottom:16px;background:var(--surface2);padding:4px;border-radius:10px">
+        ${abas.map(([id,label])=>`
+          <button onclick="trocarAbaPatrimonio('${id}')" style="flex:1;padding:9px 4px;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;background:${_patrimonioTab===id?'var(--accent)':'transparent'};color:${_patrimonioTab===id?'#0f0f0f':'var(--muted)'}">${label}</button>
+        `).join('')}
+      </div>`;
 
-    const raio = 54, circ = 2*Math.PI*raio;
-    const offset = circ - (r.score/100)*circ;
+    let conteudo = '';
+    if(_patrimonioTab==='insights') conteudo = renderInsightsTabHTML();
+    else if(_patrimonioTab==='tarefas') conteudo = renderTarefasTabHTML();
+    else conteudo = renderScoreTabHTML();
 
-    el.innerHTML = `
-      <div class="card card-full" style="margin-bottom:16px;text-align:center;padding:32px 20px">
-        <div style="position:relative;width:160px;height:160px;margin:0 auto 16px">
-          <svg width="160" height="160" viewBox="0 0 120 120" style="transform:rotate(-90deg)">
-            <circle cx="60" cy="60" r="${raio}" fill="none" stroke="var(--surface3)" stroke-width="10"/>
-            <circle cx="60" cy="60" r="${raio}" fill="none" stroke="${r.cor}" stroke-width="10" stroke-linecap="round"
-              stroke-dasharray="${circ}" stroke-dashoffset="${offset}" style="transition:stroke-dashoffset 1s ease"/>
-          </svg>
-          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
-            <div style="font-size:38px;font-weight:700;color:${r.cor};line-height:1">${r.score}</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px">de 100</div>
-          </div>
-        </div>
-        <div style="font-size:19px;font-weight:600;color:${r.cor}">${r.nivel}</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:4px">Sua saúde financeira está ${r.nivel.toLowerCase()} este mês</div>
-      </div>
-
-      <div class="card card-full">
-        <h3><span class="dot" style="background:var(--accent)"></span>O que compõe seu score</h3>
-        <div style="display:flex;flex-direction:column;gap:16px;margin-top:16px">
-          ${r.fatores.map(f=>`
-            <div>
-              <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-                <span style="font-size:13px;font-weight:500">${f.label}</span>
-                <span style="font-size:12px;color:var(--muted)">${f.pontos}/${f.max} pts</span>
-              </div>
-              <div style="background:var(--surface3);border-radius:4px;height:6px;overflow:hidden">
-                <div style="width:${(f.pontos/f.max*100).toFixed(0)}%;height:100%;background:var(--accent);border-radius:4px;transition:width .6s ease"></div>
-              </div>
-              <div style="font-size:11px;color:var(--muted);margin-top:4px">${f.desc} · ${f.valor}</div>
-            </div>`).join('')}
-        </div>
-      </div>
-
-      ${renderInsightsHTML()}`;
+    el.innerHTML = tabBar + conteudo;
   }catch(e){console.error('renderScore error:',e);}
 }
 
