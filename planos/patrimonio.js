@@ -10,6 +10,12 @@ function calcularScoreSaude(){
   const invs  = pd().invs  || [];
   const hoje  = new Date();
 
+  // Sem nenhum lançamento ainda — não faz sentido calcular nada, e muito
+  // menos dar pontuação de brinde. Mostra estado "sem dados" de verdade.
+  if(lancs.length === 0){
+    return { score:null, nivel:'Sem dados', cor:'#666', semDados:true, fatores:[] };
+  }
+
   // Últimos 6 meses (incluindo o atual)
   const meses = [];
   for(let i=5;i>=0;i--){
@@ -25,25 +31,30 @@ function calcularScoreSaude(){
   const atual = porMes[porMes.length-1];
   const totalInv = invs.reduce((a,b)=>a+b.val,0);
 
-  // 1) Taxa de poupança este mês (peso 30)
-  const taxaPoupanca = atual.receita>0 ? (atual.receita-atual.despesa)/atual.receita : 0;
+  // 1) Taxa de poupança este mês (peso 30) — só pontua se teve receita registrada de verdade
+  const taxaPoupanca = atual.receita>0 ? (atual.receita-atual.despesa)/atual.receita : null;
   let pPoupanca = 0;
-  if(taxaPoupanca>=0.3) pPoupanca=30;
-  else if(taxaPoupanca>=0.2) pPoupanca=25;
-  else if(taxaPoupanca>=0.1) pPoupanca=18;
-  else if(taxaPoupanca>=0) pPoupanca=10;
+  if(taxaPoupanca!==null){
+    if(taxaPoupanca>=0.3) pPoupanca=30;
+    else if(taxaPoupanca>=0.2) pPoupanca=25;
+    else if(taxaPoupanca>=0.1) pPoupanca=18;
+    else if(taxaPoupanca>=0) pPoupanca=10;
+  }
 
   // 2) Reserva de emergência: patrimônio investido ÷ média de despesas mensais (peso 25)
   const despesasValidas = porMes.map(m=>m.despesa).filter(v=>v>0);
   const mediaDespesa = despesasValidas.length ? despesasValidas.reduce((a,b)=>a+b,0)/despesasValidas.length : 0;
   const mesesReserva = mediaDespesa>0 ? totalInv/mediaDespesa : 0;
-  let pReserva = 3;
-  if(mesesReserva>=6) pReserva=25;
-  else if(mesesReserva>=3) pReserva=18;
-  else if(mesesReserva>=1) pReserva=10;
+  let pReserva = 0; // sem despesas registradas ainda, não dá pra medir reserva — fica em 0, não em 3
+  if(despesasValidas.length>0){
+    pReserva = 3;
+    if(mesesReserva>=6) pReserva=25;
+    else if(mesesReserva>=3) pReserva=18;
+    else if(mesesReserva>=1) pReserva=10;
+  }
 
   // 3) Estabilidade de gastos: quão previsíveis são as despesas mês a mês (peso 20)
-  let pEstabilidade = 12; // neutro, sem dados suficientes
+  let pEstabilidade = 0; // sem dados suficientes ainda — não dá crédito neutro por padrão
   if(despesasValidas.length>=3){
     const media = despesasValidas.reduce((a,b)=>a+b,0)/despesasValidas.length;
     const variancia = despesasValidas.reduce((a,b)=>a+Math.pow(b-media,2),0)/despesasValidas.length;
@@ -52,6 +63,8 @@ function calcularScoreSaude(){
     else if(coefVar<=0.3) pEstabilidade=14;
     else if(coefVar<=0.5) pEstabilidade=8;
     else pEstabilidade=3;
+  } else if(despesasValidas.length>0){
+    pEstabilidade=5; // tem algum dado, mas pouco pra confiar — parcial, não neutro
   }
 
   // 4) Hábito de investir (peso 15)
@@ -74,10 +87,10 @@ function calcularScoreSaude(){
   else {nivel='Crítico';cor='#f87171';}
 
   return {
-    score, nivel, cor,
+    score, nivel, cor, semDados:false,
     fatores: [
-      {label:'Taxa de poupança',        pontos:pPoupanca,      max:30, valor:`${(taxaPoupanca*100).toFixed(1)}%`,        desc:'Quanto sobra da renda depois das despesas'},
-      {label:'Reserva de emergência',   pontos:pReserva,       max:25, valor:`${mesesReserva.toFixed(1)} meses`,          desc:'Quantos meses de despesas seu patrimônio cobre'},
+      {label:'Taxa de poupança',        pontos:pPoupanca,      max:30, valor:taxaPoupanca!==null?`${(taxaPoupanca*100).toFixed(1)}%`:'sem receita este mês', desc:'Quanto sobra da renda depois das despesas'},
+      {label:'Reserva de emergência',   pontos:pReserva,       max:25, valor:despesasValidas.length>0?`${mesesReserva.toFixed(1)} meses`:'sem despesas registradas', desc:'Quantos meses de despesas seu patrimônio cobre'},
       {label:'Estabilidade de gastos',  pontos:pEstabilidade,  max:20, valor:despesasValidas.length>=3?`${(porMes.length)} meses analisados`:'poucos dados ainda', desc:'Quão previsíveis são seus gastos mês a mês'},
       {label:'Hábito de investir',      pontos:pInvestimento,  max:15, valor:fmtR(totalInv),                              desc:'Se você investe com regularidade'},
       {label:'Consistência de registro',pontos:pConsistencia,  max:10, valor:`${diasComLanc} dias este mês`,              desc:'Quantos dias você registrou lançamentos'},
@@ -90,6 +103,17 @@ function renderScore(){
     const el = document.getElementById('score-content');
     if(!el) return;
     const r = calcularScoreSaude();
+
+    if(r.semDados){
+      el.innerHTML = `
+        <div class="card card-full" style="text-align:center;padding:48px 20px">
+          <div style="font-size:38px;margin-bottom:12px">💎</div>
+          <div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px">Ainda não temos dados suficientes</div>
+          <div style="font-size:13px;color:var(--muted);max-width:340px;margin:0 auto">Registre suas receitas e despesas do mês pra começar a calcular seu Score de Saúde Financeira.</div>
+        </div>`;
+      return;
+    }
+
     const raio = 54, circ = 2*Math.PI*raio;
     const offset = circ - (r.score/100)*circ;
 
