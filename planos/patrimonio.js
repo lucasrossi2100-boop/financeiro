@@ -186,35 +186,51 @@ function corInsight(tipo){
   return 'var(--accent)';
 }
 
-// ─── TAREFAS SUGERIDAS ────────────────────────────────────────────────────────
-function gerarTarefas(){
-  const s = calcularScoreSaude();
-  if(s.semDados){
-    return [{icone:'📝', texto:'Registre sua primeira receita ou despesa pra começarmos a te ajudar.'}];
-  }
-  const porLabel = {};
-  s.fatores.forEach(f=>{ porLabel[f.label]=f; });
-  const tarefas = [];
+// ─── DESAFIOS (gamificação) ──────────────────────────────────────────────────
+function gerarDesafios(){
+  const lancs = pd().lancs || [];
+  const invs  = pd().invs  || [];
+  const hoje  = new Date();
+  const mesAtual = curMes();
 
-  if(porLabel['Taxa de poupança'] && porLabel['Taxa de poupança'].pontos < 18){
-    tarefas.push({icone:'💰', texto:'Registre todas as suas receitas do mês — sem isso não dá pra calcular sua taxa de poupança direito.'});
+  const doMesAtual = lancs.filter(l=>l.data && l.data.startsWith(mesAtual));
+  const recAtual = doMesAtual.filter(l=>l.tipo==='receita').reduce((a,b)=>a+b.val,0);
+  const desAtual = doMesAtual.filter(l=>l.tipo==='despesa').reduce((a,b)=>a+b.val,0);
+  const diasComLanc = new Set(doMesAtual.map(l=>l.data)).size;
+  const totalInv = invs.reduce((a,b)=>a+b.val,0);
+  const mesesComInv = new Set(invs.filter(i=>i.data).map(i=>i.data.slice(0,7))).size;
+  const s = calcularScoreSaude();
+
+  // Reserva de emergência em meses (mesma lógica do Score)
+  const meses = [];
+  for(let i=5;i>=0;i--){
+    const dt = new Date(hoje.getFullYear(), hoje.getMonth()-i, 1);
+    meses.push(dt.toISOString().slice(0,7));
   }
-  if(porLabel['Reserva de emergência'] && porLabel['Reserva de emergência'].pontos < 10){
-    tarefas.push({icone:'🏦', texto:'Comece (ou aumente) sua reserva de emergência investindo uma parte da renda todo mês.'});
-  }
-  if(porLabel['Estabilidade de gastos'] && porLabel['Estabilidade de gastos'].pontos < 14){
-    tarefas.push({icone:'📅', texto:'Continue registrando seus gastos por mais alguns meses — isso deixa seu score mais preciso.'});
-  }
-  if(porLabel['Hábito de investir'] && porLabel['Hábito de investir'].pontos < 15){
-    tarefas.push({icone:'📈', texto:'Registre um investimento este mês pra criar o hábito de investir com regularidade.'});
-  }
-  if(porLabel['Consistência de registro'] && porLabel['Consistência de registro'].pontos < 7){
-    tarefas.push({icone:'✍️', texto:'Registre um lançamento hoje — quanto mais consistente, melhor seu score.'});
-  }
-  if(tarefas.length===0){
-    tarefas.push({icone:'🎉', texto:'Você está indo muito bem! Continue registrando seus dados com regularidade.'});
-  }
-  return tarefas;
+  const despesasValidas = meses
+    .map(m=>lancs.filter(l=>l.data && l.data.startsWith(m) && l.tipo==='despesa').reduce((a,b)=>a+b.val,0))
+    .filter(v=>v>0);
+  const mediaDespesa = despesasValidas.length ? despesasValidas.reduce((a,b)=>a+b,0)/despesasValidas.length : 0;
+  const mesesReserva = mediaDespesa>0 ? totalInv/mediaDespesa : 0;
+
+  return [
+    {id:'primeiro-passo', icone:'🎯', titulo:'Primeiro Passo',        desc:'Registre seu primeiro lançamento',                     pontos:10, concluido: lancs.length>0},
+    {id:'sequencia-7',    icone:'🔥', titulo:'Sequência de 7 dias',   desc:'Lance dados em 7 dias diferentes este mês',            pontos:30, concluido: diasComLanc>=7},
+    {id:'guardiao-renda', icone:'🛡️', titulo:'Guardião da Renda',     desc:'Alcance 20% de taxa de poupança este mês',             pontos:25, concluido: recAtual>0 && ((recAtual-desAtual)/recAtual)>=0.2},
+    {id:'primeiro-inv',   icone:'🌱', titulo:'Primeiro Investimento', desc:'Registre seu primeiro investimento',                   pontos:20, concluido: invs.length>0},
+    {id:'invest-freq',    icone:'📈', titulo:'Investidor Frequente',  desc:'Invista em 3 meses diferentes',                        pontos:40, concluido: mesesComInv>=3},
+    {id:'reserva',        icone:'🏦', titulo:'Reserva de Emergência', desc:'Acumule 3+ meses de despesas investidos',              pontos:50, concluido: mesesReserva>=3},
+    {id:'mes-impecavel',  icone:'⭐', titulo:'Mês Impecável',         desc:'Alcance um Score de 80+ este mês',                     pontos:60, concluido: !s.semDados && s.score>=80},
+    {id:'sem-estouro',    icone:'✅', titulo:'Sem Estouro no Orçamento', desc:'Não gaste mais do que ganhou este mês',              pontos:15, concluido: recAtual>0 && desAtual<=recAtual},
+  ];
+}
+
+function calcularNivel(pontos){
+  if(pontos>=500) return {nome:'Diamante', icone:'💎', cor:'#60a5fa'};
+  if(pontos>=300) return {nome:'Ouro',     icone:'🥇', cor:'#fbbf24'};
+  if(pontos>=150) return {nome:'Prata',    icone:'🥈', cor:'#cbd5e1'};
+  if(pontos>=50)  return {nome:'Bronze',   icone:'🥉', cor:'#d97706'};
+  return                 {nome:'Iniciante',icone:'🌱', cor:'#4ade80'};
 }
 
 // ─── RENDERIZAÇÃO DAS ABAS ────────────────────────────────────────────────────
@@ -301,19 +317,158 @@ function renderInsightsTabHTML(){
     </div>`;
 }
 
-function renderTarefasTabHTML(){
-  const tarefas = gerarTarefas();
+function renderDesafiosTabHTML(){
+  const desafios = gerarDesafios();
+  const pontosGanhos = desafios.filter(d=>d.concluido).reduce((a,b)=>a+b.pontos,0);
+  const pontosTotais = desafios.reduce((a,b)=>a+b.pontos,0);
+  const nivel = calcularNivel(pontosGanhos);
+  const concluidos = desafios.filter(d=>d.concluido).length;
+
   return `
+    <div class="card card-full" style="margin-bottom:16px;text-align:center;padding:24px 20px">
+      <div style="font-size:32px;margin-bottom:6px">${nivel.icone}</div>
+      <div style="font-size:26px;font-weight:700;color:${nivel.cor}">${pontosGanhos} pts</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:2px">Nível ${nivel.nome} · ${concluidos}/${desafios.length} desafios concluídos</div>
+      <div style="background:var(--surface3);border-radius:4px;height:6px;overflow:hidden;margin-top:14px">
+        <div style="width:${pontosTotais>0?(pontosGanhos/pontosTotais*100).toFixed(0):0}%;height:100%;background:${nivel.cor};border-radius:4px;transition:width .6s ease"></div>
+      </div>
+    </div>
+
     <div class="card card-full">
-      <h3><span class="dot" style="background:var(--accent)"></span>O que fazer pra melhorar seu score</h3>
-      <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
-        ${tarefas.map(t=>`
-          <div style="display:flex;gap:10px;align-items:flex-start;padding:12px;background:var(--surface2);border-radius:10px">
-            <div style="font-size:18px;flex-shrink:0">${t.icone}</div>
-            <div style="font-size:13px;color:var(--text);line-height:1.4">${t.texto}</div>
+      <h3><span class="dot" style="background:var(--accent)"></span>Desafios</h3>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:14px">
+        ${desafios.map(d=>`
+          <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface2);border-radius:10px;opacity:${d.concluido?'1':'.65'}">
+            <div style="font-size:20px;flex-shrink:0">${d.concluido?'✅':d.icone}</div>
+            <div style="min-width:0;flex:1">
+              <div style="font-size:13px;font-weight:600;color:${d.concluido?'var(--text)':'var(--muted)'}">${d.titulo}</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px">${d.desc}</div>
+            </div>
+            <div style="font-size:12px;font-weight:700;color:${d.concluido?'#4ade80':'var(--muted)'};flex-shrink:0">+${d.pontos}</div>
           </div>`).join('')}
       </div>
     </div>`;
+}
+
+// ─── PROJEÇÕES FUTURAS ────────────────────────────────────────────────────────
+let _projecaoTaxa = 0.8; // % ao mês — mesmo padrão usado na Renda Passiva (CDI)
+
+function atualizarProjecaoTaxa(valor){
+  _projecaoTaxa = parseFloat(valor) || 0;
+  renderScore();
+}
+
+function calcularProjecoes(){
+  const lancs = pd().lancs || [];
+  const invs  = pd().invs  || [];
+  const hoje  = new Date();
+
+  if(lancs.length === 0) return { semDados:true };
+
+  const meses = [];
+  for(let i=5;i>=0;i--){
+    const dt = new Date(hoje.getFullYear(), hoje.getMonth()-i, 1);
+    meses.push(dt.toISOString().slice(0,7));
+  }
+  const saldosMensais = meses.map(m=>{
+    const doMes = lancs.filter(l=>l.data && l.data.startsWith(m));
+    const rec = doMes.filter(l=>l.tipo==='receita').reduce((a,b)=>a+b.val,0);
+    const des = doMes.filter(l=>l.tipo==='despesa').reduce((a,b)=>a+b.val,0);
+    return rec-des;
+  });
+  const mediaPoupanca = saldosMensais.reduce((a,b)=>a+b,0) / saldosMensais.length;
+  const patrimonioAtual = invs.reduce((a,b)=>a+b.val,0);
+  const taxa = _projecaoTaxa/100;
+  const aporteMensal = Math.max(0, mediaPoupanca); // nunca projeta aporte negativo
+
+  const trajetoria = [patrimonioAtual];
+  let valor = patrimonioAtual;
+  for(let i=1;i<=60;i++){
+    valor = valor*(1+taxa) + aporteMensal;
+    trajetoria.push(valor);
+  }
+
+  return {
+    semDados:false,
+    patrimonioAtual, mediaPoupanca, aporteMensal, taxa:_projecaoTaxa, trajetoria,
+    marcos: [
+      {label:'Em 6 meses', valor:trajetoria[6]},
+      {label:'Em 1 ano',   valor:trajetoria[12]},
+      {label:'Em 2 anos',  valor:trajetoria[24]},
+      {label:'Em 5 anos',  valor:trajetoria[60]},
+    ]
+  };
+}
+
+function renderProjecoesTabHTML(){
+  const r = calcularProjecoes();
+  if(r.semDados){
+    return `
+      <div class="card card-full" style="text-align:center;padding:48px 20px">
+        <div style="font-size:38px;margin-bottom:12px">📈</div>
+        <div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px">Ainda não temos dados suficientes</div>
+        <div style="font-size:13px;color:var(--muted);max-width:340px;margin:0 auto">Registre seus lançamentos pra começarmos a projetar seu futuro financeiro.</div>
+      </div>`;
+  }
+
+  return `
+    <div class="card card-full" style="margin-bottom:16px">
+      <h3><span class="dot" style="background:var(--accent)"></span>Parâmetros da projeção</h3>
+      <div class="form-row" style="margin-top:12px">
+        <div class="field">
+          <label>Taxa de retorno esperada (%/mês)</label>
+          <input type="number" value="${r.taxa}" step="0.1" min="0" max="5" oninput="atualizarProjecaoTaxa(this.value)">
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px">
+        Baseado na sua média de poupança dos últimos 6 meses: <strong style="color:var(--text)">${fmtR(r.mediaPoupanca)}</strong>/mês
+        ${r.mediaPoupanca<=0?' <span style="color:#f97316">(negativa — a projeção considera aporte zero até você voltar a poupar)</span>':''}
+      </div>
+    </div>
+
+    <div class="card card-full" style="margin-bottom:16px">
+      <h3><span class="dot" style="background:var(--accent)"></span>Sua trajetória patrimonial</h3>
+      <div class="chart-wrap" style="height:200px;margin-top:12px"><canvas id="c-projecao"></canvas></div>
+    </div>
+
+    <div class="card card-full">
+      <h3><span class="dot" style="background:var(--accent)"></span>Marcos futuros</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px">
+        ${r.marcos.map(m=>`
+          <div style="background:var(--surface2);border-radius:10px;padding:14px">
+            <div style="font-size:11px;color:var(--muted)">${m.label}</div>
+            <div style="font-size:17px;font-weight:700;color:var(--accent);margin-top:4px">${fmtR(m.valor)}</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+function desenharGraficoProjecao(){
+  const r = calcularProjecoes();
+  if(r.semDados) return;
+  if(typeof destroyChart==='function') destroyChart('projecao');
+  const ctx = document.getElementById('c-projecao');
+  if(!ctx || typeof Chart==='undefined') return;
+  charts['projecao'] = new Chart(ctx, {
+    type:'line',
+    data:{
+      labels: r.trajetoria.map((_,i)=>i),
+      datasets:[{
+        data: r.trajetoria,
+        borderColor:'#C8A96E',
+        backgroundColor:'rgba(200,169,110,.12)',
+        fill:true, tension:.3, pointRadius:0, borderWidth:2,
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(ctx)=>fmtR(ctx.raw)}} },
+      scales:{
+        x:{ display:false },
+        y:{ ticks:{color:'#666',font:{size:10},callback:v=>'R$'+(v/1000).toFixed(0)+'k'}, grid:{color:'rgba(255,255,255,.04)'}, border:{display:false} }
+      }
+    }
+  });
 }
 
 function renderScore(){
@@ -321,25 +476,27 @@ function renderScore(){
     const el = document.getElementById('score-content');
     if(!el) return;
 
-    const abas = [['score','📊 Score'],['insights','💡 Insights'],['tarefas','✅ Tarefas']];
+    const abas = [['score','📊 Score'],['insights','💡 Insights'],['desafios','🏆 Desafios'],['projecoes','📈 Projeções']];
     const tabBar = `
       <div style="display:flex;gap:4px;margin-bottom:16px;background:var(--surface2);padding:4px;border-radius:10px">
         ${abas.map(([id,label])=>`
-          <button onclick="trocarAbaPatrimonio('${id}')" style="flex:1;padding:9px 4px;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;background:${_patrimonioTab===id?'var(--accent)':'transparent'};color:${_patrimonioTab===id?'#0f0f0f':'var(--muted)'}">${label}</button>
+          <button onclick="trocarAbaPatrimonio('${id}')" style="flex:1;padding:9px 4px;border:none;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;background:${_patrimonioTab===id?'var(--accent)':'transparent'};color:${_patrimonioTab===id?'#0f0f0f':'var(--muted)'}">${label}</button>
         `).join('')}
       </div>`;
 
     let conteudo = '';
     if(_patrimonioTab==='insights') conteudo = renderInsightsTabHTML();
-    else if(_patrimonioTab==='tarefas') conteudo = renderTarefasTabHTML();
+    else if(_patrimonioTab==='desafios') conteudo = renderDesafiosTabHTML();
+    else if(_patrimonioTab==='projecoes') conteudo = renderProjecoesTabHTML();
     else conteudo = renderScoreTabHTML();
 
     el.innerHTML = tabBar + conteudo;
+
+    if(_patrimonioTab==='projecoes') desenharGraficoProjecao();
   }catch(e){console.error('renderScore error:',e);}
 }
 
 // ─── Próximas funcionalidades do Patrimônio entram aqui, uma de cada vez: ───
-// 3) Projeções futuras
 // 4) Evolução patrimonial
 // 5) Planejamento para liberdade financeira
 // 6) Recomendações inteligentes
