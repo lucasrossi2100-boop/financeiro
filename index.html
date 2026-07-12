@@ -50,7 +50,7 @@
       hide('loading');
       loadingEl.classList.remove('loading-zoom-out');
       proximoPasso();
-    }, 550);
+    }, 500);
   };
 
   const irParaLogin = () => { sairDoLoadingComZoom(() => { show('tela-login','flex'); hide('tela-app'); }); };
@@ -203,11 +203,10 @@
 @keyframes loginFadeIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
 
 /* Tela de carregamento "vindo até você" antes de revelar login ou app */
-.loading-zoom-out{animation:loadingZoomOut .55s cubic-bezier(.6,0,.85,.35) forwards}
+.loading-zoom-out{animation:loadingZoomOut .5s ease forwards}
 @keyframes loadingZoomOut{
-  0%{transform:scale(1);opacity:1}
-  55%{transform:scale(2.4);opacity:1}
-  100%{transform:scale(7);opacity:0}
+  0%{transform:scale(1);filter:blur(0px);opacity:1}
+  100%{transform:scale(1.6);filter:blur(6px);opacity:0}
 }
 
 /* Transição "íris" ao entrar no app (login bem-sucedido) */
