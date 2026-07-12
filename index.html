@@ -40,9 +40,22 @@
   const show = (id, d='block') => { const el=document.getElementById(id); if(el) el.style.display=d; };
   const hide = (id) => { const el=document.getElementById(id); if(el) el.style.display='none'; };
 
-  const irParaLogin = () => { hide('loading'); show('tela-login','flex'); hide('tela-app'); };
+  // Faz o logo da tela de carregamento crescer em direção à tela (como se o
+  // app estivesse vindo até você), depois revela o próximo passo
+  const sairDoLoadingComZoom = (proximoPasso) => {
+    const loadingEl = document.getElementById('loading');
+    if(!loadingEl || loadingEl.style.display==='none'){ proximoPasso(); return; }
+    loadingEl.classList.add('loading-zoom-out');
+    setTimeout(() => {
+      hide('loading');
+      loadingEl.classList.remove('loading-zoom-out');
+      proximoPasso();
+    }, 550);
+  };
+
+  const irParaLogin = () => { sairDoLoadingComZoom(() => { show('tela-login','flex'); hide('tela-app'); }); };
   const irParaApp   = (nome) => {
-    hide('loading');
+    sairDoLoadingComZoom(() => {
     const trocarTela = () => {
       hide('tela-login');
       const hoje = new Date().toDateString();
@@ -60,6 +73,7 @@
     } else {
       trocarTela();
     }
+    });
   };
 
   // Timeout de segurança — se Firebase travar, vai para login
@@ -187,6 +201,14 @@
 /* Entrada suave da tela de login */
 #tela-login{animation:loginFadeIn .5s ease both}
 @keyframes loginFadeIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
+
+/* Tela de carregamento "vindo até você" antes de revelar login ou app */
+.loading-zoom-out{animation:loadingZoomOut .55s cubic-bezier(.6,0,.85,.35) forwards}
+@keyframes loadingZoomOut{
+  0%{transform:scale(1);opacity:1}
+  55%{transform:scale(2.4);opacity:1}
+  100%{transform:scale(7);opacity:0}
+}
 
 /* Transição "íris" ao entrar no app (login bem-sucedido) */
 body.iris-in{transition:transform .35s ease-in}
