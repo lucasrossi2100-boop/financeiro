@@ -46,16 +46,20 @@
     const loadingEl = document.getElementById('loading');
     if(!loadingEl || loadingEl.style.display==='none'){ proximoPasso(); return; }
     loadingEl.classList.add('loading-zoom-out');
+    // Revela a próxima tela um pouco antes do zoom terminar — as duas se
+    // sobrepõem, em vez de uma esperar a outra (evita a sensação de travar)
+    setTimeout(() => { proximoPasso(); }, 250);
     setTimeout(() => {
       hide('loading');
       loadingEl.classList.remove('loading-zoom-out');
-      proximoPasso();
-    }, 500);
+    }, 400);
   };
 
   const irParaLogin = () => { sairDoLoadingComZoom(() => { show('tela-login','flex'); hide('tela-app'); }); };
   const irParaApp   = (nome) => {
-    sairDoLoadingComZoom(() => {
+    // Aqui não usamos o zoom da tela de carregamento — a transição "íris" logo
+    // abaixo já cuida do efeito visual, evitando duas animações rodando juntas
+    hide('loading');
     const trocarTela = () => {
       hide('tela-login');
       const hoje = new Date().toDateString();
@@ -73,7 +77,6 @@
     } else {
       trocarTela();
     }
-    });
   };
 
   // Timeout de segurança — se Firebase travar, vai para login
@@ -199,11 +202,11 @@
 }
 
 /* Entrada suave da tela de login */
-#tela-login{animation:loginFadeIn .5s ease both}
+#tela-login{animation:loginFadeIn .4s ease both}
 @keyframes loginFadeIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
 
 /* Tela de carregamento "vindo até você" antes de revelar login ou app */
-.loading-zoom-out{animation:loadingZoomOut .5s ease forwards}
+.loading-zoom-out{animation:loadingZoomOut .4s ease forwards}
 @keyframes loadingZoomOut{
   0%{transform:scale(1);filter:blur(0px);opacity:1}
   100%{transform:scale(1.6);filter:blur(6px);opacity:0}
@@ -770,7 +773,7 @@ tr:hover td{background:var(--surface2)}
   .dp-popup{width:calc(100vw - 28px);max-width:320px}
 
   /* PWA banners */
-  #pwa-banner,#ios-banner{right:12px!important;left:12px!important;bottom:72px!important;max-width:100%!important}
+  #pwa-banner,#ios-banner{right:12px!important;left:12px!important;bottom:72px!important;width:auto!important;max-width:100%!important}
 }
 
 /* ── SMALL MOBILE (≤360px) ─────────────────────────────── */
