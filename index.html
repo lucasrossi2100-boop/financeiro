@@ -185,6 +185,9 @@
   /* Accent dourado */
   --accent:#C8A96E;
   --accent-s:rgba(200,169,110,0.12);
+  --accent-hover:#D8BC8A;
+  --accent-light:#E8C96D;
+  --accent-dark:#8A6A1A;
   /* Semânticas */
   --green:#4ade80;
   --green-s:rgba(74,222,128,0.1);
@@ -421,6 +424,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 .dash-editing .dash-widget-controls{display:flex}
 .dash-widget-eye,.dash-widget-handle{width:26px;height:26px;border-radius:7px;background:var(--surface3);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text)}
 .dash-widget-eye:hover,.dash-widget-handle:hover{background:var(--accent);color:#0f0f0f}
+
+/* Seletor de cores (plano Patrimônio) */
+.cor-paleta-item:hover{transform:scale(1.08)}
+.cor-paleta-item.cor-ativa{border-color:#fff;box-shadow:0 0 0 2px var(--surface2),0 0 0 4px var(--accent)}
 .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px}
 
 /* ── FORMS ─────────────────────────────────────────────── */
@@ -1973,6 +1980,9 @@ tr:hover td{background:var(--surface2)}
           <div style="position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s"></div>
         </div>
       </label>
+
+      <!-- Cores (exclusivo Patrimônio) — conteúdo populado por planos/patrimonio.js -->
+      <div id="patrimonio-cores-wrap" style="display:none"></div>
 
       <!-- Aplicativo -->
       <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;display:block;margin:16px 0 10px">Aplicativo</label>
@@ -3619,6 +3629,7 @@ function refreshDash(){
   // sem precisar sair e voltar na tela (a função só existe se planos/patrimonio.js já carregou)
   if(typeof renderScore==='function') renderScore();
   if(typeof initPersonalizacaoDashboard==='function') initPersonalizacaoDashboard();
+  if(typeof initPatrimonioCores==='function') initPatrimonioCores();
 }
   const lancs=pd().lancs;
   const doMes=lancs.filter(l=>l.data.startsWith(mes));
@@ -5994,6 +6005,8 @@ function abrirConfiguracoes(){
     const nStatus = document.getElementById('cfg-notif-status');
     const nBtn = document.getElementById('cfg-notif-btn');
     atualizarStatusNotificacoesConfig(nStatus, nBtn);
+    // Seletor de cores — exclusivo Patrimônio
+    if(typeof initPatrimonioCores==='function') initPatrimonioCores();
     el('modal-config').style.display='flex';
   }catch(err){
     console.error('[Config] Erro:',err);

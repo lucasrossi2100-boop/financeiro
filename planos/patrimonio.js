@@ -662,3 +662,174 @@ function aplicarConfigDashboard(config){
     w.classList.toggle('dash-widget-oculto', oculto);
   });
 }
+
+// ─── SISTEMA DE CORES (paleta + color picker) — exclusivo Patrimônio ────────
+function hexParaHSL(hex){
+  let r = parseInt(hex.slice(1,3),16)/255, g = parseInt(hex.slice(3,5),16)/255, b = parseInt(hex.slice(5,7),16)/255;
+  const max = Math.max(r,g,b), min = Math.min(r,g,b);
+  let h, s, l = (max+min)/2;
+  if(max===min){ h=s=0; }
+  else{
+    const d = max-min;
+    s = l>0.5 ? d/(2-max-min) : d/(max+min);
+    switch(max){
+      case r: h=(g-b)/d+(g<b?6:0); break;
+      case g: h=(b-r)/d+2; break;
+      case b: h=(r-g)/d+4; break;
+    }
+    h/=6;
+  }
+  return [h*360, s*100, l*100];
+}
+
+function hslParaHex(h,s,l){
+  h/=360; s/=100; l/=100;
+  let r,g,b;
+  if(s===0){ r=g=b=l; }
+  else{
+    const hue2rgb=(p,q,t)=>{
+      if(t<0) t+=1;
+      if(t>1) t-=1;
+      if(t<1/6) return p+(q-p)*6*t;
+      if(t<1/2) return q;
+      if(t<2/3) return p+(q-p)*(2/3-t)*6;
+      return p;
+    };
+    const q = l<0.5 ? l*(1+s) : l+s-l*s;
+    const p = 2*l-q;
+    r = hue2rgb(p,q,h+1/3);
+    g = hue2rgb(p,q,h);
+    b = hue2rgb(p,q,h-1/3);
+  }
+  const toHex = v => Math.round(v*255).toString(16).padStart(2,'0');
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
+function ajustarLuminosidade(hex, deltaPontos){
+  const [h,s,l] = hexParaHSL(hex);
+  const novoL = Math.max(4, Math.min(96, l+deltaPontos));
+  return hslParaHex(h, s, novoL);
+}
+
+function hexParaRgba(hex, alpha){
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function gerarTonalidades(hexBase){
+  return {
+    accent: hexBase,
+    accentHover: ajustarLuminosidade(hexBase, 9),
+    accentLight: ajustarLuminosidade(hexBase, 22),
+    accentDark: ajustarLuminosidade(hexBase, -20),
+  };
+}
+
+const PALETA_CORES_PATRIMONIO = [
+  {nome:'Dourado Premium', hex:'#C8A96E'},
+  {nome:'Azul Royal',      hex:'#4169E1'},
+  {nome:'Azul Petróleo',   hex:'#0B5563'},
+  {nome:'Verde Esmeralda', hex:'#10B981'},
+  {nome:'Verde Lima',      hex:'#84CC16'},
+  {nome:'Roxo',            hex:'#8B5CF6'},
+  {nome:'Roxo Escuro',     hex:'#5B21B6'},
+  {nome:'Vermelho',        hex:'#EF4444'},
+  {nome:'Coral',           hex:'#FF6B6B'},
+  {nome:'Laranja',         hex:'#F97316'},
+  {nome:'Amarelo Ouro',    hex:'#F59E0B'},
+  {nome:'Rosa',            hex:'#EC4899'},
+  {nome:'Turquesa',        hex:'#14B8A6'},
+  {nome:'Cinza',           hex:'#6B7280'},
+  {nome:'Preto',           hex:'#18181B'},
+];
+
+function aplicarCorTema(hex, persistir){
+  if(persistir === undefined) persistir = true;
+  const t = gerarTonalidades(hex);
+  const root = document.documentElement;
+  root.style.setProperty('--accent', t.accent);
+  root.style.setProperty('--accent-hover', t.accentHover);
+  root.style.setProperty('--accent-light', t.accentLight);
+  root.style.setProperty('--accent-dark', t.accentDark);
+  root.style.setProperty('--accent-s', hexParaRgba(hex, 0.12));
+
+  atualizarSeletorCoresUI(hex);
+
+  if(persistir){
+    localStorage.setItem('fin_cor_tema', hex);
+    salvarCorTemaFirebase(hex);
+  }
+}
+
+async function salvarCorTemaFirebase(hex){
+  if(window._db && window._set && window._ref && window._firebaseUser){
+    try{ await window._set(window._ref(window._db, `usuarios/${window._firebaseUser.uid}/corTema`), hex); }
+    catch(e){ console.warn('salvarCorTemaFirebase:', e); }
+  }
+}
+
+let _corTemaCarregada = false;
+async function carregarCorTema(){
+  let hex = null;
+  try{ hex = localStorage.getItem('fin_cor_tema'); }catch(e){}
+
+  if(window._db && window._ref && window._onValue && window._firebaseUser){
+    try{
+      const snap = await new Promise((res,rej)=>{
+        const t = setTimeout(()=>rej(new Error('timeout')), 4000);
+        window._onValue(window._ref(window._db,`usuarios/${window._firebaseUser.uid}/corTema`), s=>{ clearTimeout(t); res(s); }, {onlyOnce:true});
+      });
+      const remoto = snap.val();
+      if(remoto){ hex = remoto; localStorage.setItem('fin_cor_tema', remoto); }
+    }catch(e){ /* segue com o que tiver salvo local, se tiver */ }
+  }
+
+  if(hex) aplicarCorTema(hex, false);
+}
+
+function escolherCorPaleta(hex){ aplicarCorTema(hex, true); }
+function escolherCorCustom(hex){ aplicarCorTema(hex, true); }
+
+function atualizarSeletorCoresUI(hexAtivo){
+  document.querySelectorAll('.cor-paleta-item').forEach(el=>{
+    el.classList.toggle('cor-ativa', el.dataset.hex.toLowerCase()===hexAtivo.toLowerCase());
+  });
+  const picker = document.getElementById('cor-custom-picker');
+  if(picker) picker.value = hexAtivo;
+}
+
+function initPatrimonioCores(){
+  const wrap = document.getElementById('patrimonio-cores-wrap');
+  if(!wrap) return;
+  const permitido = patrimonioTemAcesso();
+  wrap.style.display = permitido ? 'block' : 'none';
+  if(!permitido) return;
+
+  if(!wrap.dataset.montado){
+    wrap.dataset.montado = '1';
+    const corAtual = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#C8A96E';
+    wrap.innerHTML = `
+      <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;display:block;margin:16px 0 10px">Cores</label>
+      <div style="background:var(--surface2);border-radius:10px;padding:12px">
+        <div style="font-size:12px;font-weight:500;margin-bottom:2px">Cor de destaque do app</div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:12px">Muda a identidade visual inteira, na hora</div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px">
+          ${PALETA_CORES_PATRIMONIO.map(c=>`
+            <div class="cor-paleta-item" data-hex="${c.hex}" title="${c.nome}" onclick="escolherCorPaleta('${c.hex}')"
+                 style="width:100%;aspect-ratio:1;border-radius:9px;background:${c.hex};cursor:pointer;border:2px solid transparent;transition:transform .12s"></div>
+          `).join('')}
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+          <input type="color" id="cor-custom-picker" value="${corAtual}" onchange="escolherCorCustom(this.value)"
+                 style="width:38px;height:38px;border-radius:8px;border:1px solid var(--border2);background:none;cursor:pointer;padding:0">
+          <div style="font-size:11px;color:var(--muted)">Ou escolha qualquer cor personalizada</div>
+        </div>
+      </div>`;
+  }
+  atualizarSeletorCoresUI(getComputedStyle(document.documentElement).getPropertyValue('--accent').trim());
+
+  if(!_corTemaCarregada){
+    _corTemaCarregada = true;
+    carregarCorTema();
+  }
+}
