@@ -500,3 +500,165 @@ function renderScore(){
 // 4) Evolução patrimonial
 // 5) Planejamento para liberdade financeira
 // 6) Recomendações inteligentes
+
+// ─── PERSONALIZAÇÃO DO DASHBOARD (arrastar, esconder, salvar na nuvem) ───────
+function patrimonioTemAcesso(){
+  if(typeof _verComoPlano!=='undefined' && _verComoPlano){
+    const cfg = PLANOS_CONFIG[_verComoPlano];
+    return !!(cfg && cfg.limites && cfg.limites.personalizacao);
+  }
+  if(typeof isEquipe==='function' && isEquipe()) return true;
+  const plano = (typeof _userPlano!=='undefined' && _userPlano) || 'gratuito';
+  const cfg = PLANOS_CONFIG[plano];
+  return !!(cfg && cfg.limites && cfg.limites.personalizacao);
+}
+
+let _dashPersonalizando = false;
+let _dashConfigCarregada = false;
+let _dragWidgetId = null;
+
+function initPersonalizacaoDashboard(){
+  const wrap = document.getElementById('dash-personalizar-wrap');
+  if(!wrap) return;
+  const permitido = patrimonioTemAcesso();
+  wrap.style.display = permitido ? 'block' : 'none';
+  if(!permitido || _dashConfigCarregada) return;
+  _dashConfigCarregada = true;
+  carregarConfigDashboard();
+}
+
+function toggleDashPersonalizar(){
+  _dashPersonalizando = !_dashPersonalizando;
+  const grid = document.getElementById('dash-widgets-grid');
+  const btn = document.getElementById('btn-dash-personalizar');
+  if(grid) grid.classList.toggle('dash-editing', _dashPersonalizando);
+  if(btn) btn.textContent = _dashPersonalizando ? '✅ Concluir personalização' : '🎨 Personalizar Dashboard';
+
+  if(_dashPersonalizando){
+    ativarControlesWidgets();
+  } else {
+    removerControlesWidgets();
+    salvarConfigDashboard();
+  }
+}
+
+function ativarControlesWidgets(){
+  document.querySelectorAll('.dash-widget').forEach(w=>{
+    w.draggable = true;
+    w.addEventListener('dragstart', dashWidgetDragStart);
+    w.addEventListener('dragend', dashWidgetDragEnd);
+    w.addEventListener('dragover', dashWidgetDragOver);
+    w.addEventListener('dragleave', dashWidgetDragLeave);
+    w.addEventListener('drop', dashWidgetDrop);
+    if(!w.querySelector('.dash-widget-controls')){
+      const widgetId = w.dataset.widgetId;
+      const oculto = w.classList.contains('dash-widget-oculto');
+      const controls = document.createElement('div');
+      controls.className = 'dash-widget-controls';
+      controls.innerHTML = `
+        <div class="dash-widget-eye" onclick="event.stopPropagation();toggleWidgetVisibilidade('${widgetId}')" title="Mostrar/ocultar este card">${oculto?'🙈':'👁'}</div>
+        <div class="dash-widget-handle" title="Arraste para reordenar">⠿</div>`;
+      w.appendChild(controls);
+    }
+  });
+}
+
+function removerControlesWidgets(){
+  document.querySelectorAll('.dash-widget').forEach(w=>{
+    w.draggable = false;
+    w.removeEventListener('dragstart', dashWidgetDragStart);
+    w.removeEventListener('dragend', dashWidgetDragEnd);
+    w.removeEventListener('dragover', dashWidgetDragOver);
+    w.removeEventListener('dragleave', dashWidgetDragLeave);
+    w.removeEventListener('drop', dashWidgetDrop);
+    const controls = w.querySelector('.dash-widget-controls');
+    if(controls) controls.remove();
+  });
+}
+
+function toggleWidgetVisibilidade(widgetId){
+  const el = document.querySelector(`.dash-widget[data-widget-id="${widgetId}"]`);
+  if(!el) return;
+  el.classList.toggle('dash-widget-oculto');
+  const eyeBtn = el.querySelector('.dash-widget-eye');
+  if(eyeBtn) eyeBtn.textContent = el.classList.contains('dash-widget-oculto') ? '🙈' : '👁';
+}
+
+function dashWidgetDragStart(){
+  _dragWidgetId = this.dataset.widgetId;
+  this.classList.add('dragging');
+}
+function dashWidgetDragEnd(){
+  this.classList.remove('dragging');
+  document.querySelectorAll('.dash-widget.drag-over').forEach(el=>el.classList.remove('drag-over'));
+}
+function dashWidgetDragOver(e){
+  e.preventDefault();
+  if(this.dataset.widgetId !== _dragWidgetId) this.classList.add('drag-over');
+}
+function dashWidgetDragLeave(){
+  this.classList.remove('drag-over');
+}
+function dashWidgetDrop(e){
+  e.preventDefault();
+  this.classList.remove('drag-over');
+  const targetId = this.dataset.widgetId;
+  if(targetId === _dragWidgetId) return;
+  const grid = document.getElementById('dash-widgets-grid');
+  if(!grid) return;
+  const dragEl = grid.querySelector(`[data-widget-id="${_dragWidgetId}"]`);
+  if(!dragEl) return;
+  const allWidgets = [...grid.querySelectorAll('.dash-widget')];
+  const dragIdx = allWidgets.indexOf(dragEl);
+  const targetIdx = allWidgets.indexOf(this);
+  if(dragIdx < targetIdx) this.after(dragEl);
+  else this.before(dragEl);
+}
+
+async function salvarConfigDashboard(){
+  const grid = document.getElementById('dash-widgets-grid');
+  if(!grid) return;
+  const widgets = [...grid.querySelectorAll('.dash-widget')];
+  const config = {
+    ordem: widgets.map(w=>w.dataset.widgetId),
+    ocultos: widgets.filter(w=>w.classList.contains('dash-widget-oculto')).map(w=>w.dataset.widgetId)
+  };
+  localStorage.setItem('fin_dash_config', JSON.stringify(config));
+  if(window._db && window._set && window._ref && window._firebaseUser){
+    try{ await window._set(window._ref(window._db, `usuarios/${window._firebaseUser.uid}/dashboardConfig`), config); }
+    catch(e){ console.warn('salvarConfigDashboard:', e); }
+  }
+}
+
+async function carregarConfigDashboard(){
+  let config = null;
+  try{ const raw = localStorage.getItem('fin_dash_config'); if(raw) config = JSON.parse(raw); }catch(e){}
+
+  if(window._db && window._ref && window._onValue && window._firebaseUser){
+    try{
+      const snap = await new Promise((res,rej)=>{
+        const t = setTimeout(()=>rej(new Error('timeout')), 4000);
+        window._onValue(window._ref(window._db,`usuarios/${window._firebaseUser.uid}/dashboardConfig`), s=>{ clearTimeout(t); res(s); }, {onlyOnce:true});
+      });
+      const remoto = snap.val();
+      if(remoto){ config = remoto; localStorage.setItem('fin_dash_config', JSON.stringify(remoto)); }
+    }catch(e){ /* segue com o que tiver salvo local */ }
+  }
+
+  aplicarConfigDashboard(config);
+}
+
+function aplicarConfigDashboard(config){
+  const grid = document.getElementById('dash-widgets-grid');
+  if(!grid || !config) return;
+  if(Array.isArray(config.ordem)){
+    config.ordem.forEach(id=>{
+      const el = grid.querySelector(`[data-widget-id="${id}"]`);
+      if(el) grid.appendChild(el);
+    });
+  }
+  document.querySelectorAll('.dash-widget').forEach(w=>{
+    const oculto = (config.ocultos||[]).includes(w.dataset.widgetId);
+    w.classList.toggle('dash-widget-oculto', oculto);
+  });
+}

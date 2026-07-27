@@ -408,6 +408,19 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 
 /* ── GRIDS ─────────────────────────────────────────────── */
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+
+/* Personalização do Dashboard (plano Patrimônio) */
+.dash-widget{position:relative;transition:opacity .2s ease,transform .15s ease}
+.dash-editing .dash-widget{cursor:grab;outline:1px dashed var(--accent);outline-offset:4px}
+.dash-editing .dash-widget:active{cursor:grabbing}
+.dash-editing .dash-widget.dragging{opacity:.4}
+.dash-editing .dash-widget.drag-over{transform:scale(1.02);outline-width:2px}
+.dash-widget.dash-widget-oculto{display:none}
+.dash-editing .dash-widget.dash-widget-oculto{display:flex!important;flex-direction:column;opacity:.35}
+.dash-widget-controls{display:none;position:absolute;top:8px;right:8px;z-index:5;gap:6px}
+.dash-editing .dash-widget-controls{display:flex}
+.dash-widget-eye,.dash-widget-handle{width:26px;height:26px;border-radius:7px;background:var(--surface3);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text)}
+.dash-widget-eye:hover,.dash-widget-handle:hover{background:var(--accent);color:#0f0f0f}
 .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px}
 
 /* ── FORMS ─────────────────────────────────────────────── */
@@ -1096,13 +1109,13 @@ tr:hover td{background:var(--surface2)}
       <div style="font-family:'DM Serif Display',serif;font-size:20px;letter-spacing:-.3px" id="mob-dash-title">Pessoal</div>
       <div id="mob-dash-sub" style="font-size:11px;color:var(--muted)"></div>
     </div>
-    <div class="mobile-header-actions">
-      <select id="dash-mes-filtro-mob" onchange="syncMesFiltro('mob');refreshDash()" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius-sm);padding:5px 8px;font-size:12px;font-family:'DM Sans',sans-serif;outline:none;max-width:100px">
+    <div class="mobile-header-actions" style="gap:5px">
+      <select id="dash-mes-filtro-mob" onchange="syncMesFiltro('mob');refreshDash()" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:var(--radius-sm);padding:4px 6px;font-size:11px;font-family:'DM Sans',sans-serif;outline:none;max-width:82px">
         <option value="">Mês atual</option>
       </select>
-      <div id="mob-sync-badge" class="sync-badge local" style="margin:0"><span class="sync-dot"></span><span id="mob-sync-txt">Local</span></div>
-      <button class="btn sm" onclick="openMobileMore()" style="padding:6px 12px;height:36px;gap:5px">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <div id="mob-sync-badge" class="sync-badge local" style="margin:0;padding:3px 8px"><span class="sync-dot"></span><span id="mob-sync-txt">Local</span></div>
+      <button class="btn sm" onclick="openMobileMore()" style="padding:5px 9px;height:32px;gap:4px;font-size:12px">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         Perfil
       </button>
     </div>
@@ -1134,10 +1147,15 @@ tr:hover td{background:var(--surface2)}
   <div id="dash-parcelas-section"></div>
   <div id="dash-todos-meses"></div>
 
-  <!-- GRÁFICOS PRINCIPAIS -->
-  <div class="grid2" style="margin-bottom:16px">
+  <!-- Personalizar Dashboard (exclusivo Patrimônio) -->
+  <div id="dash-personalizar-wrap" style="display:none;margin-bottom:12px;text-align:right">
+    <button class="btn sm" onclick="toggleDashPersonalizar()" id="btn-dash-personalizar" style="font-size:12px">🎨 Personalizar Dashboard</button>
+  </div>
+
+  <!-- GRÁFICOS PRINCIPAIS (arrastáveis no plano Patrimônio) -->
+  <div class="grid2" id="dash-widgets-grid" style="margin-bottom:16px">
     <!-- Evolução do patrimônio (linha dourada com área) -->
-    <div class="card" id="dash-card-chart-ev" style="padding:20px">
+    <div class="card dash-widget" id="dash-card-chart-ev" data-widget-id="chart-ev" style="padding:20px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
         <div>
           <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:2px">Evolução do patrimônio</div>
@@ -1149,7 +1167,7 @@ tr:hover td{background:var(--surface2)}
     </div>
 
     <!-- Gastos por categoria (donut) -->
-    <div class="card" id="dash-card-chart-cat" style="padding:20px">
+    <div class="card dash-widget" id="dash-card-chart-cat" data-widget-id="chart-cat" style="padding:20px">
       <div style="margin-bottom:16px">
         <div style="font-size:15px;font-weight:700;color:var(--text)">Gastos por categoria</div>
       </div>
@@ -1158,18 +1176,16 @@ tr:hover td{background:var(--surface2)}
         <div id="cat-legend" style="flex:1;display:flex;flex-direction:column;gap:11px;min-width:0"></div>
       </div>
     </div>
-  </div>
 
-  <div class="grid2" style="margin-bottom:16px">
     <!-- Receitas vs Despesas -->
-    <div class="card" id="dash-card-chart-bar" style="padding:20px">
+    <div class="card dash-widget" id="dash-card-chart-bar" data-widget-id="chart-bar" style="padding:20px">
       <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Receitas vs Despesas</div>
       <div style="font-size:11px;color:var(--muted2);margin-bottom:14px">Últimos 6 meses</div>
       <div class="chart-wrap" style="height:180px"><canvas id="c-rv"></canvas></div>
     </div>
 
     <!-- Cartões -->
-    <div class="card" style="padding:20px;cursor:pointer" onclick="goTo('cartoes')" title="Ver todos os cartões">
+    <div class="card dash-widget" id="dash-card-cartoes" data-widget-id="cartoes" style="padding:20px;cursor:pointer" onclick="goTo('cartoes')" title="Ver todos os cartões">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px">
         <div style="font-size:15px;font-weight:700;color:var(--text)">Cartões</div>
         <div id="dash-cartao-select-wrap"></div>
@@ -3602,6 +3618,7 @@ function refreshDash(){
   // Plano Patrimônio: mantém o Score/Insights/Tarefas sempre atualizados,
   // sem precisar sair e voltar na tela (a função só existe se planos/patrimonio.js já carregou)
   if(typeof renderScore==='function') renderScore();
+  if(typeof initPersonalizacaoDashboard==='function') initPersonalizacaoDashboard();
 }
   const lancs=pd().lancs;
   const doMes=lancs.filter(l=>l.data.startsWith(mes));
@@ -3710,6 +3727,12 @@ function selecionarCartaoDash(id){
 }
 
 function renderDashCartaoWidget(){
+  const card=document.getElementById('dash-card-cartoes');
+  if(card){
+    const permitido = typeof verComoPlanoPermite==='function' ? verComoPlanoPermite('cartoes') : true;
+    card.style.display = permitido ? '' : 'none';
+    if(!permitido) return;
+  }
   const el=document.getElementById('dash-cartao-widget');
   const selWrap=document.getElementById('dash-cartao-select-wrap');
   if(!el) return;
@@ -5271,25 +5294,25 @@ async function reativarCliente(uid){
 const PLANOS_CONFIG = {
   gratuito: {
     label: 'Gratuito', preco: 'R$ 0', cor: 'var(--muted)', dias: 30,
-    limites: { lancamentos: 20, investimentos: false, metas: false, cartoes: false, assinaturas: false, recorrentes: false, calendario: false, notas: false, renda: false, score: false, 'minha-assinatura': true },
+    limites: { lancamentos: 20, investimentos: false, metas: false, cartoes: false, assinaturas: false, recorrentes: false, calendario: false, notas: false, renda: false, score: false, personalizacao: false, 'minha-assinatura': true },
     edicao: 'nenhuma',
     desc: 'Acesso por 30 dias com até 20 lançamentos. Sem investimentos, metas ou controles avançados.'
   },
   essencial: {
     label: 'Essencial', preco: 'R$ 9,90/mês', cor: 'var(--blue)', dias: null,
-    limites: { lancamentos: true, investimentos: true, metas: false, cartoes: false, assinaturas: false, recorrentes: false, calendario: false, notas: false, renda: false, score: false, 'minha-assinatura': true },
+    limites: { lancamentos: true, investimentos: true, metas: false, cartoes: false, assinaturas: false, recorrentes: false, calendario: false, notas: false, renda: false, score: false, personalizacao: false, 'minha-assinatura': true },
     edicao: 'visualizacao',
     desc: 'O básico não deveria ser limitado: lançamentos ilimitados, gráficos e investimentos simples.'
   },
   evolucao: {
     label: 'Evolução', preco: 'R$ 24,90/mês', cor: 'var(--green)', dias: null,
-    limites: { lancamentos: true, investimentos: true, metas: true, cartoes: true, assinaturas: true, recorrentes: true, calendario: true, notas: true, renda: false, score: false, 'minha-assinatura': true },
+    limites: { lancamentos: true, investimentos: true, metas: true, cartoes: true, assinaturas: true, recorrentes: true, calendario: true, notas: true, renda: false, score: false, personalizacao: false, 'minha-assinatura': true },
     edicao: 'observacao',
     desc: 'Tudo do Essencial + personalização: dashboard editável, temas, cores e categorias personalizadas.'
   },
   patrimonio: {
     label: 'Patrimônio', preco: 'R$ 49,90/mês', cor: 'var(--accent)', dias: null,
-    limites: { lancamentos: true, investimentos: true, metas: true, cartoes: true, assinaturas: true, recorrentes: true, calendario: true, notas: true, renda: true, score: true, 'minha-assinatura': true },
+    limites: { lancamentos: true, investimentos: true, metas: true, cartoes: true, assinaturas: true, recorrentes: true, calendario: true, notas: true, renda: true, score: true, personalizacao: true, 'minha-assinatura': true },
     edicao: 'completa',
     desc: 'Tudo do Evolução + inteligência financeira: score de saúde, insights e projeções futuras.'
   }
@@ -7378,6 +7401,7 @@ function getVencimentosProximos(diasAlerta=3){
 function renderAlertasVencimento(){
   const el = document.getElementById('dash-alertas-venc');
   if(!el) return;
+  if(typeof verComoPlanoPermite==='function' && !verComoPlanoPermite('assinaturas')){ el.innerHTML=''; return; }
   const alertas = getVencimentosProximos(5);
   if(!alertas.length){ el.innerHTML=''; return; }
 
