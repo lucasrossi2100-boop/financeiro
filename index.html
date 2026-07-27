@@ -414,6 +414,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 
 /* Personalização do Dashboard (plano Patrimônio) */
 .dash-widget{position:relative;transition:opacity .2s ease,transform .15s ease}
+.dash-widget[data-full="1"]{grid-column:1/-1}
 .dash-editing .dash-widget{cursor:grab;outline:1px dashed var(--accent);outline-offset:4px}
 .dash-editing .dash-widget:active{cursor:grabbing}
 .dash-editing .dash-widget.dragging{opacity:.4}
@@ -1149,24 +1150,24 @@ tr:hover td{background:var(--surface2)}
   </div>
 
   <!-- Todos os blocos do dashboard, arrastáveis/ocultáveis no plano Patrimônio -->
-  <div id="dash-widgets-grid" style="display:flex;flex-direction:column;gap:16px">
+  <div id="dash-widgets-grid" class="grid2">
 
     <!-- KPI CARDS COM SPARKLINE -->
-    <div class="dash-widget" data-widget-id="kpis">
+    <div class="dash-widget" data-widget-id="kpis" data-full="1">
       <div id="dash-kpi-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px"></div>
     </div>
 
     <!-- ALERTAS DE VENCIMENTO -->
-    <div class="dash-widget" data-widget-id="alertas">
+    <div class="dash-widget" data-widget-id="alertas" data-full="1">
       <div id="dash-alertas-venc"></div>
     </div>
 
     <!-- COMPARATIVO -->
-    <div class="dash-widget" data-widget-id="comparativo">
+    <div class="dash-widget" data-widget-id="comparativo" data-full="1">
       <div id="dash-comparativo"></div>
     </div>
 
-    <div class="dash-widget" data-widget-id="parcelas">
+    <div class="dash-widget" data-widget-id="parcelas" data-full="1">
       <div id="dash-parcelas-section"></div>
     </div>
 
@@ -1217,7 +1218,7 @@ tr:hover td{background:var(--surface2)}
     </div>
 
     <!-- TODOS OS MESES -->
-    <div class="dash-widget" data-widget-id="todos-meses">
+    <div class="dash-widget" data-widget-id="todos-meses" data-full="1">
       <div id="dash-todos-meses"></div>
     </div>
 
