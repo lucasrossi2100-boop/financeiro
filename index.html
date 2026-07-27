@@ -1143,62 +1143,84 @@ tr:hover td{background:var(--surface2)}
     </div>
   </div>
 
-  <!-- KPI CARDS COM SPARKLINE -->
-  <div id="dash-kpi-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:18px" id="dash-kpi-cards"></div>
-
-  <!-- ALERTAS DE VENCIMENTO -->
-  <div id="dash-alertas-venc" style="margin-bottom:16px"></div>
-
-  <!-- COMPARATIVO -->
-  <div id="dash-comparativo" style="margin-bottom:16px"></div>
-  <div id="dash-parcelas-section"></div>
-  <div id="dash-todos-meses"></div>
-
   <!-- Personalizar Dashboard (exclusivo Patrimônio) -->
   <div id="dash-personalizar-wrap" style="display:none;margin-bottom:12px;text-align:right">
     <button class="btn sm" onclick="toggleDashPersonalizar()" id="btn-dash-personalizar" style="font-size:12px">🎨 Personalizar Dashboard</button>
   </div>
 
-  <!-- GRÁFICOS PRINCIPAIS (arrastáveis no plano Patrimônio) -->
-  <div class="grid2" id="dash-widgets-grid" style="margin-bottom:16px">
-    <!-- Evolução do patrimônio (linha dourada com área) -->
-    <div class="card dash-widget" id="dash-card-chart-ev" data-widget-id="chart-ev" style="padding:20px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <div>
-          <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:2px">Evolução do patrimônio</div>
-          <div id="dash-evo-total" style="font-size:22px;font-weight:700;color:var(--accent)"></div>
-        </div>
-        <span id="dash-evo-badge" style="font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500"></span>
-      </div>
-      <div class="chart-wrap" style="height:180px"><canvas id="c-evo"></canvas></div>
+  <!-- Todos os blocos do dashboard, arrastáveis/ocultáveis no plano Patrimônio -->
+  <div id="dash-widgets-grid" style="display:flex;flex-direction:column;gap:16px">
+
+    <!-- KPI CARDS COM SPARKLINE -->
+    <div class="dash-widget" data-widget-id="kpis">
+      <div id="dash-kpi-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px"></div>
     </div>
 
-    <!-- Gastos por categoria (donut) -->
-    <div class="card dash-widget" id="dash-card-chart-cat" data-widget-id="chart-cat" style="padding:20px">
-      <div style="margin-bottom:16px">
-        <div style="font-size:15px;font-weight:700;color:var(--text)">Gastos por categoria</div>
+    <!-- ALERTAS DE VENCIMENTO -->
+    <div class="dash-widget" data-widget-id="alertas">
+      <div id="dash-alertas-venc"></div>
+    </div>
+
+    <!-- COMPARATIVO -->
+    <div class="dash-widget" data-widget-id="comparativo">
+      <div id="dash-comparativo"></div>
+    </div>
+
+    <div class="dash-widget" data-widget-id="parcelas">
+      <div id="dash-parcelas-section"></div>
+    </div>
+
+    <!-- GRÁFICOS PRINCIPAIS -->
+    <div class="dash-widget" data-widget-id="chart-ev">
+      <div class="card" id="dash-card-chart-ev" style="padding:20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div>
+            <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:2px">Evolução do patrimônio</div>
+            <div id="dash-evo-total" style="font-size:22px;font-weight:700;color:var(--accent)"></div>
+          </div>
+          <span id="dash-evo-badge" style="font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500"></span>
+        </div>
+        <div class="chart-wrap" style="height:180px"><canvas id="c-evo"></canvas></div>
       </div>
+    </div>
+
+    <div class="dash-widget" data-widget-id="chart-cat">
+      <div class="card" id="dash-card-chart-cat" style="padding:20px">
+        <div style="margin-bottom:16px">
+          <div style="font-size:15px;font-weight:700;color:var(--text)">Gastos por categoria</div>
+        </div>
       <div style="display:flex;align-items:center;gap:16px">
         <div class="chart-wrap" style="height:180px;width:180px;flex-shrink:0"><canvas id="c-cat"></canvas></div>
         <div id="cat-legend" style="flex:1;display:flex;flex-direction:column;gap:11px;min-width:0"></div>
       </div>
+      </div>
     </div>
 
     <!-- Receitas vs Despesas -->
-    <div class="card dash-widget" id="dash-card-chart-bar" data-widget-id="chart-bar" style="padding:20px">
-      <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Receitas vs Despesas</div>
-      <div style="font-size:11px;color:var(--muted2);margin-bottom:14px">Últimos 6 meses</div>
-      <div class="chart-wrap" style="height:180px"><canvas id="c-rv"></canvas></div>
+    <div class="dash-widget" data-widget-id="chart-bar">
+      <div class="card" id="dash-card-chart-bar" style="padding:20px">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Receitas vs Despesas</div>
+        <div style="font-size:11px;color:var(--muted2);margin-bottom:14px">Últimos 6 meses</div>
+        <div class="chart-wrap" style="height:180px"><canvas id="c-rv"></canvas></div>
+      </div>
     </div>
 
     <!-- Cartões -->
-    <div class="card dash-widget" id="dash-card-cartoes" data-widget-id="cartoes" style="padding:20px;cursor:pointer" onclick="goTo('cartoes')" title="Ver todos os cartões">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px">
-        <div style="font-size:15px;font-weight:700;color:var(--text)">Cartões</div>
-        <div id="dash-cartao-select-wrap"></div>
+    <div class="dash-widget" data-widget-id="cartoes">
+      <div class="card" id="dash-card-cartoes" style="padding:20px;cursor:pointer" onclick="goTo('cartoes')" title="Ver todos os cartões">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px">
+          <div style="font-size:15px;font-weight:700;color:var(--text)">Cartões</div>
+          <div id="dash-cartao-select-wrap"></div>
+        </div>
+        <div id="dash-cartao-widget"></div>
       </div>
-      <div id="dash-cartao-widget"></div>
     </div>
+
+    <!-- TODOS OS MESES -->
+    <div class="dash-widget" data-widget-id="todos-meses">
+      <div id="dash-todos-meses"></div>
+    </div>
+
   </div>
 </section>
 
@@ -3741,7 +3763,9 @@ function renderDashCartaoWidget(){
   const card=document.getElementById('dash-card-cartoes');
   if(card){
     const permitido = typeof verComoPlanoPermite==='function' ? verComoPlanoPermite('cartoes') : true;
-    card.style.display = permitido ? '' : 'none';
+    const wrapperExterno = card.closest('.dash-widget');
+    if(wrapperExterno) wrapperExterno.style.display = permitido ? '' : 'none';
+    else card.style.display = permitido ? '' : 'none';
     if(!permitido) return;
   }
   const el=document.getElementById('dash-cartao-widget');
