@@ -57,23 +57,29 @@
 
   const irParaLogin = () => { sairDoLoadingComZoom(() => { show('tela-login','flex'); hide('tela-app'); }); };
   const irParaApp   = (nome) => {
-    // Aqui não usamos o zoom da tela de carregamento — a transição "íris" logo
-    // abaixo já cuida do efeito visual, evitando duas animações rodando juntas
     hide('loading');
+
+    // Decide ANTES se a tela de boas-vindas vai aparecer — ela já tem sua
+    // própria entrada em sequência, então não precisa da explosão por cima
+    const INTERVALO_BOAS_VINDAS_MS = 30 * 60 * 1000; // 30 minutos — ajuste aqui se quiser mudar
+    const ultimoAcesso = parseInt(localStorage.getItem('fin_ultimo_acesso_ts') || '0', 10);
+    const vaiMostrarBoasVindas = !!nome && (Date.now() - ultimoAcesso) >= INTERVALO_BOAS_VINDAS_MS;
+    localStorage.setItem('fin_ultimo_acesso_ts', String(Date.now()));
+
     const trocarTela = () => {
       hide('tela-login');
-      const INTERVALO_BOAS_VINDAS_MS = 30 * 60 * 1000; // 30 minutos — ajuste aqui se quiser mudar
-      const ultimoAcesso = parseInt(localStorage.getItem('fin_ultimo_acesso_ts') || '0', 10);
-      const primeiro = (Date.now() - ultimoAcesso) >= INTERVALO_BOAS_VINDAS_MS;
-      localStorage.setItem('fin_ultimo_acesso_ts', String(Date.now()));
-      if(primeiro && nome){
+      if(vaiMostrarBoasVindas){
         // Delega para função global (definida no script principal)
         window._abrirComBoasVindas(nome, () => show('tela-app','flex'));
       } else {
         show('tela-app','flex');
       }
     };
-    if(typeof window.irisTransition === 'function'){
+
+    if(vaiMostrarBoasVindas){
+      // A tela de boas-vindas é a transição — sem explosão por cima dela
+      trocarTela();
+    } else if(typeof window.irisTransition === 'function'){
       window.irisTransition(trocarTela);
     } else {
       trocarTela();
