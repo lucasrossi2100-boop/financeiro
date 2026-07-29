@@ -48,11 +48,11 @@
     loadingEl.classList.add('loading-zoom-out');
     // Revela a próxima tela um pouco antes do zoom terminar — as duas se
     // sobrepõem, em vez de uma esperar a outra (evita a sensação de travar)
-    setTimeout(() => { proximoPasso(); }, 250);
+    setTimeout(() => { proximoPasso(); }, 320);
     setTimeout(() => {
       hide('loading');
       loadingEl.classList.remove('loading-zoom-out');
-    }, 400);
+    }, 550);
   };
 
   const irParaLogin = () => { sairDoLoadingComZoom(() => { show('tela-login','flex'); hide('tela-app'); }); };
@@ -188,6 +188,8 @@
   --accent-hover:#D8BC8A;
   --accent-light:#E8C96D;
   --accent-dark:#8A6A1A;
+  --accent-gradient:none;
+  --accent-bg:#C8A96E;
   /* Semânticas */
   --green:#4ade80;
   --green-s:rgba(74,222,128,0.1);
@@ -204,20 +206,25 @@
   --radius-sm:9px;
 }
 
+/* Entrada em sequência da tela de carregamento */
+#loading-logo{animation:loadingFadeIn .7s ease forwards;animation-delay:.1s}
+#loading-texto{animation:loadingFadeInUp .6s ease forwards;animation-delay:.6s}
+#loading-spinner{animation:loadingFadeIn .5s ease forwards;animation-delay:1.1s}
+@keyframes loadingFadeIn{from{opacity:0}to{opacity:1}}
+@keyframes loadingFadeInUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
 /* Entrada suave da tela de login */
 #tela-login{animation:loginFadeIn .4s ease both}
 @keyframes loginFadeIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
 
 /* Tela de carregamento "vindo até você" antes de revelar login ou app */
-.loading-zoom-out{animation:loadingZoomOut .4s ease forwards}
+.loading-zoom-out{animation:loadingZoomOut .55s ease-in forwards}
 @keyframes loadingZoomOut{
   0%{transform:scale(1);filter:blur(0px);opacity:1}
-  100%{transform:scale(1.6);filter:blur(6px);opacity:0}
+  100%{transform:scale(2.2);filter:blur(7px);opacity:0}
 }
 
 /* Transição "íris" ao entrar no app (login bem-sucedido) */
-body.iris-in{transition:transform .35s ease-in}
-body.iris-out{transition:transform .5s cubic-bezier(.34,1.56,.64,1),opacity .5s ease}
 
 /* ALL BLACK — variante do tema Escuro com preto puro */
 [data-theme=""][data-allblack="1"]{
@@ -428,7 +435,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 
 /* Seletor de cores (plano Patrimônio) */
 .cor-paleta-item:hover{transform:scale(1.08)}
-.cor-paleta-item.cor-ativa{border-color:#fff;box-shadow:0 0 0 2px var(--surface2),0 0 0 4px var(--accent)}
+.cor-paleta-item.cor-ativa,.gradiente-item.cor-ativa{border-color:#fff;box-shadow:0 0 0 2px var(--surface2),0 0 0 4px var(--accent)}
+.gradiente-item{transition:transform .12s}
+.gradiente-item:hover{transform:scale(1.04)}
 .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px}
 
 /* ── FORMS ─────────────────────────────────────────────── */
@@ -815,9 +824,9 @@ tr:hover td{background:var(--surface2)}
 
 <!-- LOADING -->
 <div id="loading" style="position:fixed;inset:0;background:#080808;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;z-index:999">
-  <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADQAAAA0CAIAAABKGoy8AAAFOUlEQVR4nO2XbYhUZRTHz8tzZ2ZnZ8bdWnXD0NTAQJMSClEwaUs/WZb1IZAIytKUyKKIssJWoUAwysovBYZ9yF400sTKMrWkwnWhyEqrNfF91d2Z2Zm593mec/owropSzt30QzQ/LvPCnXvP/znn/5w5F6BOnTp16tT5z4GxL8Dar1LVuLf/F8RdCiIaJsTYKRhYOEgG3JRNiCoCQn8W+6OfuRsilCuutxhWvzKhl9hprFUcIoBCcy759uKpI67IiqIJjDGGmYmJiZGQiIkYiRAREMuh++NA/pOte976oPNEb3kA+moVR4QiOm508/rl0yMHVVUmCJiZmYmImIkNMSNW64hElAiYkqar6/iC9o0btu6Jq49iLcV7LVWcdRJZsU4jK2Hkw8iFViInkfVhVH31lciVQ5vvC090F1oHpz967e472sZ4UaYYRjKxxBlDQy9vFAVj2BiDRMzMxjAxGQPGADEgAwKASujzxdAQlPrCwODK56bt2n1o36F8tQi1hIvhOVVoaUrdefMoVSUiPE31MxERASAiKmA6ZdomXjX1huH5QhlUwsi2NKdeWd3x+LItzOS9XExxA2PR3MnPPjSxJ19WL4Zh/5HC5HvfLVVcdakXJJ7nECEwdM6RCPjsIzDETIEhIlyy8uuvvv8znWTnXCW0LYMSw1uzAFBj54vnOVWw7sIVIUSrGhgCgC3f7ZtyfatzXlVSCWrKJqDmetUqjhBFddSw3LKFk0SRuOo6ImJiJiIk9gLpdHDoWGnu8x8X+kIAENEhlzU471VVVbzT0PoaI8YQBwigkGlM3DpxuFdiw8x8ardygMSqSAkWgen3r84Xw0TAkfXDhmZmTBmZL1QAlBB6i9HBo30ANRkujjgAABDRYsWLKjEwAxIoKJKCojGUkmDm/DWff/NbVVlrS3r10ulNmaC3UBHVhgT+uPf4kRPlahEuvjhETATGKxEbYmI2uUwKiAAQmO57ct2m7XtTSVMJ3XVjBq9qnza8NXOyt4ygNrK5huQ7G/cAABJAbbWNJw5AiUiBidgYtg7XfrG3WIoa08GmbXtXretMBFwJ3YybRq1c1JZK0ImeEoKWQzu4Oblh+/712/cRofe1/oPFzRwRBwAsgJls+sPPfrnrkTWnzzJhZP2jsycsnjexXInyhTKCivghzckdPxx9bPmOuPNd3MwBGaNKKIhIpXJEhIZJRKs7ZsXTbXNmjT12vOisUxURXw7d+5t/X/JmR7FkETGWvtieIzIiCCAgngBE1KN4r0QIAIFBG9kwtIRqrW9IUOfPJ5969Vvon2viJSLWrwGgfyBSUBE5Y2xVVdX5Szdv6zgwqNFEkUXQfF9047iWhfeMhTMD6aUUB6AqXkVU5OwaqQIiOi8Ptm8+3F0MGK3zoNLTGz48a8zUCa3ex5uXBiJOpYr33qkKAEC/QhFlxv2Hiwte2m4YRbz33jrXV7Ltc8YPG9zgRSlOAgcmzov31fdzznqvhnHLzoMvrupsyiSiyIFquWKzDfzCA+MDQ4Ax6htPnKraU7gosqcyd54+Znz9vZ/Wftk1qNGUypEX6e6pXDsyO2/maBHF2p8NYoljwlxjkEubbANnsklrPZzndAUQUUR45o2du7t6WnJBgiGTolLZzr7lytsmtYqe2toXpOZWogAAJwvhmk9/tdYBgLX+5dW7AEDOS58qEGGhZJ9Y0TH39qtLFSuiznlQuGZEbktnd75U67x5qfg7b9XuudjNp9oOtPpUIfDP8wXiWTOvAmC1HcaNWadOnTp16tT5H/AX48yytTtDw+wAAAAASUVORK5CYII=" width="52" height="52" alt="FinRossi" style="border-radius:10px">
-  <div style="font-family:'DM Serif Display',serif;font-size:18px;color:#e8c96d;margin-top:10px;letter-spacing:1px">Fin<span style="font-weight:300;color:#f0ede8">Rossi</span></div>
-  <div style="width:32px;height:32px;border:3px solid #222;border-top-color:#4ade80;border-radius:50%;animation:spin .8s linear infinite"></div>
+  <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADQAAAA0CAIAAABKGoy8AAAFOUlEQVR4nO2XbYhUZRTHz8tzZ2ZnZ8bdWnXD0NTAQJMSClEwaUs/WZb1IZAIytKUyKKIssJWoUAwysovBYZ9yF400sTKMrWkwnWhyEqrNfF91d2Z2Zm593mec/owropSzt30QzQ/LvPCnXvP/znn/5w5F6BOnTp16tT5z4GxL8Dar1LVuLf/F8RdCiIaJsTYKRhYOEgG3JRNiCoCQn8W+6OfuRsilCuutxhWvzKhl9hprFUcIoBCcy759uKpI67IiqIJjDGGmYmJiZGQiIkYiRAREMuh++NA/pOte976oPNEb3kA+moVR4QiOm508/rl0yMHVVUmCJiZmYmImIkNMSNW64hElAiYkqar6/iC9o0btu6Jq49iLcV7LVWcdRJZsU4jK2Hkw8iFViInkfVhVH31lciVQ5vvC090F1oHpz967e472sZ4UaYYRjKxxBlDQy9vFAVj2BiDRMzMxjAxGQPGADEgAwKASujzxdAQlPrCwODK56bt2n1o36F8tQi1hIvhOVVoaUrdefMoVSUiPE31MxERASAiKmA6ZdomXjX1huH5QhlUwsi2NKdeWd3x+LItzOS9XExxA2PR3MnPPjSxJ19WL4Zh/5HC5HvfLVVcdakXJJ7nECEwdM6RCPjsIzDETIEhIlyy8uuvvv8znWTnXCW0LYMSw1uzAFBj54vnOVWw7sIVIUSrGhgCgC3f7ZtyfatzXlVSCWrKJqDmetUqjhBFddSw3LKFk0SRuOo6ImJiJiIk9gLpdHDoWGnu8x8X+kIAENEhlzU471VVVbzT0PoaI8YQBwigkGlM3DpxuFdiw8x8ardygMSqSAkWgen3r84Xw0TAkfXDhmZmTBmZL1QAlBB6i9HBo30ANRkujjgAABDRYsWLKjEwAxIoKJKCojGUkmDm/DWff/NbVVlrS3r10ulNmaC3UBHVhgT+uPf4kRPlahEuvjhETATGKxEbYmI2uUwKiAAQmO57ct2m7XtTSVMJ3XVjBq9qnza8NXOyt4ygNrK5huQ7G/cAABJAbbWNJw5AiUiBidgYtg7XfrG3WIoa08GmbXtXretMBFwJ3YybRq1c1JZK0ImeEoKWQzu4Oblh+/712/cRofe1/oPFzRwRBwAsgJls+sPPfrnrkTWnzzJhZP2jsycsnjexXInyhTKCivghzckdPxx9bPmOuPNd3MwBGaNKKIhIpXJEhIZJRKs7ZsXTbXNmjT12vOisUxURXw7d+5t/X/JmR7FkETGWvtieIzIiCCAgngBE1KN4r0QIAIFBG9kwtIRqrW9IUOfPJ5969Vvon2viJSLWrwGgfyBSUBE5Y2xVVdX5Szdv6zgwqNFEkUXQfF9047iWhfeMhTMD6aUUB6AqXkVU5OwaqQIiOi8Ptm8+3F0MGK3zoNLTGz48a8zUCa3ex5uXBiJOpYr33qkKAEC/QhFlxv2Hiwte2m4YRbz33jrXV7Ltc8YPG9zgRSlOAgcmzov31fdzznqvhnHLzoMvrupsyiSiyIFquWKzDfzCA+MDQ4Ax6htPnKraU7gosqcyd54+Znz9vZ/Wftk1qNGUypEX6e6pXDsyO2/maBHF2p8NYoljwlxjkEubbANnsklrPZzndAUQUUR45o2du7t6WnJBgiGTolLZzr7lytsmtYqe2toXpOZWogAAJwvhmk9/tdYBgLX+5dW7AEDOS58qEGGhZJ9Y0TH39qtLFSuiznlQuGZEbktnd75U67x5qfg7b9XuudjNp9oOtPpUIfDP8wXiWTOvAmC1HcaNWadOnTp16tT5H/AX48yytTtDw+wAAAAASUVORK5CYII=" id="loading-logo" width="52" height="52" alt="FinRossi" style="border-radius:10px;opacity:0">
+  <div id="loading-texto" style="font-family:'DM Serif Display',serif;font-size:18px;color:#e8c96d;margin-top:10px;letter-spacing:1px;opacity:0;transform:translateY(6px)">Fin<span style="font-weight:300;color:#f0ede8">Rossi</span></div>
+  <div id="loading-spinner" style="width:32px;height:32px;border:3px solid #222;border-top-color:#4ade80;border-radius:50%;animation:spin .8s linear infinite;opacity:0"></div>
 </div>
 
 <!-- TELA DE BOAS-VINDAS -->
@@ -872,6 +881,7 @@ tr:hover td{background:var(--surface2)}
 
 <!-- TELA DE LOGIN -->
 <div id="portal-transition-app" style="display:none;position:fixed;inset:0;z-index:99999;pointer-events:none;overflow:hidden">
+  <div id="portal-flash-app" style="position:absolute;top:50%;left:50%;width:20px;height:20px;border-radius:50%;background:#e8c96d;transform:translate(-50%,-50%) scale(0);opacity:0;box-shadow:0 0 40px 20px rgba(232,201,109,.5)"></div>
   <div id="portal-circle-app" style="position:absolute;top:50%;left:50%;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle,#e8c96d 0%,#c8a96e 45%,rgba(200,169,110,0) 70%);transform:translate(-50%,-50%) scale(0);opacity:0"></div>
 </div>
 
@@ -6762,39 +6772,45 @@ function validarEmail(email){
 // ─── Transição "íris" ao entrar no app (contrai e explode a partir do centro) ──
 function irisTransition(callback){
   const wrap = document.getElementById('portal-transition-app');
+  const flash = document.getElementById('portal-flash-app');
   const circle = document.getElementById('portal-circle-app');
   if(!wrap || !circle){ callback(); return; }
 
+  // Cobre a tela inteira de verdade — calcula a distância até o canto mais longe
   const maxDist = Math.hypot(window.innerWidth/2, window.innerHeight/2);
   const scaleTarget = (maxDist * 2.4) / 20;
 
+  wrap.style.display = 'block';
   circle.style.transition = 'none';
   circle.style.transform = 'translate(-50%,-50%) scale(0)';
-  circle.style.opacity = '1';
-  wrap.style.display = 'block';
-  document.body.classList.add('iris-in');
-  document.body.style.transformOrigin = '50% 50%';
+  circle.style.opacity = '0';
+  if(flash){
+    flash.style.transition = 'none';
+    flash.style.transform = 'translate(-50%,-50%) scale(0)';
+    flash.style.opacity = '0';
+  }
   void circle.offsetHeight;
 
+  // 1) Flash rápido — um clarão dourado no centro
   requestAnimationFrame(()=>{
-    circle.style.transition = 'transform .35s ease-in';
-    circle.style.transform = 'translate(-50%,-50%) scale(0.15)';
-    document.body.style.transform = 'scale(0.96)';
+    if(flash){
+      flash.style.transition = 'transform .25s ease-out,opacity .25s ease-out';
+      flash.style.transform = 'translate(-50%,-50%) scale(1.5)';
+      flash.style.opacity = '1';
+    }
   });
 
+  // 2) Explosão dourada cobrindo a tela inteira
   setTimeout(()=>{
-    document.body.classList.remove('iris-in');
-    document.body.classList.add('iris-out');
-    circle.style.transition = 'transform .5s cubic-bezier(.34,1.56,.64,1),opacity .5s ease';
+    if(flash) flash.style.opacity = '0';
+    circle.style.transition = 'transform .55s cubic-bezier(.3,0,.4,1),opacity .55s ease';
+    circle.style.opacity = '1';
     circle.style.transform = `translate(-50%,-50%) scale(${scaleTarget})`;
-    document.body.style.transform = 'scale(1)';
     callback();
     setTimeout(()=>{ circle.style.opacity = '0'; }, 350);
-  }, 350);
+  }, 200);
 
   setTimeout(()=>{
-    document.body.classList.remove('iris-out');
-    document.body.style.transform = '';
     wrap.style.display = 'none';
   }, 900);
 }
