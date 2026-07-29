@@ -2201,7 +2201,7 @@ tr:hover td{background:var(--surface2)}
     <!-- Configurações e Sair -->
     <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px;display:flex;gap:8px">
       <button onclick="abrirConfiguracoes();closeMobileMoreForce()" class="btn" style="flex:1;justify-content:center">⚙ Configurações</button>
-      <button onclick="fazerLogout()" class="btn danger" style="flex:1;justify-content:center">Sair</button>
+      <button onclick="fazerLogout();closeMobileMoreForce()" class="btn danger" style="flex:1;justify-content:center">Sair</button>
     </div>
 
     <button class="btn" style="width:100%;margin-top:10px;justify-content:center;height:44px" onclick="closeMobileMoreForce()">Fechar</button>
@@ -6913,6 +6913,13 @@ async function fazerLogout(){
   // Fecha modal de config se estiver aberto
   const modalCfg = document.getElementById('modal-config');
   if(modalCfg) modalCfg.style.display='none';
+
+  // Fecha a gaveta "Mais" do mobile, se estiver aberta
+  const drawerMobile = document.getElementById('mobile-more-drawer');
+  if(drawerMobile) drawerMobile.classList.remove('open');
+
+  // Garante que a próxima vez que entrar, comece no Dashboard
+  try{ goTo('dashboard'); }catch(e){}
 
   // Reseta botões de perfil
   document.querySelectorAll('.profile-btn').forEach(b=>{
