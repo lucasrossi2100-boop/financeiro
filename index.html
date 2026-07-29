@@ -62,9 +62,10 @@
     hide('loading');
     const trocarTela = () => {
       hide('tela-login');
-      const hoje = new Date().toDateString();
-      const primeiro = localStorage.getItem('fin_ultimo_acesso') !== hoje;
-      localStorage.setItem('fin_ultimo_acesso', hoje);
+      const INTERVALO_BOAS_VINDAS_MS = 30 * 60 * 1000; // 30 minutos — ajuste aqui se quiser mudar
+      const ultimoAcesso = parseInt(localStorage.getItem('fin_ultimo_acesso_ts') || '0', 10);
+      const primeiro = (Date.now() - ultimoAcesso) >= INTERVALO_BOAS_VINDAS_MS;
+      localStorage.setItem('fin_ultimo_acesso_ts', String(Date.now()));
       if(primeiro && nome){
         // Delega para função global (definida no script principal)
         window._abrirComBoasVindas(nome, () => show('tela-app','flex'));
